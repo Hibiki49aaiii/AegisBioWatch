@@ -6,7 +6,7 @@ $Descr A4 11693 8268
 Sheet 1 1
 Title "AegisBioWatch MCU / RF / Clock"
 Date "2026-08-07"
-Rev "Rev.0 / Phase 1 r3"
+Rev "Rev.0 / Phase 1 r4"
 Comp "AegisBioWatch"
 Comment1 "CAPTURE DRAFT - ERC pending"
 Comment2 "PCB release prohibited until reference gates close"
@@ -89,7 +89,7 @@ RF_MCU
 Text Label 6200 3150 2    35   ~ 0
 GND
 Text Label 6200 3275 2    35   ~ 0
-NRF_DECRF
+NRF_DECA_RF
 Text Label 6200 3400 2    35   ~ 0
 NRF_XC1
 Text Label 6200 3525 2    35   ~ 0
@@ -109,7 +109,7 @@ EDA_INT_N
 Text Label 6200 4400 2    35   ~ 0
 BIO_SPI_CS_N
 Text Label 6200 4525 2    35   ~ 0
-NRF_DECA
+NRF_DECA_RF
 Text Label 6200 4650 2    35   ~ 0
 GND
 Text Label 6200 4775 2    35   ~ 0
@@ -355,84 +355,110 @@ Text Label 7150 5300 0    35   ~ 0
 GND
 Text Notes 6800 4400 0    42   ~ 0
 Reset reference: MCU-side 3.9pF to GND + 1k series to external NRF_RESET_N.
-Text Notes 6900 5750 0    48   ~ 0
-INTERNAL REGULATOR REFERENCE GATE — do not fabricate yet
-Text Notes 6900 5900 0    40   ~ 0
-Cross-checked reference parts: FB1=100Ω@100MHz, C6=2.2uF, C7=10nF, C8=10nF, C9=2.2uF, L1=4.7uH.
-Text Notes 6900 6050 0    40   ~ 0
-DECA/DECRF/DECD/DCC final connectivity remains blocked on Nordic Product Specification check; no guessed wire is added.
+Text Notes 6650 5650 0    48   ~ 0
+INTERNAL REGULATOR — current Nordic QFN48 Config.1 topology captured
+Text Notes 6650 5800 0    40   ~ 0
+DECA(pin43) + DECRF(pin33) share NRF_DECA_RF; FB1=120R@100MHz bridges NRF_DECA_RF to NRF_DECD.
+Text Notes 6650 5950 0    40   ~ 0
+DCC(pin46) -> L1=4.7uH -> DECD(pin45); DECD has 2.2uF to GND.
+Text Notes 6650 6100 0    40   ~ 0
+NRF_DECA_RF has 2.2uF + 10nF + 2.2nF to GND. Values follow current Nordic Config.1 BOM.
 $Comp
 L Device:FerriteBead_Small FB1
 U 1 1 7FD96D
 P 7200 6500
 F 0 "FB1" H 7350 6600 50  0000 C CNN
-F 1 "100R@100MHz" H 7450 6400 50  0000 C CNN
+F 1 "120R@100MHz" H 7500 6400 50  0000 C CNN
 F 2 "" H 7200 6500 50  0001 C CNN
 F 3 "~" H 7200 6500 50  0001 C CNN
 	1    7200 6500
 	1 0 0 -1
 $EndComp
-$Comp
-L Device:C_Small C6
-U 1 1 466D88
-P 7700 6500
-F 0 "C6" H 7850 6600 50  0000 C CNN
-F 1 "2.2uF" H 7950 6400 50  0000 C CNN
-F 2 "" H 7700 6500 50  0001 C CNN
-F 3 "~" H 7700 6500 50  0001 C CNN
-	1    7700 6500
-	1 0 0 -1
-$EndComp
+Text Label 7200 6250 0    35   ~ 0
+NRF_DECA_RF
+Text Label 7200 6750 0    35   ~ 0
+NRF_DECD
 $Comp
 L Device:C_Small C7
 U 1 1 D811C9
-P 8100 6500
-F 0 "C7" H 8250 6600 50  0000 C CNN
-F 1 "10nF" H 8350 6400 50  0000 C CNN
-F 2 "" H 8100 6500 50  0001 C CNN
-F 3 "~" H 8100 6500 50  0001 C CNN
-	1    8100 6500
+P 7850 6500
+F 0 "C7" H 8000 6600 50  0000 C CNN
+F 1 "2.2uF" H 8100 6400 50  0000 C CNN
+F 2 "" H 7850 6500 50  0001 C CNN
+F 3 "~" H 7850 6500 50  0001 C CNN
+	1    7850 6500
 	1 0 0 -1
 $EndComp
+Text Label 7850 6250 0    35   ~ 0
+NRF_DECA_RF
+Text Label 7850 6750 0    35   ~ 0
+GND
 $Comp
 L Device:C_Small C8
 U 1 1 A1F8D4
-P 8500 6500
-F 0 "C8" H 8650 6600 50  0000 C CNN
-F 1 "10nF" H 8750 6400 50  0000 C CNN
-F 2 "" H 8500 6500 50  0001 C CNN
-F 3 "~" H 8500 6500 50  0001 C CNN
-	1    8500 6500
+P 8300 6500
+F 0 "C8" H 8450 6600 50  0000 C CNN
+F 1 "10nF" H 8550 6400 50  0000 C CNN
+F 2 "" H 8300 6500 50  0001 C CNN
+F 3 "~" H 8300 6500 50  0001 C CNN
+	1    8300 6500
 	1 0 0 -1
 $EndComp
+Text Label 8300 6250 0    35   ~ 0
+NRF_DECA_RF
+Text Label 8300 6750 0    35   ~ 0
+GND
 $Comp
 L Device:C_Small C9
 U 1 1 5BC799
-P 8900 6500
-F 0 "C9" H 9050 6600 50  0000 C CNN
-F 1 "2.2uF" H 9150 6400 50  0000 C CNN
-F 2 "" H 8900 6500 50  0001 C CNN
-F 3 "~" H 8900 6500 50  0001 C CNN
-	1    8900 6500
+P 8750 6500
+F 0 "C9" H 8900 6600 50  0000 C CNN
+F 1 "2.2nF" H 9000 6400 50  0000 C CNN
+F 2 "" H 8750 6500 50  0001 C CNN
+F 3 "~" H 8750 6500 50  0001 C CNN
+	1    8750 6500
 	1 0 0 -1
 $EndComp
+Text Label 8750 6250 0    35   ~ 0
+NRF_DECA_RF
+Text Label 8750 6750 0    35   ~ 0
+GND
+$Comp
+L Device:C_Small C6
+U 1 1 466D88
+P 9250 6500
+F 0 "C6" H 9400 6600 50  0000 C CNN
+F 1 "2.2uF" H 9500 6400 50  0000 C CNN
+F 2 "" H 9250 6500 50  0001 C CNN
+F 3 "~" H 9250 6500 50  0001 C CNN
+	1    9250 6500
+	1 0 0 -1
+$EndComp
+Text Label 9250 6250 0    35   ~ 0
+NRF_DECD
+Text Label 9250 6750 0    35   ~ 0
+GND
 $Comp
 L Device:L_Small L1
 U 1 1 492E22
-P 9400 6500
-F 0 "L1" H 9550 6600 50  0000 C CNN
-F 1 "4.7uH" H 9650 6400 50  0000 C CNN
-F 2 "" H 9400 6500 50  0001 C CNN
-F 3 "~" H 9400 6500 50  0001 C CNN
-	1    9400 6500
+P 9800 6500
+F 0 "L1" H 9950 6600 50  0000 C CNN
+F 1 "4.7uH" H 10050 6400 50  0000 C CNN
+F 2 "" H 9800 6500 50  0001 C CNN
+F 3 "~" H 9800 6500 50  0001 C CNN
+	1    9800 6500
 	1 0 0 -1
 $EndComp
-Text Notes 6900 7000 0    38   ~ 0
-STAGED ONLY: FB1/C6-C9/L1 are intentionally not net-connected until official regulator topology review.
+Text Label 9800 6250 0    35   ~ 0
+NRF_DECD
+Text Label 9800 6750 0    35   ~ 0
+NRF_DCC
+Text Notes 6650 7000 0    38   ~ 0
+REFERENCE LOCK: values/topology verified against current Nordic QFN48 Config.1 and current nRF54L15-DK supply network.
 Text Notes 700 700 0    50   ~ 0
-r3: RF filter + reset + VDD decoupling captured as real nets; QFN48 pin map/buses/clocks retained.
+r4: RF/reset/VDD + DECA/DECRF/DECD/DCC network captured; QFN48 pin map/buses/clocks retained.
 Text Notes 700 850 0    45   ~ 0
-HARD GATE REMAINS: DECA/DECRF/DECD/DCC official Nordic Product Specification connectivity cross-check.
+CLOSED GATE: internal-regulator topology/value cross-check completed against current Nordic Config.1.
 Text Notes 700 1000 0    45   ~ 0
 Do not release Gerbers until regulator gate, native KiCad conversion, ERC, antenna/stackup and enclosure RF review are complete.
 Text Notes 700 1150 0    42   ~ 0
