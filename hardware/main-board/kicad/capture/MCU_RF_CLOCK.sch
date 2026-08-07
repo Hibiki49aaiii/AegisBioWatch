@@ -460,7 +460,95 @@ r4: RF/reset/VDD + DECA/DECRF/DECD/DCC network captured; QFN48 pin map/buses/clo
 Text Notes 700 850 0    45   ~ 0
 CLOSED GATE: internal-regulator topology/value cross-check completed against current Nordic Config.1.
 Text Notes 700 1000 0    45   ~ 0
-Do not release Gerbers until regulator gate, native KiCad conversion, ERC, antenna/stackup and enclosure RF review are complete.
+Do not release Gerbers until native KiCad conversion, ERC, antenna/stackup, enclosure RF and interface freeze are complete.
 Text Notes 700 1150 0    42   ~ 0
 Reference cross-check: feastorg/KiCad-Master-Lib (CC0) + hlord2000/nordic-lib-kicad (CERN-OHL-P).
+Text Notes 700 7350 0    36   ~ 0
+WIRE_AUDIT_R4_BEGIN
+Wire Wire Line
+	2450 2000 2500 2000
+Wire Wire Line
+	2700 2000 2750 2000
+Wire Wire Line
+	2450 2500 2500 2500
+Wire Wire Line
+	2700 2500 2750 2500
+Wire Wire Line
+	7300 1550 7300 1700
+Wire Wire Line
+	7300 1900 7300 2050
+Wire Wire Line
+	7700 1550 7700 1700
+Wire Wire Line
+	7700 1900 7700 2050
+Wire Wire Line
+	8100 1550 8100 1700
+Wire Wire Line
+	8100 1900 8100 2050
+Wire Wire Line
+	8500 1550 8500 1700
+Wire Wire Line
+	8500 1900 8500 2050
+Wire Wire Line
+	8900 1550 8900 1700
+Wire Wire Line
+	8900 1900 8900 2050
+Wire Wire Line
+	6550 3200 6900 3200
+Wire Wire Line
+	7100 3200 7450 3200
+Wire Wire Line
+	7550 3200 7900 3200
+Wire Wire Line
+	8100 3200 8450 3200
+Wire Wire Line
+	8550 3200 8900 3200
+Wire Wire Line
+	9100 3200 9450 3200
+Wire Wire Line
+	7450 3400 7450 3550
+Wire Wire Line
+	7450 3750 7450 3900
+Wire Wire Line
+	8450 3400 8450 3550
+Wire Wire Line
+	8450 3750 8450 3900
+Wire Wire Line
+	9450 3400 9450 3550
+Wire Wire Line
+	9450 3750 9450 3900
+Wire Wire Line
+	7150 4650 7500 4650
+Wire Wire Line
+	7700 4650 8050 4650
+Wire Wire Line
+	7150 4800 7150 4950
+Wire Wire Line
+	7150 5150 7150 5300
+Wire Wire Line
+	7200 6250 7200 6400
+Wire Wire Line
+	7200 6600 7200 6750
+Wire Wire Line
+	7850 6250 7850 6400
+Wire Wire Line
+	7850 6600 7850 6750
+Wire Wire Line
+	8300 6250 8300 6400
+Wire Wire Line
+	8300 6600 8300 6750
+Wire Wire Line
+	8750 6250 8750 6400
+Wire Wire Line
+	8750 6600 8750 6750
+Wire Wire Line
+	9250 6250 9250 6400
+Wire Wire Line
+	9250 6600 9250 6750
+Wire Wire Line
+	9800 6250 9800 6400
+Wire Wire Line
+	9800 6600 9800 6750
+Text Notes 700 7500 0    36   ~ 0
+WIRE_AUDIT_R4_END
 $EndSCHEMATC
