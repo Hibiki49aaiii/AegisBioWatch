@@ -1,0 +1,83 @@
+Ref,Part,Pin,Pin name,Net,Use,Notes
+U1,nRF54L15-QFAA,1,P1.00/XL1,LFXO_XL1,32.768 kHz crystal,Reserved clock pin
+U1,nRF54L15-QFAA,2,P1.01/XL2,LFXO_XL2,32.768 kHz crystal,Reserved clock pin
+U1,nRF54L15-QFAA,3,P1.02/NFC1,GPIO_SPARE0,Reserved GPIO,NFC disabled
+U1,nRF54L15-QFAA,4,P1.03/NFC2,DISP_PWR_EN,Display power/load-switch enable,NFC disabled
+U1,nRF54L15-QFAA,5,P1.04/AIN0,SIDE_BUTTON,Physical side button,"Active-low, internal pull-up"
+U1,nRF54L15-QFAA,6,P1.05/AIN1,PMIC_INT,nPM1300 event GPIO,Interrupt/wake
+U1,nRF54L15-QFAA,7,P1.06/AIN2,HAPTIC_EN,Haptic enable/trigger reserve,DRV2605L still controlled by I2C
+U1,nRF54L15-QFAA,8,P1.07/AIN3,BIO_SAFE_EN,Bio-board / electrode-disconnect control,Failsafe low/off
+U1,nRF54L15-QFAA,9,P1.08/EXTREF,SPARE_CLK_GPIO,Reserved,Clock-capable
+U1,nRF54L15-QFAA,10,VDD,+1V8,MCU supply,Tie to BUCK1
+U1,nRF54L15-QFAA,11,P2.00/QSPI_D3,DISP_QSPI_D3,AMOLED QSPI D3,Dedicated QSPI
+U1,nRF54L15-QFAA,12,P2.01/QSPI_SCK,DISP_QSPI_SCK,AMOLED QSPI clock,Dedicated QSPI
+U1,nRF54L15-QFAA,13,P2.02/QSPI_D0,DISP_QSPI_D0,AMOLED QSPI D0,Dedicated QSPI
+U1,nRF54L15-QFAA,14,P2.03/QSPI_D2,DISP_QSPI_D2,AMOLED QSPI D2,Dedicated QSPI
+U1,nRF54L15-QFAA,15,P2.04/QSPI_D1,DISP_QSPI_D1,AMOLED QSPI D1,Dedicated QSPI
+U1,nRF54L15-QFAA,16,P2.05/QSPI_CSN,DISP_QSPI_CS_N,AMOLED QSPI chip select,Dedicated QSPI
+U1,nRF54L15-QFAA,17,P2.06/SPIM_SCK,AUX_SPI_SCK,Flash + Bio SPI clock,Separate SPIM bus
+U1,nRF54L15-QFAA,18,P2.07/SWO/DCX,SWO,Optional SWO test pad,Preserve for debug in Rev.0
+U1,nRF54L15-QFAA,19,P2.08/SPIM_SDO,AUX_SPI_MOSI,Flash + Bio SPI MOSI,Separate SPIM bus
+U1,nRF54L15-QFAA,20,P2.09/SPIM_SDI,AUX_SPI_MISO,Flash + Bio SPI MISO,Separate SPIM bus
+U1,nRF54L15-QFAA,21,P2.10/SPIM_CSN,FLASH_CS_N,External Flash chip select,GPIO-controlled CS
+U1,nRF54L15-QFAA,22,VDD,+1V8,MCU supply,Tie to BUCK1
+U1,nRF54L15-QFAA,23,P0.00,SYS_I2C_SDA,Shared I2C/TWI SDA,PMIC/touch/haptic/bio digital sensors
+U1,nRF54L15-QFAA,24,P0.01,SYS_I2C_SCL,Shared I2C/TWI SCL,PMIC/touch/haptic/bio digital sensors
+U1,nRF54L15-QFAA,25,SWDIO,SWDIO,SWD pogo pad,Dedicated
+U1,nRF54L15-QFAA,26,SWDCLK,SWDCLK,SWD pogo pad,Dedicated
+U1,nRF54L15-QFAA,27,P0.02,DISP_RST_N,AMOLED reset,Reserve until panel frozen
+U1,nRF54L15-QFAA,28,P0.03,DISP_TE,AMOLED tear-effect/input status,Reserve until panel frozen
+U1,nRF54L15-QFAA,29,P0.04,TOUCH_RST_N,Touch reset,Can be reassigned after panel freeze
+U1,nRF54L15-QFAA,30,nRESET,NRF_RESET_N,Reset pogo pad / PMIC reset strategy,Dedicated
+U1,nRF54L15-QFAA,31,ANT,RF_ANT,Nordic reference matching network,50-ohm launch after network
+U1,nRF54L15-QFAA,32,VSS_PA,GND,Radio ground,Follow Nordic layout note
+U1,nRF54L15-QFAA,33,DECRF,DECRF,RF regulator decoupling,Must connect to DECA per Nordic
+U1,nRF54L15-QFAA,34,XC1,HFXO_XC1,32 MHz crystal,Reserved clock pin
+U1,nRF54L15-QFAA,35,XC2,HFXO_XC2,32 MHz crystal,Reserved clock pin
+U1,nRF54L15-QFAA,36,VDD,+1V8,MCU supply,Tie to BUCK1
+U1,nRF54L15-QFAA,37,P1.09,TOUCH_INT_N,Touch interrupt,Active-low expected; verify panel
+U1,nRF54L15-QFAA,38,P1.10,IMU_INT2,IMU interrupt 2,Bio/main placement TBD
+U1,nRF54L15-QFAA,39,P1.11/AIN4,IMU_INT1,IMU interrupt 1,Bio/main placement TBD
+U1,nRF54L15-QFAA,40,P1.12/AIN5,PPG_INT_N,PPG FIFO/data-ready interrupt,Bio board
+U1,nRF54L15-QFAA,41,P1.13/AIN6,EDA_INT_N,AD5940 interrupt,Bio board
+U1,nRF54L15-QFAA,42,P1.14/AIN7,BIO_SPI_CS_N,AD5940 chip select,Bio board
+U1,nRF54L15-QFAA,43,DECA,DECA,0.9 V regulator decoupling,Connect to DECRF per Nordic
+U1,nRF54L15-QFAA,44,VSS,GND,Ground,Solid ground plane
+U1,nRF54L15-QFAA,45,DECD,DECD,0.9 V regulator decoupling,Nordic reference
+U1,nRF54L15-QFAA,46,DCC,DCC,Internal DC/DC output,4.7 uH reference network
+U1,nRF54L15-QFAA,47,VDD,+1V8,MCU supply,Tie to BUCK1
+U1,nRF54L15-QFAA,48,VDD,+1V8,MCU supply,Tie to BUCK1
+U1,nRF54L15-QFAA,49,VSS exposed pad,GND,Ground exposed pad,Must connect to VSS
+U2,nPM1300-QFN32,1,VOUT1,+1V8,BUCK1 output,47k VSET1
+U2,nPM1300-QFN32,2,PVSS1,GND,BUCK1 power ground,
+U2,nPM1300-QFN32,3,SW1,BUCK1_SW,To 2.2uH L,
+U2,nPM1300-QFN32,4,PVDD,VSYS,Buck power input,
+U2,nPM1300-QFN32,5,SW2,BUCK2_SW,To 2.2uH L,
+U2,nPM1300-QFN32,6,PVSS2,GND,BUCK2 power ground,
+U2,nPM1300-QFN32,7,GPIO0,PMIC_GPIO0,Event/interrupt mapping,Firmware-configured
+U2,nPM1300-QFN32,8,GPIO1,PMIC_GPIO1,Spare/system control,
+U2,nPM1300-QFN32,9,GPIO2,PMIC_GPIO2,Spare/system control,
+U2,nPM1300-QFN32,10,GPIO3,PMIC_GPIO3,Spare/system control,
+U2,nPM1300-QFN32,11,GPIO4,PMIC_GPIO4,Spare/system control,
+U2,nPM1300-QFN32,12,VDDIO,+1V8,TWI/GPIO supply,
+U2,nPM1300-QFN32,13,SDA,SYS_I2C_SDA,PMIC TWI,
+U2,nPM1300-QFN32,14,SCL,SYS_I2C_SCL,PMIC TWI,
+U2,nPM1300-QFN32,15,SHPHLD,SHIP_HOLD,Ship-mode exit/hold network,Follow Nordic ref
+U2,nPM1300-QFN32,16,VSET2,VSET2_150K,3.0 V startup setting,150k to GND
+U2,nPM1300-QFN32,17,VSET1,VSET1_47K,1.8 V startup setting,47k to GND
+U2,nPM1300-QFN32,18,NTC,BAT_NTC,Battery thermistor,Exact value from chosen cell
+U2,nPM1300-QFN32,19,VBAT,VBAT,1-cell LiPo,Protected cell preferred
+U2,nPM1300-QFN32,20,VSYS,VSYS,System rail / Buck input,
+U2,nPM1300-QFN32,21,VBUS,CHG_5V,Magnetic dock 5 V,Input protection required
+U2,nPM1300-QFN32,22,VBUSOUT,VBUSOUT,Optional protected host output,Use only if needed
+U2,nPM1300-QFN32,23,CC1,NC_USB_CC1,Not used for magnetic dock,Do not emulate USB-C without connector
+U2,nPM1300-QFN32,24,CC2,NC_USB_CC2,Not used for magnetic dock,Do not emulate USB-C without connector
+U2,nPM1300-QFN32,25,LED0,PMIC_LED0,Optional status LED,DNM in final wearable if not needed
+U2,nPM1300-QFN32,26,LED1,PMIC_LED1,Optional status LED,DNM
+U2,nPM1300-QFN32,27,LED2,PMIC_LED2,Optional status LED,DNM
+U2,nPM1300-QFN32,28,LSIN1/VINLDO1,VSYS,LDO/load-switch input 1,
+U2,nPM1300-QFN32,29,LSOUT1/VOUTLDO1,DISP_SW,Display switched rail / control domain,Panel voltage dependent
+U2,nPM1300-QFN32,30,LSIN2/VINLDO2,VSYS,LDO/load-switch input 2,
+U2,nPM1300-QFN32,31,LSOUT2/VOUTLDO2,BIO_SW,Bio-board switched auxiliary rail,Final voltage firmware-configured
+U2,nPM1300-QFN32,32,VOUT2,+3V0,BUCK2 output,150k VSET2
+U2,nPM1300-QFN32,EP,AVSS,GND,Analog ground exposed pad,
