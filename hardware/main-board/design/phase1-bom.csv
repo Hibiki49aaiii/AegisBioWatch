@@ -1,32 +1,32 @@
 Ref,Part/Value,Description,Footprint,Manufacturer,Status,Notes
-U1,nRF54L15-QFAA,nRF54L15 QFN48,QFN48,Nordic,FROZEN,Use official QFAA reference circuit/layout v0.8
+U1,nRF54L15-QFAA,nRF54L15 QFN48,QFN48,Nordic,FROZEN,Pin map verified; Nordic layout authority
 U2,nPM1300,QFN32 variant,QFN32,Nordic,FROZEN,Reference Configuration 1
-U3,W25Q512NWEIQ/NWEIN class,512 Mbit 1.8 V SPI NOR,WSON-8 8x6,Winbond,PROVISIONAL,Use single-SPI on AUX_SPIM; package may shrink later
-U4,DRV2605L,LRA/ERM haptic driver,WSON-10 2x2,Texas Instruments,FROZEN,I2C
-X1,32.768 kHz crystal,"CL 9 pF, total ±20 ppm",2012,TBD,FROZEN_SPEC,Nordic reference spec
-X2,32 MHz crystal,"CL 8 pF, total ±40 ppm",2016,TBD,FROZEN_SPEC,Nordic reference spec
-L_NRF1,4.7 uH,"120 mA+, ±20%, <=650mΩ",0603,TBD,FROZEN_SPEC,nRF DCC reference
-FB_NRF1,120Ω @100MHz,"200mA+, <=500mΩ",0201,TBD,FROZEN_SPEC,Nordic reference
-L_RF2,2.7 nH,±0.1nH high-Q,0201,TBD,FROZEN_SPEC,Nordic RF ref; tune only after RF review
-L_RF3,3.5 nH,±0.1nH high-Q,0201,TBD,FROZEN_SPEC,Nordic RF ref
-L_RF4,3.5 nH,±0.1nH high-Q,0201,TBD,FROZEN_SPEC,Nordic RF ref
-L_PMIC1,2.2 uH,"DCR <400mΩ, ±20%",0806,TBD,FROZEN_SPEC,nPM BUCK1
-L_PMIC2,2.2 uH,"DCR <400mΩ, ±20%",0806,TBD,FROZEN_SPEC,nPM BUCK2
-R_VSET1,47 kΩ,1%,0201,TBD,FROZEN,BUCK1 = 1.8V
-R_VSET2,150 kΩ,1%,0201,TBD,FROZEN,BUCK2 = 3.0V
-R_I2C_SDA,4.7 kΩ provisional,1%,0201,TBD,PROVISIONAL,Tune for bus C/speed; nPM says dependent on bus
-R_I2C_SCL,4.7 kΩ provisional,1%,0201,TBD,PROVISIONAL,Tune for bus C/speed
-"C_NRF1,C_NRF2",2.2 uF,X6T ±20% 2.5V,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-C_NRF3,10 uF,X6S ±20% 6.3V,0402,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-"C_NRF4,C_NRF7,C_NRF8,C_NRF10",100 nF,X7R ±10%,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-C_NRF5,2.2 nF,X7R ±10% 10V,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-C_NRF6,1.5 pF,NP0 ±0.05pF high-Q,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-C_NRF9,2.0 pF,NP0 ±0.05pF,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-C_NRF11,0.3 pF,C0G ±0.1pF,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-C_NRF12,10 nF,X7R 6.3V,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-C_NRF13,3.9 pF,C0G ±0.25pF,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-R_NRF1,1 kΩ,1% 0.05W,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
-"C_PMIC1,C_PMIC5",1.0 uF,X5R 10V ±10%,0603,TBD,FROZEN_SPEC,From nPM1300 configuration 1
-"C_PMIC2,C_PMIC3,C_PMIC4,C_PMIC7,C_PMIC8,C_PMIC9,C_PMIC10,C_PMIC11,C_PMIC12",10 uF,X5R 25V ±20%,0603,TBD,FROZEN_SPEC,From nPM1300 configuration 1
-C_PMIC6,2.2 uF,X7R 16V ±10%,0603,TBD,FROZEN_SPEC,From nPM1300 configuration 1
-C_PMIC13,100 nF,X5R ±10%,0201,TBD,FROZEN_SPEC,From nPM1300 configuration 1
+U3,W25Q512NW class,512 Mbit / 64 MB 1.8 V SPI NOR,PROVISIONAL,Winbond,PROVISIONAL,Standard SPI on AUX bus; exact MPN/package not frozen
+U4,DRV2605LDGSR,LRA/ERM haptic driver,VSSOP-10 3x3 P0.5mm,Texas Instruments,FROZEN_PART_CLASS,Pinout captured; actuator/current review pending
+Y1,32 MHz crystal,HFXO crystal,PROVISIONAL,TBD,PROVISIONAL,MPN/load strategy pending
+Y2,32.768 kHz crystal,LFXO crystal,PROVISIONAL,TBD,PROVISIONAL,MPN/load strategy pending
+C1,10 uF,nRF VDD bulk decoupling,0402/TBD,TBD,REFERENCE_LOCKED,QFN48 reference block
+C2-C5,100 nF,nRF VDD local decoupling,0201/TBD,TBD,REFERENCE_LOCKED,QFN48 reference block
+L2,2.7 nH,RF series high-Q,0201,TBD,REFERENCE_LOCKED,RF topology/value cross-checked
+C10,1.5 pF,RF shunt C0G/NP0,0201,TBD,REFERENCE_LOCKED,RF topology/value cross-checked
+L3,3.5 nH,RF series high-Q,0201,TBD,REFERENCE_LOCKED,RF topology/value cross-checked
+C11,2.0 pF,RF shunt C0G/NP0,0201,TBD,REFERENCE_LOCKED,RF topology/value cross-checked
+L4,3.5 nH,RF series high-Q,0201,TBD,REFERENCE_LOCKED,RF topology/value cross-checked
+C12,0.3 pF,RF shunt C0G/NP0,0201,TBD,REFERENCE_LOCKED,RF topology/value cross-checked
+R1,1 kΩ,nRF reset series resistor,0201,TBD,REFERENCE_LOCKED,QFN48 reference block
+C13,3.9 pF,nRF reset shunt capacitor,0201,TBD,REFERENCE_LOCKED,QFN48 reference block
+FB1,100 Ω @ 100 MHz,nRF internal-regulator ferrite bead,0201,TBD,REFERENCE_STAGED,Official DECA/DECRF/DECD/DCC connectivity check pending
+C6,2.2 uF,nRF internal-regulator capacitor,0201/TBD,TBD,REFERENCE_STAGED,Official connectivity check pending
+C7-C8,10 nF,nRF internal-regulator capacitors,0201/TBD,TBD,REFERENCE_STAGED,Official connectivity check pending
+C9,2.2 uF,nRF internal-regulator capacitor,0201/TBD,TBD,REFERENCE_STAGED,Official connectivity check pending
+L1,4.7 uH,nRF internal DC/DC inductor,0603/TBD,TBD,REFERENCE_STAGED,Official connectivity check pending
+L101-L102,2.2 uH,nPM1300 BUCK inductors,0806/TBD,TBD,FROZEN_SPEC,nPM1300 reference config
+R101,47 kΩ 1%,nPM VSET1,0201,TBD,FROZEN,BUCK1 startup 1.8 V
+R102,150 kΩ 1%,nPM VSET2,0201,TBD,FROZEN,BUCK2 startup 3.0 V
+R301-R302,47 kΩ,Flash WP/HOLD pull-ups,0201,TBD,PROVISIONAL,Tune before release
+C301,100 nF,Flash local decoupling,0201,TBD,PROVISIONAL,Place at VCC
+C302,1 uF,Flash local bulk decoupling,0201/0402,TBD,PROVISIONAL,Place at VCC
+C303,1 uF,DRV2605L REG capacitor,0201/0402,TBD,VERIFY_TI,Verify against current TI datasheet before manufacturing
+C304,100 nF,DRV2605L VDD decoupling,0201,TBD,PROVISIONAL,Place at VDD
+C305,1 uF,DRV2605L VDD bulk,0201/0402,TBD,PROVISIONAL,Place at VDD
+R303-R304,100 kΩ,Haptic trigger/enable boot-safe pull-downs,0201,TBD,PROVISIONAL,Review firmware boot state
