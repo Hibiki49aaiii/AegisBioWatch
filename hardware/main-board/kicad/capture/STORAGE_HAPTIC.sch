@@ -6,7 +6,7 @@ $Descr A4 11693 8268
 Sheet 1 1
 Title "AegisBioWatch Storage / Haptic"
 Date "2026-08-07"
-Rev "Rev.0 / Phase 1 r3"
+Rev "Rev.0 / Phase 1 r4"
 Comp "AegisBioWatch"
 Comment1 "CAPTURE DRAFT - ERC pending"
 Comment2 "Flash package and LRA part still provisional"
@@ -211,12 +211,12 @@ GND
 $Comp
 L Connector_Generic:Conn_01x02 J4
 U 1 1 74B358
-P 9550 4700
+P 9550 4650
 F 0 "J4" H 9700 4800 50  0000 C CNN
 F 1 "LRA_ACTUATOR" H 9800 4600 50  0000 C CNN
 F 2 "" H 9550 4700 50  0001 C CNN
 F 3 "~" H 9550 4700 50  0001 C CNN
-	1    9550 4700
+	1    9550 4650
 	1 0 0 -1
 $EndComp
 Text Label 9200 4650 0    35   ~ 0
@@ -228,7 +228,51 @@ DRV2605L supply = +3V0. LRA peak-current budget must be validated against select
 Text Notes 6050 3800 0    40   ~ 0
 Pin 6 is treated as NC for DRV2605L; REG capacitor value is flagged for TI-datasheet review before manufacture.
 Text Notes 700 700 0    48   ~ 0
-r3 STORAGE_HAPTIC: real SPI/I2C/enable/output nets captured; package/actuator selection remains gated.
+r4 STORAGE_HAPTIC: real SPI/I2C/enable/output nets captured; package/actuator selection remains gated.
 Text Notes 700 850 0    42   ~ 0
 No full-rate logger guarantee yet: firmware duty cycle and raw-buffer policy determine usable retention.
+Text Notes 700 7350 0    36   ~ 0
+WIRE_AUDIT_R4_BEGIN
+Wire Wire Line
+	1900 2550 1900 2750
+Wire Wire Line
+	1900 2950 1900 3150
+Wire Wire Line
+	2250 2550 2250 2750
+Wire Wire Line
+	2250 2950 2250 3150
+Wire Wire Line
+	5000 2550 5000 2700
+Wire Wire Line
+	5000 2900 5000 3050
+Wire Wire Line
+	5350 2550 5350 2700
+Wire Wire Line
+	5350 2900 5350 3050
+Wire Wire Line
+	6050 3850 6050 4000
+Wire Wire Line
+	6050 4200 6050 4350
+Wire Wire Line
+	8750 5050 8750 5200
+Wire Wire Line
+	8750 5400 8750 5550
+Wire Wire Line
+	9100 5050 9100 5200
+Wire Wire Line
+	9100 5400 9100 5550
+Wire Wire Line
+	5750 4700 5750 4900
+Wire Wire Line
+	5750 5100 5750 5300
+Wire Wire Line
+	6100 5000 6100 5200
+Wire Wire Line
+	6100 5400 6100 5600
+Wire Wire Line
+	9200 4650 9350 4650
+Wire Wire Line
+	9200 4750 9350 4750
+Text Notes 700 7500 0    36   ~ 0
+WIRE_AUDIT_R4_END
 $EndSCHEMATC
