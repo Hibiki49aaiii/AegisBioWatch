@@ -1,0 +1,22 @@
+{
+  "revision": "r4",
+  "status": "SCHEMATIC_CAPTURE_R4_ELECTRICAL_WIRES_VALIDATED",
+  "manufacturing_ready": false,
+  "wire_count": 130,
+  "endpoint_checks": 124,
+  "endpoint_checks_passed": 124,
+  "open_hard_gates": [
+    "native KiCad 9 conversion",
+    "ERC",
+    "nPM1300 passives/decoupling",
+    "final crystals",
+    "final Flash",
+    "final LRA",
+    "battery/NTC",
+    "dock ESD/surge",
+    "display/touch freeze",
+    "antenna/RF tuning",
+    "physical Main-Bio connector",
+    "Bio electrode disconnect"
+  ]
+}
