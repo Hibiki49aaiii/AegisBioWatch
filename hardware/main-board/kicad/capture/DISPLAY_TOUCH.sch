@@ -16,12 +16,12 @@ $EndDescr
 $Comp
 L Connector_Generic:Conn_01x10 J5
 U 1 1 410001
-P 3300 3000
+P 3300 2950
 F 0 "J5" H 3450 3100 50  0000 C CNN
 F 1 "AMOLED_LOGIC_PLACEHOLDER" H 3900 2900 50  0000 C CNN
 F 2 "" H 3300 3000 50  0001 C CNN
 F 3 "~" H 3300 3000 50  0001 C CNN
-	1    3300 3000
+	1    3300 2950
 	1 0 0 -1
 $EndComp
 Text Label 2950 2550 0    35   ~ 0
@@ -51,12 +51,12 @@ DISP_SW voltage/current and panel initialization sequence remain supplier-datash
 $Comp
 L Connector_Generic:Conn_01x06 J6
 U 1 1 410002
-P 3300 5000
+P 3300 4950
 F 0 "J6" H 3450 5100 50  0000 C CNN
 F 1 "TOUCH_LOGIC_PLACEHOLDER" H 3900 4900 50  0000 C CNN
 F 2 "" H 3300 5000 50  0001 C CNN
 F 3 "~" H 3300 5000 50  0001 C CNN
-	1    3300 5000
+	1    3300 4950
 	1 0 0 -1
 $EndComp
 Text Label 2950 4750 0    35   ~ 0
@@ -156,4 +156,60 @@ Text Notes 700 700 0    48   ~ 0
 r4 DISPLAY_TOUCH: logical AMOLED QSPI + reset/TE + touch I2C interface captured without inventing supplier FPC pinout.
 Text Notes 700 850 0    42   ~ 0
 Hard gate remains: exact panel/touch MPN, FPC drawing, DISP_SW voltage/current, TOUCH_VDD and I/O thresholds.
+Text Notes 700 7350 0    36   ~ 0
+WIRE_AUDIT_R4_BEGIN
+Wire Wire Line
+	2950 2550 3100 2550
+Wire Wire Line
+	2950 2650 3100 2650
+Wire Wire Line
+	2950 2750 3100 2750
+Wire Wire Line
+	2950 2850 3100 2850
+Wire Wire Line
+	2950 2950 3100 2950
+Wire Wire Line
+	2950 3050 3100 3050
+Wire Wire Line
+	2950 3150 3100 3150
+Wire Wire Line
+	2950 3250 3100 3250
+Wire Wire Line
+	2950 3350 3100 3350
+Wire Wire Line
+	2950 3450 3100 3450
+Wire Wire Line
+	2950 4750 3100 4750
+Wire Wire Line
+	2950 4850 3100 4850
+Wire Wire Line
+	2950 4950 3100 4950
+Wire Wire Line
+	2950 5050 3100 5050
+Wire Wire Line
+	2950 5150 3100 5150
+Wire Wire Line
+	2950 5250 3100 5250
+Wire Wire Line
+	5150 4650 5500 4650
+Wire Wire Line
+	5700 4650 6050 4650
+Wire Wire Line
+	5150 5200 5500 5200
+Wire Wire Line
+	5700 5200 6050 5200
+Wire Wire Line
+	6800 4350 6800 4550
+Wire Wire Line
+	6800 4750 6800 4950
+Wire Wire Line
+	7450 4350 7450 4550
+Wire Wire Line
+	7450 4750 7450 4950
+Wire Wire Line
+	8300 4650 8300 4800
+Wire Wire Line
+	8300 5000 8300 5150
+Text Notes 700 7500 0    36   ~ 0
+WIRE_AUDIT_R4_END
 $EndSCHEMATC
