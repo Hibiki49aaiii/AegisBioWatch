@@ -2,24 +2,30 @@
 
 ## Nordic Semiconductor
 
-nRF54L15 and nPM1300 design is based on the corresponding Nordic Semiconductor product specifications and reference circuitry.
+The nRF54L15 and nPM1300 design uses Nordic Semiconductor product
+specifications/reference-design guidance as the engineering authority.
 
-## KiCad-Master-Lib — nRF54L15 QFAA reference design
+## feastorg/KiCad-Master-Lib — nRF54L15 QFAA reference block
 
-Reference used to cross-check the nRF54L15-QFAA passive/reference network:
+Reference used for independent nRF54L15-QFAA circuit/pin/value cross-check:
+`https://github.com/feastorg/KiCad-Master-Lib`
 
-https://github.com/feastorg/KiCad-Master-Lib
+The repository publishes its work under CC0 1.0 Universal.
 
-The repository states CC0 1.0 Universal. The exact DECA/DECRF/DECD/DCC/RF network remains a release gate until captured and checked in AegisBioWatch.
+## hlord2000/nordic-lib-kicad — nRF54L15 QFN48 reference block
 
-## RoyalBlue54L Feather Hardware
+Reference used for a second independent implementation cross-check:
+`https://github.com/hlord2000/nordic-lib-kicad`
 
-The nPM1300 pin implementation was independently cross-checked against:
+License: CERN Open Hardware Licence Version 2 — Permissive (CERN-OHL-P-2.0).
 
-https://github.com/LordsBoards/RoyalBlue54L-Feather-Hardware
+Modification notice — 2026-08-07:
+AegisBioWatch adapts only the relevant nRF54L15-QFN48 reference values/topology
+into a watch-specific design, renames nets, removes unrelated development-board
+features, and adds project-specific display/storage/haptic/bio interfaces.
 
-That project is distributed under CERN Open Hardware Licence Version 2 — Permissive (CERN-OHL-P-2.0).
+## DRV2605L pinout
 
-AegisBioWatch is a purpose-built watch design and does not include the RoyalBlue54L Feather/NFC/debug circuitry.
-
-An unlicensed public nRF54L15 schematic was used only as an independent pin-number cross-check and no source content from it is copied into this repository.
+DRV2605LDGS pin numbering was cross-checked against KiCad's haptic-driver symbol
+representation and a generated SKiDL mirror. The AegisBioWatch symbol is local
+and purpose-built.
