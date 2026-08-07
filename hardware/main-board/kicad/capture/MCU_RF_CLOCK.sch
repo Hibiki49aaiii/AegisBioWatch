@@ -6,7 +6,7 @@ $Descr A4 11693 8268
 Sheet 1 1
 Title "AegisBioWatch MCU / RF / Clock"
 Date "2026-08-07"
-Rev "Rev.0 / Phase 1 r2"
+Rev "Rev.0 / Phase 1 r3"
 Comp "AegisBioWatch"
 Comment1 "CAPTURE DRAFT - ERC pending"
 Comment2 "PCB release prohibited until reference gates close"
@@ -83,9 +83,9 @@ DISP_TE
 Text Label 6200 2775 2    35   ~ 0
 TOUCH_RST_N
 Text Label 6200 2900 2    35   ~ 0
-NRF_RESET_N
+NRF_RESET_RAW
 Text Label 6200 3025 2    35   ~ 0
-RF_ANT
+RF_MCU
 Text Label 6200 3150 2    35   ~ 0
 GND
 Text Label 6200 3275 2    35   ~ 0
@@ -152,12 +152,289 @@ Text Label 2450 2500 2    35   ~ 0
 NRF_XL1
 Text Label 2750 2500 0    35   ~ 0
 NRF_XL2
+$Comp
+L Device:C_Small C1
+U 1 1 797CB7
+P 7300 1800
+F 0 "C1" H 7450 1900 50  0000 C CNN
+F 1 "10uF" H 7550 1700 50  0000 C CNN
+F 2 "" H 7300 1800 50  0001 C CNN
+F 3 "~" H 7300 1800 50  0001 C CNN
+	1    7300 1800
+	1 0 0 -1
+$EndComp
+Text Label 7300 1550 0    35   ~ 0
++1V8
+Text Label 7300 2050 0    35   ~ 0
+GND
+$Comp
+L Device:C_Small C2
+U 1 1 B581E6
+P 7700 1800
+F 0 "C2" H 7850 1900 50  0000 C CNN
+F 1 "100nF" H 7950 1700 50  0000 C CNN
+F 2 "" H 7700 1800 50  0001 C CNN
+F 3 "~" H 7700 1800 50  0001 C CNN
+	1    7700 1800
+	1 0 0 -1
+$EndComp
+Text Label 7700 1550 0    35   ~ 0
++1V8
+Text Label 7700 2050 0    35   ~ 0
+GND
+$Comp
+L Device:C_Small C3
+U 1 1 3DDA1F
+P 8100 1800
+F 0 "C3" H 8250 1900 50  0000 C CNN
+F 1 "100nF" H 8350 1700 50  0000 C CNN
+F 2 "" H 8100 1800 50  0001 C CNN
+F 3 "~" H 8100 1800 50  0001 C CNN
+	1    8100 1800
+	1 0 0 -1
+$EndComp
+Text Label 8100 1550 0    35   ~ 0
++1V8
+Text Label 8100 2050 0    35   ~ 0
+GND
+$Comp
+L Device:C_Small C4
+U 1 1 AC8758
+P 8500 1800
+F 0 "C4" H 8650 1900 50  0000 C CNN
+F 1 "100nF" H 8750 1700 50  0000 C CNN
+F 2 "" H 8500 1800 50  0001 C CNN
+F 3 "~" H 8500 1800 50  0001 C CNN
+	1    8500 1800
+	1 0 0 -1
+$EndComp
+Text Label 8500 1550 0    35   ~ 0
++1V8
+Text Label 8500 2050 0    35   ~ 0
+GND
+$Comp
+L Device:C_Small C5
+U 1 1 78191F
+P 8900 1800
+F 0 "C5" H 9050 1900 50  0000 C CNN
+F 1 "100nF" H 9150 1700 50  0000 C CNN
+F 2 "" H 8900 1800 50  0001 C CNN
+F 3 "~" H 8900 1800 50  0001 C CNN
+	1    8900 1800
+	1 0 0 -1
+$EndComp
+Text Label 8900 1550 0    35   ~ 0
++1V8
+Text Label 8900 2050 0    35   ~ 0
+GND
+Text Notes 7150 1300 0    45   ~ 0
+VDD decoupling — QFN48 reference-block cross-check complete
+$Comp
+L Device:L_Small L2
+U 1 1 3FE3DD
+P 7000 3200
+F 0 "L2" H 7150 3300 50  0000 C CNN
+F 1 "2.7nH" H 7250 3100 50  0000 C CNN
+F 2 "" H 7000 3200 50  0001 C CNN
+F 3 "~" H 7000 3200 50  0001 C CNN
+	1    7000 3200
+	0 -1 -1 0
+$EndComp
+Text Label 6550 3200 0    35   ~ 0
+RF_MCU
+Text Label 7450 3200 0    35   ~ 0
+RF_A
+$Comp
+L Device:C_Small C10
+U 1 1 C805D3
+P 7450 3650
+F 0 "C10" H 7600 3750 50  0000 C CNN
+F 1 "1.5pF" H 7700 3550 50  0000 C CNN
+F 2 "" H 7450 3650 50  0001 C CNN
+F 3 "~" H 7450 3650 50  0001 C CNN
+	1    7450 3650
+	1 0 0 -1
+$EndComp
+Text Label 7450 3400 0    35   ~ 0
+RF_A
+Text Label 7450 3900 0    35   ~ 0
+GND
+$Comp
+L Device:L_Small L3
+U 1 1 D11522
+P 8000 3200
+F 0 "L3" H 8150 3300 50  0000 C CNN
+F 1 "3.5nH" H 8250 3100 50  0000 C CNN
+F 2 "" H 8000 3200 50  0001 C CNN
+F 3 "~" H 8000 3200 50  0001 C CNN
+	1    8000 3200
+	0 -1 -1 0
+$EndComp
+Text Label 7550 3200 0    35   ~ 0
+RF_A
+Text Label 8450 3200 0    35   ~ 0
+RF_B
+$Comp
+L Device:C_Small C11
+U 1 1 9563D9
+P 8450 3650
+F 0 "C11" H 8600 3750 50  0000 C CNN
+F 1 "2.0pF" H 8700 3550 50  0000 C CNN
+F 2 "" H 8450 3650 50  0001 C CNN
+F 3 "~" H 8450 3650 50  0001 C CNN
+	1    8450 3650
+	1 0 0 -1
+$EndComp
+Text Label 8450 3400 0    35   ~ 0
+RF_B
+Text Label 8450 3900 0    35   ~ 0
+GND
+$Comp
+L Device:L_Small L4
+U 1 1 E19BF1
+P 9000 3200
+F 0 "L4" H 9150 3300 50  0000 C CNN
+F 1 "3.5nH" H 9250 3100 50  0000 C CNN
+F 2 "" H 9000 3200 50  0001 C CNN
+F 3 "~" H 9000 3200 50  0001 C CNN
+	1    9000 3200
+	0 -1 -1 0
+$EndComp
+Text Label 8550 3200 0    35   ~ 0
+RF_B
+Text Label 9450 3200 0    35   ~ 0
+RF_ANT
+$Comp
+L Device:C_Small C12
+U 1 1 A46B13
+P 9450 3650
+F 0 "C12" H 9600 3750 50  0000 C CNN
+F 1 "0.3pF" H 9700 3550 50  0000 C CNN
+F 2 "" H 9450 3650 50  0001 C CNN
+F 3 "~" H 9450 3650 50  0001 C CNN
+	1    9450 3650
+	1 0 0 -1
+$EndComp
+Text Label 9450 3400 0    35   ~ 0
+RF_ANT
+Text Label 9450 3900 0    35   ~ 0
+GND
+Text Notes 6750 2850 0    42   ~ 0
+RF_MCU → 2.7nH → [1.5pF↓] → 3.5nH → [2.0pF↓] → 3.5nH → [0.3pF↓] → RF_ANT
+Text Notes 6750 3000 0    42   ~ 0
+Values/topology independently match two nRF54L15 QFN48 KiCad reference blocks; layout must still follow Nordic placement.
+$Comp
+L Device:R_Small R1
+U 1 1 1EC394
+P 7600 4650
+F 0 "R1" H 7750 4750 50  0000 C CNN
+F 1 "1k" H 7850 4550 50  0000 C CNN
+F 2 "" H 7600 4650 50  0001 C CNN
+F 3 "~" H 7600 4650 50  0001 C CNN
+	1    7600 4650
+	0 -1 -1 0
+$EndComp
+Text Label 7150 4650 0    35   ~ 0
+NRF_RESET_RAW
+Text Label 8050 4650 0    35   ~ 0
+NRF_RESET_N
+$Comp
+L Device:C_Small C13
+U 1 1 94629C
+P 7150 5050
+F 0 "C13" H 7300 5150 50  0000 C CNN
+F 1 "3.9pF" H 7400 4950 50  0000 C CNN
+F 2 "" H 7150 5050 50  0001 C CNN
+F 3 "~" H 7150 5050 50  0001 C CNN
+	1    7150 5050
+	1 0 0 -1
+$EndComp
+Text Label 7150 4800 0    35   ~ 0
+NRF_RESET_RAW
+Text Label 7150 5300 0    35   ~ 0
+GND
+Text Notes 6800 4400 0    42   ~ 0
+Reset reference: MCU-side 3.9pF to GND + 1k series to external NRF_RESET_N.
+Text Notes 6900 5750 0    48   ~ 0
+INTERNAL REGULATOR REFERENCE GATE — do not fabricate yet
+Text Notes 6900 5900 0    40   ~ 0
+Cross-checked reference parts: FB1=100Ω@100MHz, C6=2.2uF, C7=10nF, C8=10nF, C9=2.2uF, L1=4.7uH.
+Text Notes 6900 6050 0    40   ~ 0
+DECA/DECRF/DECD/DCC final connectivity remains blocked on Nordic Product Specification check; no guessed wire is added.
+$Comp
+L Device:FerriteBead_Small FB1
+U 1 1 7FD96D
+P 7200 6500
+F 0 "FB1" H 7350 6600 50  0000 C CNN
+F 1 "100R@100MHz" H 7450 6400 50  0000 C CNN
+F 2 "" H 7200 6500 50  0001 C CNN
+F 3 "~" H 7200 6500 50  0001 C CNN
+	1    7200 6500
+	1 0 0 -1
+$EndComp
+$Comp
+L Device:C_Small C6
+U 1 1 466D88
+P 7700 6500
+F 0 "C6" H 7850 6600 50  0000 C CNN
+F 1 "2.2uF" H 7950 6400 50  0000 C CNN
+F 2 "" H 7700 6500 50  0001 C CNN
+F 3 "~" H 7700 6500 50  0001 C CNN
+	1    7700 6500
+	1 0 0 -1
+$EndComp
+$Comp
+L Device:C_Small C7
+U 1 1 D811C9
+P 8100 6500
+F 0 "C7" H 8250 6600 50  0000 C CNN
+F 1 "10nF" H 8350 6400 50  0000 C CNN
+F 2 "" H 8100 6500 50  0001 C CNN
+F 3 "~" H 8100 6500 50  0001 C CNN
+	1    8100 6500
+	1 0 0 -1
+$EndComp
+$Comp
+L Device:C_Small C8
+U 1 1 A1F8D4
+P 8500 6500
+F 0 "C8" H 8650 6600 50  0000 C CNN
+F 1 "10nF" H 8750 6400 50  0000 C CNN
+F 2 "" H 8500 6500 50  0001 C CNN
+F 3 "~" H 8500 6500 50  0001 C CNN
+	1    8500 6500
+	1 0 0 -1
+$EndComp
+$Comp
+L Device:C_Small C9
+U 1 1 5BC799
+P 8900 6500
+F 0 "C9" H 9050 6600 50  0000 C CNN
+F 1 "2.2uF" H 9150 6400 50  0000 C CNN
+F 2 "" H 8900 6500 50  0001 C CNN
+F 3 "~" H 8900 6500 50  0001 C CNN
+	1    8900 6500
+	1 0 0 -1
+$EndComp
+$Comp
+L Device:L_Small L1
+U 1 1 492E22
+P 9400 6500
+F 0 "L1" H 9550 6600 50  0000 C CNN
+F 1 "4.7uH" H 9650 6400 50  0000 C CNN
+F 2 "" H 9400 6500 50  0001 C CNN
+F 3 "~" H 9400 6500 50  0001 C CNN
+	1    9400 6500
+	1 0 0 -1
+$EndComp
+Text Notes 6900 7000 0    38   ~ 0
+STAGED ONLY: FB1/C6-C9/L1 are intentionally not net-connected until official regulator topology review.
 Text Notes 700 700 0    50   ~ 0
-U1 QFN48 pad map captured; display QSPI, AUX SPI, I2C, interrupts, SWD and clocks are real nets.
-Text Notes 700 850 0    50   ~ 0
-REFERENCE GATE: DECA/DECRF/DECD/DCC and RF harmonic/matching network must be copied exactly from CC0 QFAA reference block.
-Text Notes 700 1000 0    50   ~ 0
-Do not route PCB or release Gerbers until that gate is closed and ERC is run in KiCad 9.
-Text Notes 700 1150 0    50   ~ 0
-Reference block: feastorg/KiCad-Master-Lib nRF54L15-QFAA_Reference_Design (CC0 1.0).
+r3: RF filter + reset + VDD decoupling captured as real nets; QFN48 pin map/buses/clocks retained.
+Text Notes 700 850 0    45   ~ 0
+HARD GATE REMAINS: DECA/DECRF/DECD/DCC official Nordic Product Specification connectivity cross-check.
+Text Notes 700 1000 0    45   ~ 0
+Do not release Gerbers until regulator gate, native KiCad conversion, ERC, antenna/stackup and enclosure RF review are complete.
+Text Notes 700 1150 0    42   ~ 0
+Reference cross-check: feastorg/KiCad-Master-Lib (CC0) + hlord2000/nordic-lib-kicad (CERN-OHL-P).
 $EndSCHEMATC
