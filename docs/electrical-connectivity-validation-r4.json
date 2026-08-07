@@ -1,0 +1,37 @@
+[
+  {
+    "file": "MCU_RF_CLOCK.sch",
+    "wires": 42,
+    "checks": 36,
+    "passed": 36,
+    "failures": []
+  },
+  {
+    "file": "PMIC_CHARGER.sch",
+    "wires": 13,
+    "checks": 13,
+    "passed": 13,
+    "failures": []
+  },
+  {
+    "file": "STORAGE_HAPTIC.sch",
+    "wires": 20,
+    "checks": 20,
+    "passed": 20,
+    "failures": []
+  },
+  {
+    "file": "DISPLAY_TOUCH.sch",
+    "wires": 26,
+    "checks": 26,
+    "passed": 26,
+    "failures": []
+  },
+  {
+    "file": "BIO_INTERFACE.sch",
+    "wires": 29,
+    "checks": 29,
+    "passed": 29,
+    "failures": []
+  }
+]
