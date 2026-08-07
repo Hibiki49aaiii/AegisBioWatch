@@ -15,11 +15,12 @@ L4,3.5 nH,RF series high-Q,0201,TBD,REFERENCE_LOCKED,RF topology/value cross-che
 C12,0.3 pF,RF shunt C0G/NP0,0201,TBD,REFERENCE_LOCKED,RF topology/value cross-checked
 R1,1 kΩ,nRF reset series resistor,0201,TBD,REFERENCE_LOCKED,QFN48 reference block
 C13,3.9 pF,nRF reset shunt capacitor,0201,TBD,REFERENCE_LOCKED,QFN48 reference block
-FB1,100 Ω @ 100 MHz,nRF internal-regulator ferrite bead,0201,TBD,REFERENCE_STAGED,Official DECA/DECRF/DECD/DCC connectivity check pending
-C6,2.2 uF,nRF internal-regulator capacitor,0201/TBD,TBD,REFERENCE_STAGED,Official connectivity check pending
-C7-C8,10 nF,nRF internal-regulator capacitors,0201/TBD,TBD,REFERENCE_STAGED,Official connectivity check pending
-C9,2.2 uF,nRF internal-regulator capacitor,0201/TBD,TBD,REFERENCE_STAGED,Official connectivity check pending
-L1,4.7 uH,nRF internal DC/DC inductor,0603/TBD,TBD,REFERENCE_STAGED,Official connectivity check pending
+FB1,120 Ω @ 100 MHz,nRF internal-regulator ferrite bead,0201,TBD,REFERENCE_LOCKED,Current Nordic QFN48 Config.1; 200 mA 500 mΩ max
+C6,2.2 uF,nRF DECD decoupling capacitor,0201,TBD,REFERENCE_LOCKED,DECD to GND
+C7,2.2 uF,nRF DECA/DECRF decoupling capacitor,0201,TBD,REFERENCE_LOCKED,NRF_DECA_RF to GND
+C8,10 nF,nRF DECA/DECRF HF bypass capacitor,0201,TBD,REFERENCE_LOCKED,NRF_DECA_RF to GND
+C9,2.2 nF,nRF DECRF harmonic-suppression bypass,0201,TBD,REFERENCE_LOCKED,Current Nordic Config.1; replaces older 10 nF recommendation
+L1,4.7 uH,nRF internal DC/DC inductor,0603/TBD,TBD,REFERENCE_LOCKED,DCC to DECD; current Config.1 120 mA ±20% 650 mΩ
 L101-L102,2.2 uH,nPM1300 BUCK inductors,0806/TBD,TBD,FROZEN_SPEC,nPM1300 reference config
 R101,47 kΩ 1%,nPM VSET1,0201,TBD,FROZEN,BUCK1 startup 1.8 V
 R102,150 kΩ 1%,nPM VSET2,0201,TBD,FROZEN,BUCK2 startup 3.0 V
@@ -30,3 +31,13 @@ C303,1 uF,DRV2605L REG capacitor,0201/0402,TBD,VERIFY_TI,Verify against current 
 C304,100 nF,DRV2605L VDD decoupling,0201,TBD,PROVISIONAL,Place at VDD
 C305,1 uF,DRV2605L VDD bulk,0201/0402,TBD,PROVISIONAL,Place at VDD
 R303-R304,100 kΩ,Haptic trigger/enable boot-safe pull-downs,0201,TBD,PROVISIONAL,Review firmware boot state
+J5,AMOLED logical interface,10-signal logical placeholder,TBD,TBD,LOGICAL_ONLY,Production FPC pinout/footprint not frozen
+J6,Touch logical interface,6-signal logical placeholder,TBD,TBD,LOGICAL_ONLY,Production touch/FPC not frozen
+R401-R402,0 Ω,Touch I2C direct-link option,0201,TBD,PROVISIONAL,Fit only if selected touch I/O is 1.8 V compatible
+R403-R404,4.7 kΩ,SYS_I2C pull-ups,0201,TBD,PROVISIONAL,Single Main Board pull-up pair; tune from bus capacitance
+C401,100 nF,Touch local decoupling placeholder,0201,TBD,PROVISIONAL,Value/domain recheck after touch MPN freeze
+J7,Main-Bio logical interface,20-signal logical placeholder,TBD,TBD,LOGICAL_ONLY,Physical connector and pin ordering not frozen
+Q501,2N7002-class,Hardware charge-present open-drain switch,SOT-23/TBD,TBD,PROVISIONAL,CHG_PRESENT_N independent of MCU firmware
+R501,100 kΩ,Charge-sense gate series resistor,0201,TBD,PROVISIONAL,CHG_5V to Q501 gate
+R502,1 MΩ,Charge-sense gate pull-down,0201,TBD,PROVISIONAL,Default gate low when charger absent
+R503,47 kΩ,CHG_PRESENT_N pull-up to 1.8 V,0201,TBD,PROVISIONAL,Active-low hardware charge indication
