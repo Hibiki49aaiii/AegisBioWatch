@@ -6,7 +6,7 @@ $Descr A4 11693 8268
 Sheet 1 1
 Title "AegisBioWatch PMIC / Charger"
 Date "2026-08-07"
-Rev "Rev.0 / Phase 1 r2"
+Rev "Rev.0 / Phase 1 r4"
 Comp "AegisBioWatch"
 Comment1 "CAPTURE DRAFT - ERC pending"
 Comment2 "PCB release prohibited until reference gates close"
@@ -170,12 +170,12 @@ GND
 $Comp
 L Connector_Generic:Conn_01x02 J3
 U 1 1 D776F5
-P 1800 3300
+P 1800 3250
 F 0 "J3" H 1950 3400 50  0000 C CNN
 F 1 "MAG_DOCK_5V" H 2050 3200 50  0000 C CNN
 F 2 "" H 1800 3300 50  0001 C CNN
 F 3 "~" H 1800 3300 50  0001 C CNN
-	1    1800 3300
+	1    1800 3250
 	1 0 0 -1
 $EndComp
 Text Label 1500 3250 0    35   ~ 0
@@ -190,4 +190,34 @@ Text Notes 700 1000 0    50   ~ 0
 GATE: final battery/NTC curve, input ESD/surge parts, exact charge-current policy and output capacitor MPNs.
 Text Notes 700 1150 0    50   ~ 0
 Bio-electrode acquisition remains inhibited whenever external charging is detected.
+Text Notes 700 7350 0    36   ~ 0
+WIRE_AUDIT_R4_BEGIN
+Wire Wire Line
+	7500 2750 7700 2750
+Wire Wire Line
+	7900 2750 8100 2750
+Wire Wire Line
+	7500 3900 7700 3900
+Wire Wire Line
+	7900 3900 8100 3900
+Wire Wire Line
+	7400 4500 7400 4700
+Wire Wire Line
+	7400 4900 7400 5100
+Wire Wire Line
+	8100 4500 8100 4700
+Wire Wire Line
+	8100 4900 8100 5100
+Wire Wire Line
+	1500 2400 1600 2400
+Wire Wire Line
+	1500 2500 1600 2500
+Wire Wire Line
+	1500 2600 1600 2600
+Wire Wire Line
+	1500 3250 1600 3250
+Wire Wire Line
+	1500 3350 1600 3350
+Text Notes 700 7500 0    36   ~ 0
+WIRE_AUDIT_R4_END
 $EndSCHEMATC
