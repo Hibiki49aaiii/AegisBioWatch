@@ -16,12 +16,12 @@ $EndDescr
 $Comp
 L Connector_Generic:Conn_02x10_Odd_Even J7
 U 1 1 510001
-P 3600 3600
+P 3600 3550
 F 0 "J7" H 3650 4200 50  0000 C CNN
 F 1 "MAIN_BIO_LOGIC_20" H 3650 3000 50  0000 C CNN
 F 2 "" H 3600 3600 50  0001 C CNN
 F 3 "~" H 3600 3600 50  0001 C CNN
-	1    3600 3600
+	1    3600 3550
 	1 0 0 -1
 $EndComp
 Text Label 3150 3150 2    35   ~ 0
@@ -140,4 +140,66 @@ Text Notes 700 700 0    48   ~ 0
 r4 BIO_INTERFACE: 20-signal logical interface + independent active-low charge-present safety signal captured.
 Text Notes 700 850 0    42   ~ 0
 Hard gate remains: physical connector/footprint, pin ordering, hot-plug behavior, ESD, and Bio Board electrode-disconnect implementation.
+Text Notes 700 7350 0    36   ~ 0
+WIRE_AUDIT_R4_BEGIN
+Wire Wire Line
+	3150 3150 3400 3150
+Wire Wire Line
+	3900 3150 4150 3150
+Wire Wire Line
+	3150 3250 3400 3250
+Wire Wire Line
+	3900 3250 4150 3250
+Wire Wire Line
+	3150 3350 3400 3350
+Wire Wire Line
+	3900 3350 4150 3350
+Wire Wire Line
+	3150 3450 3400 3450
+Wire Wire Line
+	3900 3450 4150 3450
+Wire Wire Line
+	3150 3550 3400 3550
+Wire Wire Line
+	3900 3550 4150 3550
+Wire Wire Line
+	3150 3650 3400 3650
+Wire Wire Line
+	3900 3650 4150 3650
+Wire Wire Line
+	3150 3750 3400 3750
+Wire Wire Line
+	3900 3750 4150 3750
+Wire Wire Line
+	3150 3850 3400 3850
+Wire Wire Line
+	3900 3850 4150 3850
+Wire Wire Line
+	3150 3950 3400 3950
+Wire Wire Line
+	3900 3950 4150 3950
+Wire Wire Line
+	3150 4050 3400 4050
+Wire Wire Line
+	3900 4050 4150 4050
+Wire Wire Line
+	6050 3300 6400 3300
+Wire Wire Line
+	6600 3300 6950 3300
+Wire Wire Line
+	6950 3550 6950 3750
+Wire Wire Line
+	6950 3950 6950 4150
+Wire Wire Line
+	7550 3850 7650 3850
+Wire Wire Line
+	7950 3500 7950 3650
+Wire Wire Line
+	7950 4050 7950 4200
+Wire Wire Line
+	8600 3000 8600 3200
+Wire Wire Line
+	8600 3400 8600 3600
+Text Notes 700 7500 0    36   ~ 0
+WIRE_AUDIT_R4_END
 $EndSCHEMATC
