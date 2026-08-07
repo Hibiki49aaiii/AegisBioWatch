@@ -1,0 +1,32 @@
+Ref,Part/Value,Description,Footprint,Manufacturer,Status,Notes
+U1,nRF54L15-QFAA,nRF54L15 QFN48,QFN48,Nordic,FROZEN,Use official QFAA reference circuit/layout v0.8
+U2,nPM1300,QFN32 variant,QFN32,Nordic,FROZEN,Reference Configuration 1
+U3,W25Q512NWEIQ/NWEIN class,512 Mbit 1.8 V SPI NOR,WSON-8 8x6,Winbond,PROVISIONAL,Use single-SPI on AUX_SPIM; package may shrink later
+U4,DRV2605L,LRA/ERM haptic driver,WSON-10 2x2,Texas Instruments,FROZEN,I2C
+X1,32.768 kHz crystal,"CL 9 pF, total ±20 ppm",2012,TBD,FROZEN_SPEC,Nordic reference spec
+X2,32 MHz crystal,"CL 8 pF, total ±40 ppm",2016,TBD,FROZEN_SPEC,Nordic reference spec
+L_NRF1,4.7 uH,"120 mA+, ±20%, <=650mΩ",0603,TBD,FROZEN_SPEC,nRF DCC reference
+FB_NRF1,120Ω @100MHz,"200mA+, <=500mΩ",0201,TBD,FROZEN_SPEC,Nordic reference
+L_RF2,2.7 nH,±0.1nH high-Q,0201,TBD,FROZEN_SPEC,Nordic RF ref; tune only after RF review
+L_RF3,3.5 nH,±0.1nH high-Q,0201,TBD,FROZEN_SPEC,Nordic RF ref
+L_RF4,3.5 nH,±0.1nH high-Q,0201,TBD,FROZEN_SPEC,Nordic RF ref
+L_PMIC1,2.2 uH,"DCR <400mΩ, ±20%",0806,TBD,FROZEN_SPEC,nPM BUCK1
+L_PMIC2,2.2 uH,"DCR <400mΩ, ±20%",0806,TBD,FROZEN_SPEC,nPM BUCK2
+R_VSET1,47 kΩ,1%,0201,TBD,FROZEN,BUCK1 = 1.8V
+R_VSET2,150 kΩ,1%,0201,TBD,FROZEN,BUCK2 = 3.0V
+R_I2C_SDA,4.7 kΩ provisional,1%,0201,TBD,PROVISIONAL,Tune for bus C/speed; nPM says dependent on bus
+R_I2C_SCL,4.7 kΩ provisional,1%,0201,TBD,PROVISIONAL,Tune for bus C/speed
+"C_NRF1,C_NRF2",2.2 uF,X6T ±20% 2.5V,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+C_NRF3,10 uF,X6S ±20% 6.3V,0402,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+"C_NRF4,C_NRF7,C_NRF8,C_NRF10",100 nF,X7R ±10%,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+C_NRF5,2.2 nF,X7R ±10% 10V,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+C_NRF6,1.5 pF,NP0 ±0.05pF high-Q,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+C_NRF9,2.0 pF,NP0 ±0.05pF,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+C_NRF11,0.3 pF,C0G ±0.1pF,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+C_NRF12,10 nF,X7R 6.3V,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+C_NRF13,3.9 pF,C0G ±0.25pF,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+R_NRF1,1 kΩ,1% 0.05W,0201,TBD,FROZEN_SPEC,From Nordic QFAA config 1
+"C_PMIC1,C_PMIC5",1.0 uF,X5R 10V ±10%,0603,TBD,FROZEN_SPEC,From nPM1300 configuration 1
+"C_PMIC2,C_PMIC3,C_PMIC4,C_PMIC7,C_PMIC8,C_PMIC9,C_PMIC10,C_PMIC11,C_PMIC12",10 uF,X5R 25V ±20%,0603,TBD,FROZEN_SPEC,From nPM1300 configuration 1
+C_PMIC6,2.2 uF,X7R 16V ±10%,0603,TBD,FROZEN_SPEC,From nPM1300 configuration 1
+C_PMIC13,100 nF,X5R ±10%,0201,TBD,FROZEN_SPEC,From nPM1300 configuration 1
