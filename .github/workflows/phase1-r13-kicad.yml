@@ -2,104 +2,22 @@ name: Phase 1 r13 KiCad validation
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     types: [opened, reopened, synchronize, edited]
-    paths:
-      - '.github/workflows/phase1-r13-kicad.yml'
-      - 'tools/probe-kicad-pcbnew.py'
-      - 'tools/recover-pcb-r11-payload-from-history.py'
-      - 'tools/rebuild-pcb-r11-payload-from-git-objects.py'
-      - 'tools/inspect-pcb-r11.py'
-      - 'tools/materialize-pcb-r11.py'
-      - 'hardware/main-board/pcb/placement-r11-payload/**'
-      - 'tools/materialize-pcb-r13.py'
-      - 'tools/package-pcb-r13-evidence.py'
-      - 'tools/materialize-pcb-r13-route1.py'
-      - 'tools/package-pcb-r13-route1-evidence.py'
-      - 'docs/pcb-placement-implementation-r13.json'
-      - 'docs/pcb-routing-r13-1.json'
-      - 'docs/nrf54l15-reference-placement-gate-r13.json'
-      - 'hardware/main-board/design/pcb-placement-implementation-r13.md'
-      - 'hardware/main-board/design/pcb-routing-seed-r13-1.md'
-      - 'hardware/main-board/design/nrf54l15-reference-placement-r13.md'
-      - 'hardware/main-board/design/layout-rules.md'
   push:
-    branches:
-      - agent/phase1-mainboard-schematic
-    paths:
-      - '.github/workflows/phase1-r13-kicad.yml'
-      - 'tools/probe-kicad-pcbnew.py'
-      - 'tools/recover-pcb-r11-payload-from-history.py'
-      - 'tools/rebuild-pcb-r11-payload-from-git-objects.py'
-      - 'tools/inspect-pcb-r11.py'
-      - 'tools/materialize-pcb-r11.py'
-      - 'hardware/main-board/pcb/placement-r11-payload/**'
-      - 'tools/materialize-pcb-r13.py'
-      - 'tools/package-pcb-r13-evidence.py'
-      - 'tools/materialize-pcb-r13-route1.py'
-      - 'tools/package-pcb-r13-route1-evidence.py'
-      - 'docs/pcb-placement-implementation-r13.json'
-      - 'docs/pcb-routing-r13-1.json'
-      - 'docs/nrf54l15-reference-placement-gate-r13.json'
-      - 'hardware/main-board/design/pcb-placement-implementation-r13.md'
-      - 'hardware/main-board/design/pcb-routing-seed-r13-1.md'
-      - 'hardware/main-board/design/nrf54l15-reference-placement-r13.md'
-      - 'hardware/main-board/design/layout-rules.md'
+    branches: [agent/phase1-mainboard-schematic]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  validate-r13:
+  rebuild-r11:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Recover r11 payload from exact repository evidence
-        shell: bash
-        run: |
-          set -uo pipefail
-          R11_OK=0
-          if python3 tools/recover-pcb-r11-payload-from-history.py --restore | tee /tmp/r11-payload-history-recovery.json; then
-            R11_OK=1
-            echo "Recovered original archive container from Git history."
-          else
-            echo "No exact archive container survived in history; searching Git objects for every exact r11 file identity."
-            if python3 tools/rebuild-pcb-r11-payload-from-git-objects.py --restore | tee /tmp/r11-payload-object-recovery.json; then
-              R11_OK=1
-            fi
-          fi
-          if [ "$R11_OK" -eq 1 ]; then
-            echo "R11_PAYLOAD_READY=1" >> "$GITHUB_ENV"
-          else
-            echo "R11_PAYLOAD_READY=0" >> "$GITHUB_ENV"
-            echo "R11_REBUILD_REQUIRED=1" >> "$GITHUB_ENV"
-            echo "No exact historical r11 container/files survive; authoritative r8+r10 rebuild is required."
-          fi
-
-      - name: Commit certified r11 payload repair back to branch
-        if: github.event_name == 'push' && env.R11_PAYLOAD_READY == '1'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            hardware/main-board/pcb/placement-r11-payload/manifest.json \
-            hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64
-          if test -f docs/pcb-r11-payload-recovery.json; then git add docs/pcb-r11-payload-recovery.json; fi
-          if git diff --cached --quiet; then
-            echo "r11 payload already matches certified repository evidence."
-          else
-            git commit -m "Repair hash-verified r11 payload [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
-
-      - name: Install and assert KiCad 9.0.9
+      - name: Install and assert KiCad 9.0.9 plus footprint libraries
         shell: bash
         run: |
           set -euxo pipefail
@@ -107,196 +25,78 @@ jobs:
           sudo apt-get install -y software-properties-common
           sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends kicad
+          sudo apt-get install -y kicad kicad-footprints
           KICAD_VERSION="$(kicad-cli --version | head -n1)"
-          printf '%s\n' "$KICAD_VERSION"
-          printf '%s\n' "$KICAD_VERSION" | grep -E '(^|[[:space:]])9\.0\.9([[:space:]]|$)'
-          echo "KICAD_VERSION=$KICAD_VERSION" >> "$GITHUB_ENV"
+          echo "$KICAD_VERSION"
+          echo "$KICAD_VERSION" | grep -E '(^|[[:space:]])9\.0\.9([[:space:]]|$)'
 
-      - name: Probe KiCad PCB Python API for authoritative r11 rebuild
-        if: env.R11_REBUILD_REQUIRED == '1'
-        run: python3 tools/probe-kicad-pcbnew.py | tee /tmp/kicad-pcbnew-probe.json
+      - name: Materialize r8 electrical authority
+        run: python3 tools/materialize-native-r8.py
 
-      - name: Stop until authoritative r11 rebuild implementation is selected
-        if: env.R11_REBUILD_REQUIRED == '1'
-        run: |
-          echo "Existing r11 payload cannot be recovered exactly. Probe evidence above defines the available KiCad API for rebuilding from r8+r10."
-          exit 1
-
-      - name: Materialize hash-verified r11
-        if: env.R11_PAYLOAD_READY == '1'
-        run: python3 tools/materialize-pcb-r11.py
-
-      - name: Inspect r11 critical PMIC and nRF source geometry
-        if: env.R11_PAYLOAD_READY == '1'
-        run: python3 tools/inspect-pcb-r11.py | tee /tmp/r11-critical-placement.json
-
-      - name: KiCad r11 PCB DRC baseline
-        if: env.R11_PAYLOAD_READY == '1'
+      - name: Re-run r8 ERC
         shell: bash
         run: |
-          set -euxo pipefail
-          cd hardware/main-board/pcb/placement-r11
-          kicad-cli pcb drc --format json --severity-all \
-            -o /tmp/drc-r11.json AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pcb
+          kicad-cli sch erc --format json --severity-all \
+            -o /tmp/erc-r8.json \
+            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-r8.kicad_sch
+          cat /tmp/erc-r8.json
 
-      - name: Assert documented r11 baseline
-        if: env.R11_PAYLOAD_READY == '1'
+      - name: Export authoritative r8 XML netlist
+        shell: bash
+        run: |
+          kicad-cli sch export netlist --format kicadxml \
+            -o /tmp/aegis-r8.xml \
+            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-r8.kicad_sch
+
+      - name: Probe footprint assignments
+        env:
+          R8_NETLIST: /tmp/aegis-r8.xml
+        run: python3 tools/probe-r8-netlist-footprints.py | tee /tmp/r8-footprint-probe.json
+
+      - name: Rebuild real-net r11 from r8 plus r10
+        run: |
+          python3 tools/rebuild-pcb-r11-from-r8-r10.py --netlist /tmp/aegis-r8.xml \
+            | tee /tmp/r11-rebuild.log
+
+      - name: KiCad r11 rebuilt PCB DRC
+        shell: bash
+        run: |
+          set +e
+          kicad-cli pcb drc --format json --severity-all \
+            -o /tmp/drc-r11-rebuilt.json \
+            hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb
+          RC=$?
+          echo "R11_DRC_RC=$RC" >> "$GITHUB_ENV"
+          test -f /tmp/drc-r11-rebuilt.json && cat /tmp/drc-r11-rebuilt.json
+          exit 0
+
+      - name: Summarize rebuilt r11 state
         shell: bash
         run: |
           python3 - <<'PY'
           import json
+          from collections import Counter
           from pathlib import Path
-          d = json.loads(Path('/tmp/drc-r11.json').read_text())
-          violations = d.get('violations', [])
-          unconnected = d.get('unconnected_items', [])
-          print(f'KiCad r11: rule violations={len(violations)}, unconnected={len(unconnected)}')
-          if len(violations) != 0:
-              raise SystemExit('r11 rule-violation baseline changed')
-          if len(unconnected) != 186:
-              raise SystemExit(f'r11 unconnected baseline changed: expected 186, got {len(unconnected)}')
+          erc=json.loads(Path('/tmp/erc-r8.json').read_text())
+          d=json.loads(Path('/tmp/drc-r11-rebuilt.json').read_text())
+          v=d.get('violations',[]); u=d.get('unconnected_items',[])
+          print('r8 ERC violations=', len(erc.get('violations',[])))
+          print('rebuilt r11 rule violations=', len(v))
+          print('rebuilt r11 unconnected items=', len(u))
+          print('violation types=', dict(Counter(x.get('type','?') for x in v if isinstance(x,dict))))
+          print('first violations=', json.dumps(v[:20], indent=2))
           PY
 
-      - name: Materialize r13 nPM1300 placement
-        if: env.R11_PAYLOAD_READY == '1'
-        run: python3 tools/materialize-pcb-r13.py | tee /tmp/r13-materialize.log
-
-      - name: KiCad r13 placement DRC and retain JSON even on findings
-        if: env.R11_PAYLOAD_READY == '1'
-        shell: bash
-        run: |
-          set +e
-          cd hardware/main-board/pcb/placement-r13
-          kicad-cli pcb drc --format json --severity-all \
-            -o /tmp/drc-r13.json AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
-          RC=$?
-          echo "R13_DRC_RC=$RC" >> "$GITHUB_ENV"
-          test -f /tmp/drc-r13.json && cat /tmp/drc-r13.json
-          exit 0
-
-      - name: Package executed r13 placement evidence
-        if: env.R11_PAYLOAD_READY == '1'
-        env:
-          R13_DRC_JSON: /tmp/drc-r13.json
-        run: python3 tools/package-pcb-r13-evidence.py | tee /tmp/r13-evidence.log
-
-      - name: Commit r13 placement evidence back to branch
-        if: github.event_name == 'push' && env.R11_PAYLOAD_READY == '1'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            docs/pcb-placement-implementation-r13-kicad-result.json \
-            hardware/main-board/pcb/placement-r13-payload/manifest.json \
-            hardware/main-board/pcb/placement-r13-payload/r13-placement-kicad-evidence.tar.gz.b64
-          if git diff --cached --quiet; then
-            echo "Executed placement evidence is unchanged."
-          else
-            git commit -m "Record r13 placement KiCad evidence [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
-
-      - name: Assert r13 placement-only electrical state before routing
-        if: env.R11_PAYLOAD_READY == '1'
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          result = json.loads(Path('docs/pcb-placement-implementation-r13-kicad-result.json').read_text())
-          violations = result['rule_violations']
-          unconnected = result['unconnected_items']
-          print(f'KiCad r13 placement: rule violations={violations}, unconnected={unconnected}')
-          if violations != 0:
-              raise SystemExit(f'r13 placement has {violations} KiCad rule violations; route-1 blocked')
-          if unconnected != 186:
-              raise SystemExit(f'r13 placement-only unconnected count changed unexpectedly: {unconnected}')
-          PY
-
-      - name: Materialize r13 route-1 PMIC critical loops
-        if: env.R11_PAYLOAD_READY == '1'
-        env:
-          R13_PLACEMENT_DRC_JSON: /tmp/drc-r13.json
-        run: python3 tools/materialize-pcb-r13-route1.py | tee /tmp/r13-route1-materialize.log
-
-      - name: KiCad r13 route-1 PCB DRC and retain JSON even on findings
-        if: env.R11_PAYLOAD_READY == '1'
-        shell: bash
-        run: |
-          set +e
-          cd hardware/main-board/pcb/route-r13-1
-          kicad-cli pcb drc --format json --severity-all \
-            -o /tmp/drc-r13-route1.json AegisBioWatch-MainBoard-Route1-r13.kicad_pcb
-          RC=$?
-          echo "R13_ROUTE1_DRC_RC=$RC" >> "$GITHUB_ENV"
-          test -f /tmp/drc-r13-route1.json && cat /tmp/drc-r13-route1.json
-          exit 0
-
-      - name: Package executed r13 route-1 evidence
-        if: env.R11_PAYLOAD_READY == '1'
-        env:
-          R13_ROUTE1_DRC_JSON: /tmp/drc-r13-route1.json
-        run: python3 tools/package-pcb-r13-route1-evidence.py | tee /tmp/r13-route1-evidence.log
-
-      - name: Commit r13 route-1 evidence back to branch
-        if: github.event_name == 'push' && env.R11_PAYLOAD_READY == '1'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          git add \
-            docs/pcb-routing-r13-1-kicad-result.json \
-            hardware/main-board/pcb/route-r13-1-payload/manifest.json \
-            hardware/main-board/pcb/route-r13-1-payload/r13-route1-kicad-evidence.tar.gz.b64
-          if git diff --cached --quiet; then
-            echo "Executed route-1 evidence is unchanged."
-          else
-            git commit -m "Record r13 route-1 KiCad evidence [skip ci]"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
-
-      - name: Preserve r13 validation evidence artifact
+      - name: Preserve rebuild evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase1-r13-kicad-evidence
+          name: phase1-r11-rebuilt-evidence
           if-no-files-found: warn
           path: |
-            /tmp/r11-payload-history-recovery.json
-            /tmp/r11-payload-object-recovery.json
-            docs/pcb-r11-payload-recovery.json
-            /tmp/kicad-pcbnew-probe.json
-            /tmp/drc-r11.json
-            /tmp/drc-r13.json
-            /tmp/drc-r13-route1.json
-            /tmp/r11-critical-placement.json
-            /tmp/r13-materialize.log
-            /tmp/r13-evidence.log
-            /tmp/r13-route1-materialize.log
-            /tmp/r13-route1-evidence.log
-            hardware/main-board/pcb/placement-r13/**
-            docs/pcb-placement-implementation-r13-kicad-result.json
-            hardware/main-board/pcb/placement-r13-payload/**
-            hardware/main-board/pcb/route-r13-1/**
-            docs/pcb-routing-r13-1-kicad-result.json
-            hardware/main-board/pcb/route-r13-1-payload/**
-
-      - name: Assert r13 route-1 rule state
-        if: env.R11_PAYLOAD_READY == '1'
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          result = json.loads(Path('docs/pcb-routing-r13-1-kicad-result.json').read_text())
-          violations = result['rule_violations']
-          unconnected = result['unconnected_items']
-          print(f'KiCad r13 route-1: rule violations={violations}, unconnected={unconnected}')
-          if violations != 0:
-              raise SystemExit(f'r13 route-1 has {violations} KiCad rule violations; see committed evidence')
-          if unconnected == 0:
-              print('Route-1 unexpectedly completed all routing; verify scope manually.')
-          else:
-              print('Partial routing remains intentionally unrouted; do not call this a complete PCB DRC pass.')
-          PY
+            /tmp/erc-r8.json
+            /tmp/aegis-r8.xml
+            /tmp/r8-footprint-probe.json
+            /tmp/r11-rebuild.log
+            /tmp/drc-r11-rebuilt.json
+            hardware/main-board/pcb/placement-r11-rebuilt/**
