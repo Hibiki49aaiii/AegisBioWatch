@@ -12,8 +12,15 @@ on:
       - 'hardware/main-board/pcb/placement-r11-payload/**'
       - 'tools/materialize-pcb-r13.py'
       - 'tools/package-pcb-r13-evidence.py'
+      - 'tools/materialize-pcb-r13-route1.py'
+      - 'tools/package-pcb-r13-route1-evidence.py'
       - 'docs/pcb-placement-implementation-r13.json'
+      - 'docs/pcb-routing-r13-1.json'
+      - 'docs/nrf54l15-reference-placement-gate-r13.json'
       - 'hardware/main-board/design/pcb-placement-implementation-r13.md'
+      - 'hardware/main-board/design/pcb-routing-seed-r13-1.md'
+      - 'hardware/main-board/design/nrf54l15-reference-placement-r13.md'
+      - 'hardware/main-board/design/layout-rules.md'
   push:
     branches:
       - agent/phase1-mainboard-schematic
@@ -24,8 +31,15 @@ on:
       - 'hardware/main-board/pcb/placement-r11-payload/**'
       - 'tools/materialize-pcb-r13.py'
       - 'tools/package-pcb-r13-evidence.py'
+      - 'tools/materialize-pcb-r13-route1.py'
+      - 'tools/package-pcb-r13-route1-evidence.py'
       - 'docs/pcb-placement-implementation-r13.json'
+      - 'docs/pcb-routing-r13-1.json'
+      - 'docs/nrf54l15-reference-placement-gate-r13.json'
       - 'hardware/main-board/design/pcb-placement-implementation-r13.md'
+      - 'hardware/main-board/design/pcb-routing-seed-r13-1.md'
+      - 'hardware/main-board/design/nrf54l15-reference-placement-r13.md'
+      - 'hardware/main-board/design/layout-rules.md'
   workflow_dispatch:
 
 permissions:
@@ -56,7 +70,7 @@ jobs:
       - name: Materialize hash-verified r11
         run: python3 tools/materialize-pcb-r11.py
 
-      - name: Inspect r11 critical placement source
+      - name: Inspect r11 critical PMIC and nRF source geometry
         run: python3 tools/inspect-pcb-r11.py | tee /tmp/r11-critical-placement.json
 
       - name: KiCad r11 PCB DRC baseline
@@ -86,7 +100,7 @@ jobs:
       - name: Materialize r13 nPM1300 placement
         run: python3 tools/materialize-pcb-r13.py | tee /tmp/r13-materialize.log
 
-      - name: KiCad r13 PCB DRC and retain JSON even on findings
+      - name: KiCad r13 placement DRC and retain JSON even on findings
         shell: bash
         run: |
           set +e
@@ -98,12 +112,12 @@ jobs:
           test -f /tmp/drc-r13.json && cat /tmp/drc-r13.json
           exit 0
 
-      - name: Package executed r13 evidence
+      - name: Package executed r13 placement evidence
         env:
           R13_DRC_JSON: /tmp/drc-r13.json
         run: python3 tools/package-pcb-r13-evidence.py | tee /tmp/r13-evidence.log
 
-      - name: Commit executed evidence back to branch
+      - name: Commit r13 placement evidence back to branch
         if: github.event_name == 'push'
         shell: bash
         run: |
@@ -115,32 +129,13 @@ jobs:
             hardware/main-board/pcb/placement-r13-payload/manifest.json \
             hardware/main-board/pcb/placement-r13-payload/r13-placement-kicad-evidence.tar.gz.b64
           if git diff --cached --quiet; then
-            echo "Executed KiCad evidence is unchanged."
+            echo "Executed placement evidence is unchanged."
           else
-            git commit -m "Record r13 KiCad evidence [skip ci]"
+            git commit -m "Record r13 placement KiCad evidence [skip ci]"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
 
-      - name: Preserve validation evidence artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase1-r13-kicad-evidence
-          if-no-files-found: warn
-          path: |
-            /tmp/drc-r11.json
-            /tmp/drc-r13.json
-            /tmp/r11-critical-placement.json
-            /tmp/r13-materialize.log
-            /tmp/r13-evidence.log
-            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
-            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pro
-            hardware/main-board/pcb/placement-r13/placement-implementation-r13.json
-            docs/pcb-placement-implementation-r13-kicad-result.json
-            hardware/main-board/pcb/placement-r13-payload/manifest.json
-            hardware/main-board/pcb/placement-r13-payload/r13-placement-kicad-evidence.tar.gz.b64
-
-      - name: Assert r13 placement-only electrical state
+      - name: Assert r13 placement-only electrical state before routing
         shell: bash
         run: |
           python3 - <<'PY'
@@ -149,9 +144,93 @@ jobs:
           result = json.loads(Path('docs/pcb-placement-implementation-r13-kicad-result.json').read_text())
           violations = result['rule_violations']
           unconnected = result['unconnected_items']
-          print(f'KiCad r13: rule violations={violations}, unconnected={unconnected}')
+          print(f'KiCad r13 placement: rule violations={violations}, unconnected={unconnected}')
           if violations != 0:
-              raise SystemExit(f'r13 has {violations} KiCad rule violations; see committed evidence')
+              raise SystemExit(f'r13 placement has {violations} KiCad rule violations; route-1 blocked')
           if unconnected != 186:
               raise SystemExit(f'r13 placement-only unconnected count changed unexpectedly: {unconnected}')
+          PY
+
+      - name: Materialize r13 route-1 PMIC critical loops
+        env:
+          R13_PLACEMENT_DRC_JSON: /tmp/drc-r13.json
+        run: python3 tools/materialize-pcb-r13-route1.py | tee /tmp/r13-route1-materialize.log
+
+      - name: KiCad r13 route-1 PCB DRC and retain JSON even on findings
+        shell: bash
+        run: |
+          set +e
+          cd hardware/main-board/pcb/route-r13-1
+          kicad-cli pcb drc --format json --severity-all \
+            -o /tmp/drc-r13-route1.json AegisBioWatch-MainBoard-Route1-r13.kicad_pcb
+          RC=$?
+          echo "R13_ROUTE1_DRC_RC=$RC" >> "$GITHUB_ENV"
+          test -f /tmp/drc-r13-route1.json && cat /tmp/drc-r13-route1.json
+          exit 0
+
+      - name: Package executed r13 route-1 evidence
+        env:
+          R13_ROUTE1_DRC_JSON: /tmp/drc-r13-route1.json
+        run: python3 tools/package-pcb-r13-route1-evidence.py | tee /tmp/r13-route1-evidence.log
+
+      - name: Commit r13 route-1 evidence back to branch
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git add \
+            docs/pcb-routing-r13-1-kicad-result.json \
+            hardware/main-board/pcb/route-r13-1-payload/manifest.json \
+            hardware/main-board/pcb/route-r13-1-payload/r13-route1-kicad-evidence.tar.gz.b64
+          if git diff --cached --quiet; then
+            echo "Executed route-1 evidence is unchanged."
+          else
+            git commit -m "Record r13 route-1 KiCad evidence [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+
+      - name: Preserve r13 validation evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-r13-kicad-evidence
+          if-no-files-found: warn
+          path: |
+            /tmp/drc-r11.json
+            /tmp/drc-r13.json
+            /tmp/drc-r13-route1.json
+            /tmp/r11-critical-placement.json
+            /tmp/r13-materialize.log
+            /tmp/r13-evidence.log
+            /tmp/r13-route1-materialize.log
+            /tmp/r13-route1-evidence.log
+            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
+            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pro
+            hardware/main-board/pcb/placement-r13/placement-implementation-r13.json
+            docs/pcb-placement-implementation-r13-kicad-result.json
+            hardware/main-board/pcb/placement-r13-payload/manifest.json
+            hardware/main-board/pcb/placement-r13-payload/r13-placement-kicad-evidence.tar.gz.b64
+            hardware/main-board/pcb/route-r13-1/AegisBioWatch-MainBoard-Route1-r13.kicad_pcb
+            hardware/main-board/pcb/route-r13-1/AegisBioWatch-MainBoard-Route1-r13.kicad_pro
+            hardware/main-board/pcb/route-r13-1/routing-seed-r13-1.json
+            docs/pcb-routing-r13-1-kicad-result.json
+            hardware/main-board/pcb/route-r13-1-payload/manifest.json
+            hardware/main-board/pcb/route-r13-1-payload/r13-route1-kicad-evidence.tar.gz.b64
+
+      - name: Assert r13 route-1 rule state
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('docs/pcb-routing-r13-1-kicad-result.json').read_text())
+          violations = result['rule_violations']
+          unconnected = result['unconnected_items']
+          print(f'KiCad r13 route-1: rule violations={violations}, unconnected={unconnected}')
+          if violations != 0:
+              raise SystemExit(f'r13 route-1 has {violations} KiCad rule violations; see committed evidence')
+          if unconnected == 0:
+              print('Route-1 unexpectedly completed all routing; verify scope manually.')
+          else:
+              print('Partial routing remains intentionally unrouted; do not call this a complete PCB DRC pass.')
           PY
