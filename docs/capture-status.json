@@ -4,14 +4,32 @@
   "phase": 1,
   "capture_revision": "r8",
   "design_review_revision": "r9",
-  "status": "R8_NATIVE_ERC_CLEAN_R9_INTERFACE_SELECTION_REVIEW",
+  "pcb_floorplan_revision": "r10",
+  "status": "R8_NATIVE_ERC_CLEAN_R9_INTERFACE_REVIEW_R10_PCB_FLOORPLAN",
   "manufacturing_ready": false,
   "kicad_cli": "9.0.9",
-  "canonical_materialization": "python3 tools/materialize-native-r8.py",
-  "canonical_output": "hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-Rev0.kicad_sch",
-  "erc": {"violations": 0, "severity_all": true},
-  "interface_netlist_validation": {"checks": 12, "passed": 12, "failed": 0},
-  "footprints": {"bom_rows": 79, "assigned": 76, "empty_or_unfrozen": 3, "empty_refs": ["J3", "J5", "J6"]},
+  "electrical_authority": {
+    "revision": "r8",
+    "canonical_materialization": "python3 tools/materialize-native-r8.py",
+    "canonical_output": "hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-Rev0.kicad_sch",
+    "erc": {"violations": 0, "severity_all": true},
+    "interface_netlist_validation": {"checks": 12, "passed": 12, "failed": 0},
+    "footprints": {"bom_rows": 79, "assigned": 76, "empty_or_unfrozen": 3, "empty_refs": ["J3", "J5", "J6"]}
+  },
+  "pcb_floorplan": {
+    "revision": "r10",
+    "authority": "PROVISIONAL_NOT_GERBER_AUTHORITY",
+    "path": "hardware/main-board/pcb/AegisBioWatch-MainBoard-Floorplan-r10.kicad_pcb",
+    "board_mm": [41.0, 34.0],
+    "case_max_mm": [45.0, 39.5],
+    "thickness_mm": 0.8,
+    "layers": 4,
+    "planning_layer_roles": {"In1.Cu": "continuous_GND", "In2.Cu": "power_and_low_speed"},
+    "rf_antenna_keepout_mm": [31.0, 2.75, 43.0, 9.0],
+    "floorplan_drc": {"violations": 0, "unconnected_items": 0, "electrical_pcb_drc": false},
+    "final_fab_stackup_frozen": false,
+    "controlled_impedance_frozen": false
+  },
   "frozen_interfaces": {
     "SWD": "Tag-Connect TC2030 6-pin; 1 VTRef, 2 SWDIO, 3 nRESET, 4 SWCLK, 5 GND, 6 SWO",
     "SideButton": "Panasonic EVQPUK02K",
@@ -33,9 +51,10 @@
     "performance-critical RF/PMIC passive MPN closure",
     "procured nPM1300 build code / applicable errata",
     "protected battery-pack drawing/PCM/charge limits",
-    "PCB stackup / controlled-impedance RF geometry / antenna keepout",
+    "final PCB fabricator stackup and controlled-impedance RF geometry",
+    "synchronize r8 electrical design into production PCB and reproduce Nordic QFAA/nPM1300 reference placement",
     "Bio Board charging-time electrode disconnect/high-Z hardware",
-    "PCB DRC/DFM and prototype bring-up"
+    "full electrical PCB DRC/DFM and prototype bring-up"
   ],
   "privacy": "No individual case history, private messages, medication details, or identifying health data stored."
 }
