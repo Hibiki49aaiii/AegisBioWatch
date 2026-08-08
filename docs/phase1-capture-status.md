@@ -1,47 +1,48 @@
-# Phase 1 capture status — Rev.0 r5
+# Phase 1 capture status — Rev.0 r6
 
-## Completed through r5
+## Completed through r6
 
-- nRF54L15-QFAA QFN48 pin map and RF/internal-regulator reference capture
-- nPM1300 QFN32 pin map
-- nPM1300 Configuration-1 reference passive network and local PVSS return topology
-- dedicated AMOLED QSPI and separate AUX SPI
-- shared I2C/TWI, interrupts and SWD
-- 32 MHz + 32.768 kHz clock interfaces
-- RF matching/harmonic network
-- 512 Mbit / 64 MB-class SPI NOR storage capture
-- DRV2605LDGSR + LRA haptic capture
-- logical display/touch and Main↔Bio interfaces
-- hardware `CHG_PRESENT_N` safety indication independent of MCU firmware
-- PCB/RF layout constraint document
-- explicit power-budget release gate
-- nPM1300 Revision/build-code errata gate
-- r5 connectivity audit: 172 explicit wires; 166/166 mapped wire endpoints; nPM1300 pin labels 33/33; zero checked net-label conflicts
-- no personal case/medication details in Git
+- r5 electrical architecture and nPM1300 Config.1 passive network retained
+- HFXO MPN selected: Golledge MP06003
+- LFXO MPN selected: Abracon ABS06-32.768KHZ-9-T
+- local Flash reduced/frozen to W25Q256JWPIQ, 32 MB
+- haptic actuator selected: Precision Microdrives C10-100
+- DRV2605L haptic power moved from +3V0 to `VSYS_HAPTIC`
+- C(REG)=1uF and VDD bulk=1uF verified for DRV2605L
+- battery cell candidate selected: EEMB LP372435TB 300mAh
+- matching 10k/B3380 battery NTC selected: Murata NXRT15XH103FA5B030
+- pack-protection requirement documented; bare cell direct connection prohibited
+- magnetic dock ESD/reverse-polarity protection selected and captured
+- preferred AMOLED candidate selected mechanically: GL175AMC10C
+- no production 24-pin AMOLED mapping invented without supplier documentation
 
-## Hard release gates
+## r6 electrical audit
 
-- [ ] native KiCad 9 conversion
-- [ ] ERC passed
-- [ ] final 32 MHz / 32.768 kHz crystal MPN and load-cap strategy
-- [ ] effective-capacitance/DC-bias check for all PMIC MLCCs
-- [ ] final nPM1300 inductor MPNs
-- [ ] final nPM1300 build code / errata applicability
-- [ ] final Flash MPN/package/footprint
-- [ ] final LRA MPN and current budget
-- [ ] final battery, PCM and NTC curve
-- [ ] charger input ESD/reverse-polarity protection MPNs
-- [ ] charge current / VBUS current-limit policy
-- [ ] exact AMOLED/FPC/power sequence
-- [ ] touch I/O voltage / level shifting
-- [ ] power-budget gate for display / bio / haptic
-- [ ] antenna selection, matching footprint and RF keep-out
-- [ ] final 4-layer stack-up and 50 Ω geometry
-- [ ] physical Main↔Bio connector
-- [ ] Bio Board electrode-disconnect/high-Z implementation
+- 178 explicit wire segments
+- 172 / 172 mapped endpoint checks pass
+- nPM1300 direct pin-label mapping remains 33 / 33 pass
+- dock ESD polarity explicitly verified: cathode to raw +5V, anode to GND
+- no checked wire-connected net-label conflicts
+
+This audit is not a substitute for KiCad ERC.
+
+## Remaining hard release gates
+
+- [ ] native KiCad 9 conversion and ERC
+- [ ] custom/verified landing patterns for selected crystals and WSON Flash
+- [ ] exact PMIC inductors/MLCC MPNs and DC-bias validation
+- [ ] actual nPM1300 build code / errata record
+- [ ] qualified protected battery-pack drawing, PCM and cell charging specification
+- [ ] final charge-current profile and fuel-gauge battery model
+- [ ] dock electrical margin test including diode/contact drop
+- [ ] AMOLED supplier FPC pinout, rails, power sequence and command table
+- [ ] touch I/O voltage / level shifting decision
+- [ ] physical Main-Bio connector freeze
+- [ ] antenna, fab stack-up and VNA tuning
+- [ ] Bio Board electrode-disconnect/high-Z hardware capture
 
 ## Status
 
-`SCHEMATIC_CAPTURE_R5_PMIC_LAYOUT_REVIEW`
+`SCHEMATIC_CAPTURE_R6_PART_SELECTION`
 
 **PCB fabrication remains prohibited until all hard gates are closed.**
