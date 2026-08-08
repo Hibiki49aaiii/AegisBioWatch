@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-    types: [opened, reopened, synchronize]
+    types: [opened, reopened, synchronize, edited]
     paths:
       - '.github/workflows/phase1-r13-kicad.yml'
       - 'tools/inspect-pcb-r11.py'
@@ -103,7 +103,6 @@ jobs:
               for v in violations:
                   print(v)
               raise SystemExit(f'r13 has {len(violations)} KiCad rule violations')
-          # r13 currently changes placement only; topology/routing has not yet changed.
           if len(unconnected) != 186:
               raise SystemExit(f'r13 placement-only unconnected count changed unexpectedly: {len(unconnected)}')
           PY
