@@ -7,6 +7,7 @@ on:
     types: [opened, reopened, synchronize, edited]
     paths:
       - '.github/workflows/phase1-r13-kicad.yml'
+      - 'tools/recover-pcb-r11-payload-from-history.py'
       - 'tools/inspect-pcb-r11.py'
       - 'tools/materialize-pcb-r11.py'
       - 'hardware/main-board/pcb/placement-r11-payload/**'
@@ -26,6 +27,7 @@ on:
       - agent/phase1-mainboard-schematic
     paths:
       - '.github/workflows/phase1-r13-kicad.yml'
+      - 'tools/recover-pcb-r11-payload-from-history.py'
       - 'tools/inspect-pcb-r11.py'
       - 'tools/materialize-pcb-r11.py'
       - 'hardware/main-board/pcb/placement-r11-payload/**'
@@ -52,6 +54,28 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Recover r11 payload only from certified Git history
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 tools/recover-pcb-r11-payload-from-history.py --restore | tee /tmp/r11-payload-recovery.json
+          git diff --check -- hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64
+
+      - name: Commit certified r11 payload restoration back to branch
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64
+          if git diff --cached --quiet; then
+            echo "r11 payload already matches the certified historical blob."
+          else
+            git commit -m "Restore hash-verified r11 payload [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
 
       - name: Install and assert KiCad 9.0.9
         shell: bash
@@ -196,6 +220,7 @@ jobs:
           name: phase1-r13-kicad-evidence
           if-no-files-found: warn
           path: |
+            /tmp/r11-payload-recovery.json
             /tmp/drc-r11.json
             /tmp/drc-r13.json
             /tmp/drc-r13-route1.json
