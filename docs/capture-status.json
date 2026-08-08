@@ -3,29 +3,40 @@
   "revision": "Rev.0",
   "phase": "1",
   "capture_revision": "r7",
-  "status": "NATIVE_KICAD9_ERC_CLEAN",
+  "status": "NATIVE_KICAD9_ERC_CLEAN_REPRODUCIBLE",
   "manufacturing_ready": false,
   "kicad_cli": "9.0.9",
-  "erc_violations": 0,
-  "native_authority": "hardware/main-board/kicad/capture/AegisBioWatch-MainBoard-Rev0.kicad_sch",
-  "native_custom_symbols": 8,
-  "reviewed_custom_footprints": 4,
-  "bom_rows": 77,
-  "bom_rows_without_footprint": 6,
-  "frozen_interfaces": {
-    "SWD": "Tag-Connect TC2030-IDC-NL",
-    "Main-Bio": "Hirose FH12-20S-0.5SH(55)",
-    "Battery": "Hirose DF57H-3P-1.2V(21)"
+  "canonical_materialization": "python3 tools/materialize-native-r7.py",
+  "canonical_output": "hardware/main-board/kicad/native-r7/AegisBioWatch-MainBoard-Rev0.kicad_sch",
+  "erc": {
+    "violations": 0,
+    "severity_all": true
+  },
+  "netlist_validation": {
+    "checks": 63,
+    "passed": 63,
+    "failed": 0
+  },
+  "footprints": {
+    "assigned": 72,
+    "empty_or_unfrozen": 7,
+    "empty_refs": ["J3", "J101", "J4", "J5", "J6", "J8", "J9"]
+  },
+  "interface_status": {
+    "battery": "DF57H-3P-1.2V footprint assigned",
+    "main_bio": "FH12-20S-0.5SH footprint assigned",
+    "swd": "TC2030-IDC-NL is the target, but r7 still contains the older 8-pin debug connector and requires pin-map reconciliation before PCB release"
   },
   "open_hard_gates": [
-    "six enclosure/mechanical footprint decisions",
-    "10uF 25V MLCC effective-capacitance validation",
-    "AMOLED/touch FPC and power sequence",
-    "protected battery pack drawing",
-    "dock mechanical/electrical qualification",
-    "fab stackup and RF geometry",
-    "Bio Board electrode disconnect",
-    "PCB DRC/DFM"
+    "resolve seven remaining physical footprints/interfaces",
+    "reconcile debug interface to 6-pin TC2030 mapping",
+    "freeze performance-critical RF/PMIC passive MPNs",
+    "record procured nPM1300 build code and applicable errata",
+    "freeze protected battery pack drawing/PCM/NTC/charge limits",
+    "qualify charger contact drop and fuel-gauge battery model",
+    "obtain AMOLED/touch FPC pinout, rails, sequence and timing",
+    "capture/review Bio Board electrode-disconnect hardware",
+    "create PCB stackup/RF geometry/antenna keepout and run PCB DRC/DFM"
   ],
   "privacy": "No individual case history, private messages, medication details, or identifying health data stored."
 }
