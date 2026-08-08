@@ -1,0 +1,77 @@
+name: r11 authoritative rebuild
+
+on:
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+    paths:
+      - '.github/workflows/r11-authoritative-rebuild.yml'
+      - 'tools/rebuild-pcb-r11-from-r8-r10.py'
+      - 'tools/materialize-native-r8.py'
+      - 'hardware/main-board/kicad/native-r8-patch/**'
+      - 'hardware/main-board/pcb/AegisBioWatch-MainBoard-Floorplan-r10.kicad_pcb'
+      - 'hardware/main-board/pcb/AegisBioWatch-MainBoard-Floorplan-r10.kicad_pro'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9 and libraries
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y kicad kicad-footprints
+          kicad-cli --version | grep '9.0.9'
+      - name: Materialize r8 electrical authority
+        run: python3 tools/materialize-native-r8.py
+      - name: Export r8 XML netlist
+        run: |
+          kicad-cli sch export netlist --format kicadxml \
+            -o /tmp/aegis-r8.xml \
+            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-r8.kicad_sch
+      - name: Rebuild real-net r11 from r8 plus r10
+        run: |
+          python3 tools/rebuild-pcb-r11-from-r8-r10.py --netlist /tmp/aegis-r8.xml \
+            | tee /tmp/r11-rebuild.log
+      - name: Run KiCad 9.0.9 PCB DRC
+        shell: bash
+        run: |
+          set +e
+          kicad-cli pcb drc --format json --severity-all \
+            -o /tmp/drc-r11-rebuilt.json \
+            hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb
+          RC=$?
+          echo "DRC_RC=$RC" >> "$GITHUB_ENV"
+          test -f /tmp/drc-r11-rebuilt.json && cat /tmp/drc-r11-rebuilt.json
+          exit 0
+      - name: Summarize DRC without hiding unconnected items
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/drc-r11-rebuilt.json')
+          if not p.exists(): raise SystemExit('KiCad did not produce DRC JSON')
+          d=json.loads(p.read_text())
+          v=d.get('violations',[]); u=d.get('unconnected_items',[])
+          print(f'REBUILT_R11 rule_violations={len(v)} unconnected_items={len(u)}')
+          from collections import Counter
+          print('violation_types=', Counter(x.get('type','?') for x in v if isinstance(x,dict)))
+          PY
+      - name: Upload rebuilt board and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r11-authoritative-rebuild-evidence
+          path: |
+            hardware/main-board/pcb/placement-r11-rebuilt/**
+            /tmp/aegis-r8.xml
+            /tmp/drc-r11-rebuilt.json
+            /tmp/r11-rebuild.log
