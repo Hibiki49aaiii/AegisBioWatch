@@ -3,20 +3,30 @@
   "status": "PREPARED_PENDING_EXECUTED_PLACEMENT_DRC",
   "materializer": "tools/materialize-pcb-r13-route1.py",
   "entry_gate": {
-    "evidence": "executed_kicad_cli_placement_drc_json",
+    "evidence": "executed_kicad_cli_9.0.9_placement_result_plus_drc_json",
     "required_rule_violations": 0,
-    "required_unconnected_items": 186
+    "required_unconnected_items": 186,
+    "require_exact_output_pcb_sha256_match": true,
+    "require_exact_drc_json_sha256_match": true,
+    "purpose": "Block stale DRC evidence from authorizing copper on a different placement build."
   },
   "scope": [
     "U2_SW1_to_L101",
     "U2_SW2_to_L102",
     "L101_to_C107_plus1V8_local",
+    "C107_to_U2_pin1_VOUT1",
     "L102_to_C108_plus3V0_local",
-    "U2_VSYS_to_C103_C104_C114",
+    "C108_to_U2_pin32_VOUT2",
+    "U2_pin4_PVDD_VSYS_to_C103_C104_C114",
     "PVSS1_LOCAL_return_tree_to_NT101",
     "PVSS2_LOCAL_return_tree_to_NT102",
     "NT101_NT102_GND_escape_to_provisional_through_vias"
   ],
+  "official_pin_dependency": {
+    "U2_pin1": "VOUT1_BUCK1_output",
+    "U2_pin4": "PVDD_BUCK_power_input",
+    "U2_pin32": "VOUT2_BUCK2_output"
+  },
   "seed_geometry_mm": {
     "SW": 0.25,
     "VSYS_local": 0.30,
