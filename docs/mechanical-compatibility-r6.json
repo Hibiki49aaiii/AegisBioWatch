@@ -1,0 +1,23 @@
+{
+  "case_target_mm": {
+    "width": 39.5,
+    "height": 45.0,
+    "thickness_approx": 12.0
+  },
+  "display_GL175AMC10C_mm": {
+    "width": 34.12,
+    "height": 40.28,
+    "thickness": 2.42
+  },
+  "display_margin_each_side_mm": {
+    "width_direction": 2.69,
+    "height_direction": 2.36
+  },
+  "battery_LP372435TB_mm": {
+    "width": 24.5,
+    "length": 36.0,
+    "thickness": 4.0
+  },
+  "fixed_stack_excluding_case_mm": 8.02,
+  "note": "Fixed stack excludes cover glass, adhesives, gaps, optical island, shields and case back."
+}
