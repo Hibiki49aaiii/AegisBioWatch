@@ -1,0 +1,69 @@
+{
+  "revision": "r13-nrf54l15-qfaa-reference-placement-gate",
+  "device": "nRF54L15-QFAA",
+  "package": "QFN48_6x6mm_P0.4mm",
+  "official_reference": {
+    "vendor": "Nordic Semiconductor",
+    "product_page_selected_qfaa_layout": "0.8",
+    "physical_authority": "Nordic nRF54L15-QFAA reference layout and current product datasheet",
+    "third_party_coordinates_allowed_as_authority": false
+  },
+  "critical_pins": {
+    "1": "XL1",
+    "2": "XL2",
+    "25": "SWDIO",
+    "26": "SWDCLK",
+    "30": "nRESET",
+    "31": "ANT",
+    "32": "VSS_PA",
+    "33": "DECRF",
+    "34": "XC1",
+    "35": "XC2",
+    "43": "DECA",
+    "44": "VSS",
+    "45": "DECD",
+    "46": "DCC",
+    "47": "VDD",
+    "48": "VDD",
+    "49": "VSS_exposed_die_pad"
+  },
+  "aegis_functional_translation": {
+    "nordic_first_rf_shunt_C6": "Aegis_C10_1p5pF_RF_A_to_GND",
+    "warning": "Do not apply Nordic C6 special RF grounding to Aegis C6; Aegis C6 is the 2.2uF DECD capacitor.",
+    "special_return": "Aegis C10 first RF shunt must reproduce the Nordic VSS_PA/die-pad return topology."
+  },
+  "rf_nominal_sequence": [
+    "L2_2p7nH_series",
+    "C10_1p5pF_shunt_special_VSS_PA_return",
+    "L3_3p5nH_series",
+    "C11_2p0pF_shunt",
+    "L4_3p5nH_series",
+    "C12_0p3pF_shunt"
+  ],
+  "internal_regulator_cluster": [
+    "L1_4p7uH_DCC_DECD",
+    "C6_2p2uF_DECD",
+    "FB1_120ohm_at_100MHz_DECA_RF_DECD",
+    "C7_2p2uF_DECA_RF",
+    "C8_10nF_DECA_RF",
+    "C9_2p2nF_DECA_RF"
+  ],
+  "placement_status": {
+    "pin_authority_verified": true,
+    "schematic_functional_mapping_reviewed": true,
+    "exact_rf_coordinates_frozen": false,
+    "reason": "Exact RF geometry must be cross-checked directly against Nordic QFAA reference layout rather than inferred from generic QFN geometry.",
+    "rf_impedance_width_frozen": false,
+    "routing_started_for_u1_rf": false
+  },
+  "release_gates": [
+    "current_QFAA_reference_layout_version_recheck",
+    "applicable_nRF54L15_silicon_revision_and_errata",
+    "direct_Nordic_QFAA_reference_geometry_review",
+    "performance_critical_RF_passive_MPNs",
+    "fabricator_stackup_and_impedance_geometry",
+    "VNA_antenna_tuning_and_RF_precompliance"
+  ],
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}
