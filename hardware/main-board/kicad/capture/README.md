@@ -1,4 +1,4 @@
-# KiCad Phase 1 capture — r4
+# KiCad Phase 1 capture — r5
 
 This directory contains **real KiCad schematic capture sources** in legacy
 Eeschema v4 interchange format. The design remains pre-freeze and is not yet
@@ -21,30 +21,32 @@ during import.
 The legacy format is used as a deterministic interchange format because the
 current automation environment does not contain `kicad-cli`.
 
-## r4 electrical-connectivity audit
+## r5 electrical-connectivity audit
 
-A previous structural pass revealed that the capture had labels and component
-symbols but no explicit `Wire Wire Line` records around standard passive and
-connector symbols. r4 corrects this rather than treating the drawings as
-connected by appearance.
+r4 introduced explicit wire records around legacy passive/connector symbols.
+r5 repeats the audit after expanding `PMIC_CHARGER`.
 
-Explicit wire counts after correction:
-
-| Sheet | Explicit wires | Validated endpoint/net checks |
+| Sheet | Explicit wires | Validated wire/component endpoint checks |
 |---|---:|---:|
 | MCU_RF_CLOCK | 42 | 36 / 36 |
-| PMIC_CHARGER | 13 | 13 / 13 |
+| PMIC_CHARGER | 55 | 55 / 55 |
 | STORAGE_HAPTIC | 20 | 20 / 20 |
 | DISPLAY_TOUCH | 26 | 26 / 26 |
 | BIO_INTERFACE | 29 | 29 / 29 |
 
-No checked wire-connected node contains conflicting net labels. Legacy KiCad
-`Connector_Generic` pin geometry was also checked; even-row connector placement
-was shifted by 50 mil where required so the drawn wires terminate on the real
-symbol pin endpoints.
+Totals:
+- **172** explicit wire segments;
+- **166 / 166** mapped wire/component endpoint checks pass;
+- nPM1300 U2 direct pin-label mapping: **33 / 33** pass;
+- **0** conflicting net-label sets on checked wire-connected nodes.
 
-See `docs/electrical-connectivity-validation-r4.json` for the machine-readable
-check result.
+The PMIC PVSS1/PVSS2 net-ties follow the Nordic QFN reference schematic intent:
+a short local switching-current return on the top layer transitions into the
+**same continuous L2 GND plane**. They do not authorize a split ground plane.
+The production net-tie copper/via geometry remains layout-specific.
+
+See `docs/electrical-connectivity-validation-r5.json` and
+`docs/structural-validation-r5.json`.
 
 ## Current capture
 
@@ -72,22 +74,30 @@ Still gated:
 - final crystals and load strategy;
 - antenna choice, PCB stackup/controlled impedance, keep-out and enclosure RF tuning.
 
-### PMIC_CHARGER
+### PMIC_CHARGER — r5
+Captured and cross-checked against current Nordic nPM1300 guidance:
+- QFN32 pin mapping;
+- VBUS 1 µF decoupling;
+- mandatory VBUSOUT 1 µF decoupling even when VBUSOUT is unused;
+- VBAT 2.2 µF decoupling;
+- VSYS nominal 10 µF decoupling;
+- two additional nominal 10 µF local BUCK input capacitors from VSYS/PVDD to the local PVSS1/PVSS2 current-return regions;
+- BUCK1/BUCK2 2.2 µH inductors;
+- BUCK1/BUCK2 10 µF output capacitors;
+- PVSS1/PVSS2 local net-ties to main GND;
+- VDDIO 100 nF decoupling;
+- LDO output stability network (2 × 10 µF per output);
+- optional 10 kΩ TWI pull-ups;
+- optional VSYS feed links for VINLDO1/VINLDO2;
+- SHPHLD two-pin wake-button interface.
 
-Captured:
-- nPM1300 QFN32 pin allocation;
-- 1S battery/NTC logical interface;
-- magnetic 5 V charge input logical interface;
-- BUCK1 startup target 1.8 V via 47 kΩ VSET1;
-- BUCK2 startup target 3.0 V via 150 kΩ VSET2;
-- 2.2 µH BUCK inductors;
-- system I2C and switched `DISP_SW` / `BIO_SW` interfaces.
+Application addition:
+- 100 nF high-frequency VSYS/PVDD bypass for the RF-sensitive wearable environment.
 
-Still gated:
-- complete nPM1300 reference-passive/decoupling capture and ERC;
-- final battery and NTC curve;
-- charge-current policy;
-- magnetic-dock ESD/surge protection.
+Important:
+- `DISP_SW` and `BIO_SW` remain **provisional** because nPM1300 LS/LDO output-current limits may be below the final display/PPG peak-current requirement.
+- no Gerber release is permitted until the power-budget gate is closed.
+
 
 ### STORAGE_HAPTIC
 
