@@ -6,7 +6,7 @@ $Descr A4 11693 8268
 Sheet 1 1
 Title "AegisBioWatch Display / Touch"
 Date "2026-08-07"
-Rev "Rev.0 / Phase 1 r4"
+Rev "Rev.0 / Phase 1 r6"
 Comp "AegisBioWatch"
 Comment1 "LOGICAL CAPTURE - final supplier FPC pinout not frozen"
 Comment2 "Touch I/O voltage compatibility remains a release gate"
@@ -18,7 +18,7 @@ L Connector_Generic:Conn_01x10 J5
 U 1 1 410001
 P 3300 2950
 F 0 "J5" H 3450 3100 50  0000 C CNN
-F 1 "AMOLED_LOGIC_PLACEHOLDER" H 3900 2900 50  0000 C CNN
+F 1 "GL175AMC10C_LOGIC_ONLY" H 4050 2900 50  0000 C CNN
 F 2 "" H 3300 3000 50  0001 C CNN
 F 3 "~" H 3300 3000 50  0001 C CNN
 	1    3300 2950
@@ -45,9 +45,9 @@ DISP_RST_N
 Text Label 2950 3450 0    35   ~ 0
 DISP_TE
 Text Notes 1700 2100 0    45   ~ 0
-J5 is a LOGICAL placeholder only. It is not the production AMOLED FPC pin order or footprint.
+Preferred panel candidate GL175AMC10C: 1.75in 390x450 QSPI, CO5300AF-41 + CST820B, outline 34.12x40.28x2.42mm, 24-pin.
 Text Notes 1700 2250 0    42   ~ 0
-DISP_SW voltage/current and panel initialization sequence remain supplier-datasheet gates.
+Supplier reports connector OK-118RM024-35, but production FPC pinout, power rails, sequence and init table remain mandatory supplier-document gates.
 $Comp
 L Connector_Generic:Conn_01x06 J6
 U 1 1 410002
@@ -153,11 +153,11 @@ If not compatible, DNP the links and insert a bidirectional level-shifter at the
 Text Notes 4950 4200 0    42   ~ 0
 R403/R404 are the single provisional SYS_I2C pull-up pair for Main Board; tune after bus-capacitance review.
 Text Notes 700 700 0    48   ~ 0
-r4 DISPLAY_TOUCH: logical AMOLED QSPI + reset/TE + touch I2C interface captured without inventing supplier FPC pinout.
+r6 DISPLAY_TOUCH: GL175AMC10C is the preferred mechanical/electrical candidate; no 24-pin mapping is invented without supplier FPC documentation.
 Text Notes 700 850 0    42   ~ 0
 Hard gate remains: exact panel/touch MPN, FPC drawing, DISP_SW voltage/current, TOUCH_VDD and I/O thresholds.
 Text Notes 700 7350 0    36   ~ 0
-WIRE_AUDIT_R4_BEGIN
+WIRE_AUDIT_R6_BEGIN
 Wire Wire Line
 	2950 2550 3100 2550
 Wire Wire Line
@@ -211,5 +211,5 @@ Wire Wire Line
 Wire Wire Line
 	8300 5000 8300 5150
 Text Notes 700 7500 0    36   ~ 0
-WIRE_AUDIT_R4_END
+WIRE_AUDIT_R6_END
 $EndSCHEMATC
