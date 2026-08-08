@@ -6,13 +6,15 @@
   "status": "schematic-capture-r5-pmic-layout-review",
   "pmic": {
     "device": "nPM1300-QFN32",
-    "full_functional_passives_captured": false,
+    "full_functional_passives_captured": true,
     "power_budget_gate": true,
     "errata_build_code_gate": true,
     "reference_passive_network_captured": true,
     "pvss_net_tie_intent": "local_top_return_to_continuous_L2_GND",
     "pvss_physical_net_tie_geometry_frozen": false,
-    "lsldo_input_source_frozen": false
+    "lsldo_input_source_frozen": false,
+    "exact_component_mpns_frozen": false,
+    "effective_capacitance_validated": false
   },
   "layout": {
     "minimum_layers": 4,
