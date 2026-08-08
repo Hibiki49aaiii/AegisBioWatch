@@ -1,0 +1,19 @@
+{
+  "revision": "r6",
+  "checks": [
+    {"check": "HFXO MPN captured", "pass": true, "detail": "MCU_RF_CLOCK.sch"},
+    {"check": "LFXO MPN captured", "pass": true, "detail": "MCU_RF_CLOCK.sch"},
+    {"check": "Flash changed to 32MB MPN", "pass": true, "detail": "STORAGE_HAPTIC.sch"},
+    {"check": "Haptic uses VSYS_HAPTIC", "pass": true, "detail": "STORAGE_HAPTIC.sch"},
+    {"check": "LRA MPN captured", "pass": true, "detail": "STORAGE_HAPTIC.sch"},
+    {"check": "Battery pack gate captured", "pass": true, "detail": "PMIC_CHARGER.sch"},
+    {"check": "Dock reverse protection captured", "pass": true, "detail": "PMIC_CHARGER.sch"},
+    {"check": "Dock ESD captured", "pass": true, "detail": "PMIC_CHARGER.sch"},
+    {"check": "Display candidate captured", "pass": true, "detail": "DISPLAY_TOUCH.sch"},
+    {"check": "No invented 24-pin mapping", "pass": true, "detail": "DISPLAY_TOUCH.sch"},
+    {"check": "Custom protection symbols exist", "pass": true, "detail": "AegisBioWatch.lib"},
+    {"check": "ESD diode polarity captured", "pass": true, "detail": "PESD5V0S1UL anode->GND, cathode->DOCK_5V_RAW"}
+  ],
+  "passed": 12,
+  "total": 12
+}
