@@ -1,0 +1,32 @@
+{
+  "MCU_RF_CLOCK.kicad_sch": {
+    "sha256": "7bc733a0ce844bbf0d3f2e0b6b3195fc8b85f8b3fc994186c5093a227820594c",
+    "bytes": 101775,
+    "payload": "hardware/main-board/kicad/native-r7-payload/MCU_RF_CLOCK.kicad_sch.gz.b64"
+  },
+  "PMIC_CHARGER.kicad_sch": {
+    "sha256": "853b8756237134f00bfcdf5ff9a20e14abfcfaa9470591d26f95d7f7e8605e85",
+    "bytes": 95250,
+    "payload": "hardware/main-board/kicad/native-r7-payload/PMIC_CHARGER.kicad_sch.gz.b64"
+  },
+  "STORAGE_HAPTIC.kicad_sch": {
+    "sha256": "7c70e1f6a10482d8648439c5e90106372f2a383a9664fe63dcf5794c6dd95b30",
+    "bytes": 45561,
+    "payload": "hardware/main-board/kicad/native-r7-payload/STORAGE_HAPTIC.kicad_sch.gz.b64"
+  },
+  "DISPLAY_TOUCH.kicad_sch": {
+    "sha256": "85d88cdc60da3789478adfeb55296503b297d963d3f694a342853afd4c625318",
+    "bytes": 36695,
+    "payload": "hardware/main-board/kicad/native-r7-payload/DISPLAY_TOUCH.kicad_sch.gz.b64"
+  },
+  "BIO_INTERFACE.kicad_sch": {
+    "sha256": "496cf262c83e28ea12ff04c12e9054c5b556991cadd8d82a7b63103fc66da0db",
+    "bytes": 39537,
+    "payload": "hardware/main-board/kicad/native-r7-payload/BIO_INTERFACE.kicad_sch.gz.b64"
+  },
+  "AegisBioWatch.kicad_sym": {
+    "sha256": "8dcffc1a4767422443f5b1db2eb163afc4861ac999e000c1333412d781b93106",
+    "bytes": 40479,
+    "payload": "hardware/main-board/kicad/native-r7-payload/AegisBioWatch.kicad_sym.gz.b64"
+  }
+}
