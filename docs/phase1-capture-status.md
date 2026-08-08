@@ -1,49 +1,41 @@
 # Phase 1 capture status — Rev.0 r7
 
-## Completed through r7
+## Completed
 
-- Native KiCad 9.0.9 hierarchical Main Board project created.
-- Native project-specific symbol library created and validated.
-- Native project-specific footprint library created and validated.
-- nRF54L15-QFAA and nPM1300 custom symbols normalized to KiCad schematic grid.
-- MP06003 HFXO represented as a four-pad device with grounded lid pads.
-- MCU/RF, PMIC/charger, storage/haptic, display/touch, Bio interface and system
-  power are connected as child sheets under one Main Board root.
-- Real KiCad ERC: **0 violations**.
-- Native netlist export: PASS.
-- Native BOM export: PASS.
-- Privacy scan: PASS.
+- Native KiCad **9.0.9** hierarchical schematic is reproducible from the hash-verified r7 payload.
+- Integrated ERC with `--severity-all`: **0 violations**.
+- Critical exported-netlist validation: **63/63 pass**.
+- Production/package footprints assigned to **72** schematic components.
+- Battery connector uses the KiCad Hirose DF57H-3P footprint.
+- Main↔Bio connector uses the KiCad Hirose FH12-20S-0.5SH footprint.
+- nRF54L15-QFAA / nPM1300 pin-to-net mapping remains validated after footprint assignment.
+- PVSS1/PVSS2 local switching returns retain explicit NetTie semantics into the same continuous GND plane.
 
-## r7 validation result
+## Reproducing the native project
 
-| Check | Result |
-|---|---|
-| KiCad version | 9.0.9 |
-| Hierarchical sheets | 7 including root |
-| ERC | 0 violations |
-| Custom native symbols | 8 |
-| Reviewed custom footprints | 4 |
-| Native BOM rows | 77 |
-| BOM rows still without footprint | 6 |
-| Netlist export | PASS |
-| BOM export | PASS |
-| Privacy scan | PASS |
+Run from the repository root:
 
-## Still blocked before PCB release
+```bash
+python3 tools/materialize-native-r7.py
+cd hardware/main-board/kicad/native-r7
+kicad-cli sch erc --format json --severity-all \
+  -o erc-r7.json AegisBioWatch-MainBoard-Rev0.kicad_sch
+```
 
-- Resolve the six remaining enclosure/mechanical footprint gates (dock, LRA, display/touch and buttons).
-- Freeze exact PMIC/nRF passive MPNs where electrical performance depends on
-  DCR, Q, tolerance, DC-bias or effective capacitance.
-- Freeze Main↔Bio FPC cable length/contact-side/stiffener geometry.
-- Obtain the official AMOLED/touch FPC pinout, rail requirements and power
-  sequence.
-- Close touch I/O voltage/level-shifter decision.
-- Freeze the protected battery-pack construction, harness pin numbering and wire colors.
-- Close magnetic-dock contact-drop/ESD/reverse-polarity validation.
-- Freeze PCB fab stack-up and calculate controlled-impedance RF geometry.
-- Reproduce Nordic RF/current-return placement constraints in PCB layout.
-- Capture and review the Bio Sensor Board, including hardware electrode
-  disconnect/high-Z behavior during charging.
-- Run PCB DRC, DFM and assembled-prototype bring-up tests.
+The materializer verifies the archive SHA-256, source-file hashes, applies the reviewed footprint assignments deterministically, and verifies the resulting native files against post-materialization hashes.
 
-**Do not release Gerbers yet.**
+## PCB-release status
+
+**NOT manufacturing-ready.**
+
+Seven physical interfaces/footprints remain intentionally unresolved:
+
+- `J3` magnetic charging dock
+- `J4` C10-100 LRA mechanical/electrical attachment
+- `J5` AMOLED physical FPC/module interface
+- `J6` touch physical interface
+- `J8` debug connector: canonical r7 still uses the earlier 8-pin debug header; target is TC2030-IDC-NL 6-pin and requires a deliberate pin-map refactor
+- `J9` side button contact
+- `J101` ship/wake button
+
+The next phase is physical-interface/footprint freeze and PCB floorplanning, not Gerber release.
