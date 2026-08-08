@@ -5,7 +5,8 @@
   "capture_revision": "r8",
   "design_review_revision": "r9",
   "pcb_floorplan_revision": "r10",
-  "status": "R8_NATIVE_ERC_CLEAN_R9_INTERFACE_REVIEW_R10_PCB_FLOORPLAN",
+  "pcb_placement_seed_revision": "r11",
+  "status": "R8_ELECTRICAL_R9_INTERFACE_R10_FLOORPLAN_R11_UNROUTED_PLACEMENT_SEED",
   "manufacturing_ready": false,
   "kicad_cli": "9.0.9",
   "electrical_authority": {
@@ -30,6 +31,24 @@
     "final_fab_stackup_frozen": false,
     "controlled_impedance_frozen": false
   },
+  "pcb_placement_seed": {
+    "revision": "r11",
+    "authority": "UNROUTED_NET_AND_FOOTPRINT_SYNC_SEED_NOT_GERBER_AUTHORITY",
+    "canonical_materialization": "python3 tools/materialize-pcb-r11.py",
+    "canonical_output": "hardware/main-board/pcb/placement-r11/AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pcb",
+    "components_total": 79,
+    "footprints_imported": 76,
+    "missing_refs": ["J3", "J5", "J6"],
+    "nets": 86,
+    "pin_net_audit": {"checks": 268, "mismatches": 0, "missing_source_footprint_pins": 0},
+    "drc": {"rule_violations": 0, "unconnected_items": 186, "routing_started": false},
+    "planning_rules_frozen_for_fab": false,
+    "critical_placement": {
+      "nRF54L15_RF": "seed_only_copy_Nordic_QFAA_reference_before_routing",
+      "nPM1300": "seed_only_copy_Nordic_QFN_reference_before_routing",
+      "PVSS_NetTies": "staged_not_final"
+    }
+  },
   "frozen_interfaces": {
     "SWD": "Tag-Connect TC2030 6-pin; 1 VTRef, 2 SWDIO, 3 nRESET, 4 SWCLK, 5 GND, 6 SWO",
     "SideButton": "Panasonic EVQPUK02K",
@@ -52,9 +71,10 @@
     "procured nPM1300 build code / applicable errata",
     "protected battery-pack drawing/PCM/charge limits",
     "final PCB fabricator stackup and controlled-impedance RF geometry",
-    "synchronize r8 electrical design into production PCB and reproduce Nordic QFAA/nPM1300 reference placement",
+    "replace r11 seed positions with reviewed Nordic QFAA RF and nPM1300 reference placement/current-return geometry",
+    "route production PCB and close 186 ratsnest connections",
     "Bio Board charging-time electrode disconnect/high-Z hardware",
-    "full electrical PCB DRC/DFM and prototype bring-up"
+    "full routed PCB DRC/DFM and prototype bring-up"
   ],
   "privacy": "No individual case history, private messages, medication details, or identifying health data stored."
 }
