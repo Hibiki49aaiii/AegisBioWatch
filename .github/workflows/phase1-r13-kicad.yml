@@ -1,6 +1,19 @@
 name: Phase 1 r13 KiCad validation
 
 on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/phase1-r13-kicad.yml'
+      - 'tools/inspect-pcb-r11.py'
+      - 'tools/materialize-pcb-r11.py'
+      - 'hardware/main-board/pcb/placement-r11-payload/**'
+      - 'tools/materialize-pcb-r13.py'
+      - 'hardware/main-board/pcb/placement-r13-payload/**'
+      - 'docs/pcb-placement-implementation-r13.json'
+      - 'hardware/main-board/design/pcb-placement-implementation-r13.md'
   push:
     branches:
       - agent/phase1-mainboard-schematic
