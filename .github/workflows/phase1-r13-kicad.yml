@@ -11,6 +11,7 @@ on:
       - 'tools/materialize-pcb-r11.py'
       - 'hardware/main-board/pcb/placement-r11-payload/**'
       - 'tools/materialize-pcb-r13.py'
+      - 'tools/package-pcb-r13-evidence.py'
       - 'docs/pcb-placement-implementation-r13.json'
       - 'hardware/main-board/design/pcb-placement-implementation-r13.md'
   push:
@@ -22,20 +23,23 @@ on:
       - 'tools/materialize-pcb-r11.py'
       - 'hardware/main-board/pcb/placement-r11-payload/**'
       - 'tools/materialize-pcb-r13.py'
+      - 'tools/package-pcb-r13-evidence.py'
       - 'docs/pcb-placement-implementation-r13.json'
       - 'hardware/main-board/design/pcb-placement-implementation-r13.md'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate-r13:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Install KiCad 9.0.9
+      - name: Install and assert KiCad 9.0.9
         shell: bash
         run: |
           set -euxo pipefail
@@ -44,8 +48,10 @@ jobs:
           sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends kicad
-          kicad-cli --version
-          kicad-cli --version | grep -E '(^|[[:space:]])9\.0\.9([[:space:]]|$)'
+          KICAD_VERSION="$(kicad-cli --version | head -n1)"
+          printf '%s\n' "$KICAD_VERSION"
+          printf '%s\n' "$KICAD_VERSION" | grep -E '(^|[[:space:]])9\.0\.9([[:space:]]|$)'
+          echo "KICAD_VERSION=$KICAD_VERSION" >> "$GITHUB_ENV"
 
       - name: Materialize hash-verified r11
         run: python3 tools/materialize-pcb-r11.py
@@ -80,14 +86,59 @@ jobs:
       - name: Materialize r13 nPM1300 placement
         run: python3 tools/materialize-pcb-r13.py | tee /tmp/r13-materialize.log
 
-      - name: KiCad r13 PCB DRC
+      - name: KiCad r13 PCB DRC and retain JSON even on findings
         shell: bash
         run: |
-          set -euxo pipefail
+          set +e
           cd hardware/main-board/pcb/placement-r13
           kicad-cli pcb drc --format json --severity-all \
             -o /tmp/drc-r13.json AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
-          cat /tmp/drc-r13.json
+          RC=$?
+          echo "R13_DRC_RC=$RC" >> "$GITHUB_ENV"
+          test -f /tmp/drc-r13.json && cat /tmp/drc-r13.json
+          exit 0
+
+      - name: Package executed r13 evidence
+        env:
+          R13_DRC_JSON: /tmp/drc-r13.json
+        run: python3 tools/package-pcb-r13-evidence.py | tee /tmp/r13-evidence.log
+
+      - name: Commit executed evidence back to branch
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            docs/pcb-placement-implementation-r13-kicad-result.json \
+            hardware/main-board/pcb/placement-r13-payload/manifest.json \
+            hardware/main-board/pcb/placement-r13-payload/r13-placement-kicad-evidence.tar.gz.b64
+          if git diff --cached --quiet; then
+            echo "Executed KiCad evidence is unchanged."
+          else
+            git commit -m "Record r13 KiCad evidence [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+
+      - name: Preserve validation evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-r13-kicad-evidence
+          if-no-files-found: warn
+          path: |
+            /tmp/drc-r11.json
+            /tmp/drc-r13.json
+            /tmp/r11-critical-placement.json
+            /tmp/r13-materialize.log
+            /tmp/r13-evidence.log
+            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
+            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pro
+            hardware/main-board/pcb/placement-r13/placement-implementation-r13.json
+            docs/pcb-placement-implementation-r13-kicad-result.json
+            hardware/main-board/pcb/placement-r13-payload/manifest.json
+            hardware/main-board/pcb/placement-r13-payload/r13-placement-kicad-evidence.tar.gz.b64
 
       - name: Assert r13 placement-only electrical state
         shell: bash
@@ -95,28 +146,12 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
-          d = json.loads(Path('/tmp/drc-r13.json').read_text())
-          violations = d.get('violations', [])
-          unconnected = d.get('unconnected_items', [])
-          print(f'KiCad r13: rule violations={len(violations)}, unconnected={len(unconnected)}')
-          if violations:
-              for v in violations:
-                  print(v)
-              raise SystemExit(f'r13 has {len(violations)} KiCad rule violations')
-          if len(unconnected) != 186:
-              raise SystemExit(f'r13 placement-only unconnected count changed unexpectedly: {len(unconnected)}')
+          result = json.loads(Path('docs/pcb-placement-implementation-r13-kicad-result.json').read_text())
+          violations = result['rule_violations']
+          unconnected = result['unconnected_items']
+          print(f'KiCad r13: rule violations={violations}, unconnected={unconnected}')
+          if violations != 0:
+              raise SystemExit(f'r13 has {violations} KiCad rule violations; see committed evidence')
+          if unconnected != 186:
+              raise SystemExit(f'r13 placement-only unconnected count changed unexpectedly: {unconnected}')
           PY
-
-      - name: Preserve validation evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase1-r13-kicad-evidence
-          if-no-files-found: error
-          path: |
-            /tmp/drc-r11.json
-            /tmp/drc-r13.json
-            /tmp/r11-critical-placement.json
-            /tmp/r13-materialize.log
-            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
-            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pro
-            hardware/main-board/pcb/placement-r13/placement-implementation-r13.json
