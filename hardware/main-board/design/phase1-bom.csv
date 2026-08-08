@@ -1,6 +1,6 @@
 Ref,Part/Value,Description,Footprint,Manufacturer,Status,Notes
 U1,nRF54L15-QFAA,nRF54L15 QFN48,QFN48,Nordic,FROZEN,Pin map verified; Nordic layout authority
-U2,nPM1300,QFN32 variant,QFN32,Nordic,FROZEN,Reference Configuration 1
+U2,nPM1300,QFN32 variant,QFN32,Nordic,FROZEN_PACKAGE_BUILD_GATE,QFN32 architecture frozen; exact procured build code/errata applicability pending
 U3,W25Q512NW class,512 Mbit / 64 MB 1.8 V SPI NOR,PROVISIONAL,Winbond,PROVISIONAL,Standard SPI on AUX bus; exact MPN/package not frozen
 U4,DRV2605LDGSR,LRA/ERM haptic driver,VSSOP-10 3x3 P0.5mm,Texas Instruments,FROZEN_PART_CLASS,Pinout captured; actuator/current review pending
 Y1,32 MHz crystal,HFXO crystal,PROVISIONAL,TBD,PROVISIONAL,MPN/load strategy pending
@@ -21,9 +21,6 @@ C7,2.2 uF,nRF DECA/DECRF decoupling capacitor,0201,TBD,REFERENCE_LOCKED,NRF_DECA
 C8,10 nF,nRF DECA/DECRF HF bypass capacitor,0201,TBD,REFERENCE_LOCKED,NRF_DECA_RF to GND
 C9,2.2 nF,nRF DECRF harmonic-suppression bypass,0201,TBD,REFERENCE_LOCKED,Current Nordic Config.1; replaces older 10 nF recommendation
 L1,4.7 uH,nRF internal DC/DC inductor,0603/TBD,TBD,REFERENCE_LOCKED,DCC to DECD; current Config.1 120 mA ±20% 650 mΩ
-L101-L102,2.2 uH,nPM1300 BUCK inductors,0806/TBD,TBD,FROZEN_SPEC,nPM1300 reference config
-R101,47 kΩ 1%,nPM VSET1,0201,TBD,FROZEN,BUCK1 startup 1.8 V
-R102,150 kΩ 1%,nPM VSET2,0201,TBD,FROZEN,BUCK2 startup 3.0 V
 R301-R302,47 kΩ,Flash WP/HOLD pull-ups,0201,TBD,PROVISIONAL,Tune before release
 C301,100 nF,Flash local decoupling,0201,TBD,PROVISIONAL,Place at VCC
 C302,1 uF,Flash local bulk decoupling,0201/0402,TBD,PROVISIONAL,Place at VCC
@@ -41,3 +38,19 @@ Q501,2N7002-class,Hardware charge-present open-drain switch,SOT-23/TBD,TBD,PROVI
 R501,100 kΩ,Charge-sense gate series resistor,0201,TBD,PROVISIONAL,CHG_5V to Q501 gate
 R502,1 MΩ,Charge-sense gate pull-down,0201,TBD,PROVISIONAL,Default gate low when charger absent
 R503,47 kΩ,CHG_PRESENT_N pull-up to 1.8 V,0201,TBD,PROVISIONAL,Active-low hardware charge indication
+L101-L102,2.2 uH,nPM1300 BUCK inductors; DCR <400mΩ,0806,TBD,FROZEN_SPEC,"Isat >350mA, rated >200mA; final MPN pending"
+R101,47 kΩ 1%,nPM VSET1,0201,TBD,FROZEN,BUCK1 startup 1.8 V
+R102,150 kΩ 1%,nPM VSET2,0201,TBD,FROZEN,BUCK2 startup 3.0 V
+R103-R104,10 kΩ DNP/TUNE,Optional nPM/shared TWI pull-ups,0201,TBD,PROVISIONAL,Populate only once for shared bus; final value from bus capacitance/speed
+R105-R106,0 Ω OPTION,VSYS to VINLDO1/VINLDO2 option links,0201,TBD,DNP_OPTION,Populate only after LS/LDO mode and power budget freeze
+C101,1.0 µF X5R 10V,nPM VBUS input capacitor,0603,TBD,REFERENCE_LOCKED,At VBUS pin
+C102,10 µF X5R 25V,nPM VSYS bulk capacitor,0603,TBD,REFERENCE_LOCKED,Effective capacitance review required
+C103-C104,10 µF X5R 25V,nPM local BUCK input capacitors,0603,TBD,REFERENCE_LOCKED,VSYS/PVDD to local PVSS1/PVSS2 returns
+C105,1.0 µF X5R 10V,nPM VBUSOUT capacitor,0603,TBD,REFERENCE_LOCKED,Required even if VBUSOUT is unused
+C106,2.2 µF X7R 16V,nPM VBAT capacitor,0603,TBD,REFERENCE_LOCKED,At VBAT pin
+C107-C108,10 µF X5R 25V,nPM BUCK output capacitors,0603,TBD,REFERENCE_LOCKED,VOUT1/VOUT2; effective 4–20µF required
+C109-C112,10 µF X5R 25V,nPM LS/LDO output capacitors,0603,TBD,REFERENCE_LOCKED_FOR_LDO,Two per output; only if configured as LDO
+C113,100 nF X5R,nPM VDDIO bypass,0201,TBD,REFERENCE_LOCKED,At VDDIO
+C114,100 nF X5R,RF-sensitive extra VSYS/PVDD HF bypass,0201,TBD,APPLICATION_ADD,Nordic recommends 10–100nF parallel HF decoupling for RF-sensitive designs
+NT101-NT102,Net tie,PVSS1/PVSS2 local return to main GND,LAYOUT_SPECIFIC,N/A,LAYOUT_CRITICAL_TBD,Nordic QFN reference-style local PVSS return into continuous L2 GND; custom copper/via geometry at PCB layout
+J101,SHIP_WAKE_BUTTON,SHPHLD wake button interface,TBD,TBD,PROVISIONAL,Physical button integration pending
