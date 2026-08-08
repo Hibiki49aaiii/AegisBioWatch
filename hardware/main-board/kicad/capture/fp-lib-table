@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "AegisBioWatch")(type "KiCad")(uri "${KIPRJMOD}/AegisBioWatch.pretty")(options "")(descr "AegisBioWatch reviewed Rev.0 footprints"))
+)
