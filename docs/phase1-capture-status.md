@@ -1,48 +1,49 @@
-# Phase 1 capture status — Rev.0 r6
+# Phase 1 capture status — Rev.0 r7
 
-## Completed through r6
+## Completed through r7
 
-- r5 electrical architecture and nPM1300 Config.1 passive network retained
-- HFXO MPN selected: Golledge MP06003
-- LFXO MPN selected: Abracon ABS06-32.768KHZ-9-T
-- local Flash reduced/frozen to W25Q256JWPIQ, 32 MB
-- haptic actuator selected: Precision Microdrives C10-100
-- DRV2605L haptic power moved from +3V0 to `VSYS_HAPTIC`
-- C(REG)=1uF and VDD bulk=1uF verified for DRV2605L
-- battery cell candidate selected: EEMB LP372435TB 300mAh
-- matching 10k/B3380 battery NTC selected: Murata NXRT15XH103FA5B030
-- pack-protection requirement documented; bare cell direct connection prohibited
-- magnetic dock ESD/reverse-polarity protection selected and captured
-- preferred AMOLED candidate selected mechanically: GL175AMC10C
-- no production 24-pin AMOLED mapping invented without supplier documentation
+- Native KiCad 9.0.9 hierarchical Main Board project created.
+- Native project-specific symbol library created and validated.
+- Native project-specific footprint library created and validated.
+- nRF54L15-QFAA and nPM1300 custom symbols normalized to KiCad schematic grid.
+- MP06003 HFXO represented as a four-pad device with grounded lid pads.
+- MCU/RF, PMIC/charger, storage/haptic, display/touch, Bio interface and system
+  power are connected as child sheets under one Main Board root.
+- Real KiCad ERC: **0 violations**.
+- Native netlist export: PASS.
+- Native BOM export: PASS.
+- Privacy scan: PASS.
 
-## r6 electrical audit
+## r7 validation result
 
-- 178 explicit wire segments
-- 172 / 172 mapped endpoint checks pass
-- nPM1300 direct pin-label mapping remains 33 / 33 pass
-- dock ESD polarity explicitly verified: cathode to raw +5V, anode to GND
-- no checked wire-connected net-label conflicts
+| Check | Result |
+|---|---|
+| KiCad version | 9.0.9 |
+| Hierarchical sheets | 7 including root |
+| ERC | 0 violations |
+| Custom native symbols | 8 |
+| Reviewed custom footprints | 4 |
+| Native BOM rows | 77 |
+| BOM rows still without footprint | 6 |
+| Netlist export | PASS |
+| BOM export | PASS |
+| Privacy scan | PASS |
 
-This audit is not a substitute for KiCad ERC.
+## Still blocked before PCB release
 
-## Remaining hard release gates
+- Resolve the six remaining enclosure/mechanical footprint gates (dock, LRA, display/touch and buttons).
+- Freeze exact PMIC/nRF passive MPNs where electrical performance depends on
+  DCR, Q, tolerance, DC-bias or effective capacitance.
+- Freeze Main↔Bio FPC cable length/contact-side/stiffener geometry.
+- Obtain the official AMOLED/touch FPC pinout, rail requirements and power
+  sequence.
+- Close touch I/O voltage/level-shifter decision.
+- Freeze the protected battery-pack construction, harness pin numbering and wire colors.
+- Close magnetic-dock contact-drop/ESD/reverse-polarity validation.
+- Freeze PCB fab stack-up and calculate controlled-impedance RF geometry.
+- Reproduce Nordic RF/current-return placement constraints in PCB layout.
+- Capture and review the Bio Sensor Board, including hardware electrode
+  disconnect/high-Z behavior during charging.
+- Run PCB DRC, DFM and assembled-prototype bring-up tests.
 
-- [ ] native KiCad 9 conversion and ERC
-- [ ] custom/verified landing patterns for selected crystals and WSON Flash
-- [ ] exact PMIC inductors/MLCC MPNs and DC-bias validation
-- [ ] actual nPM1300 build code / errata record
-- [ ] qualified protected battery-pack drawing, PCM and cell charging specification
-- [ ] final charge-current profile and fuel-gauge battery model
-- [ ] dock electrical margin test including diode/contact drop
-- [ ] AMOLED supplier FPC pinout, rails, power sequence and command table
-- [ ] touch I/O voltage / level shifting decision
-- [ ] physical Main-Bio connector freeze
-- [ ] antenna, fab stack-up and VNA tuning
-- [ ] Bio Board electrode-disconnect/high-Z hardware capture
-
-## Status
-
-`SCHEMATIC_CAPTURE_R6_PART_SELECTION`
-
-**PCB fabrication remains prohibited until all hard gates are closed.**
+**Do not release Gerbers yet.**
