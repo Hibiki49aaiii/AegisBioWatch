@@ -1,27 +1,32 @@
 {
-  "project": "AegisBioWatch",
-  "revision": "Rev.0",
-  "phase": "1",
-  "capture_revision": "r5",
-  "status": "schematic-capture-r5-pmic-layout-review",
-  "pmic": {
-    "device": "nPM1300-QFN32",
-    "full_functional_passives_captured": true,
-    "power_budget_gate": true,
-    "errata_build_code_gate": true,
-    "reference_passive_network_captured": true,
-    "pvss_net_tie_intent": "local_top_return_to_continuous_L2_GND",
-    "pvss_physical_net_tie_geometry_frozen": false,
-    "lsldo_input_source_frozen": false,
-    "exact_component_mpns_frozen": false,
-    "effective_capacitance_validated": false
+  "revision": "r6",
+  "status": "SCHEMATIC_CAPTURE_R6_PART_SELECTION",
+  "manufacturing_ready": false,
+  "selected_parts": {
+    "hfxo": "MP06003",
+    "lfxo": "ABS06-32.768KHZ-9-T",
+    "flash": "W25Q256JWPIQ",
+    "haptic_driver": "DRV2605LDGSR",
+    "lra": "C10-100",
+    "cell": "LP372435TB",
+    "battery_ntc": "NXRT15XH103FA5B030",
+    "dock_reverse_diode": "PMEG2010AEJ",
+    "dock_esd": "PESD5V0S1UL",
+    "display_candidate": "GL175AMC10C"
   },
-  "layout": {
-    "minimum_layers": 4,
-    "layer2": "continuous_GND",
-    "rf_impedance": "calculate_after_fab_stackup_freeze"
-  },
-  "erc": "not-run: kicad-cli unavailable in current execution environment",
-  "pcb_release_allowed": false,
-  "privacy": "No personal case history or medication details stored"
+  "open_hard_gates": [
+    "native KiCad 9 conversion",
+    "ERC",
+    "selected-part landing patterns",
+    "PMIC inductor/MLCC MPNs",
+    "nPM1300 build code/errata",
+    "qualified protected battery pack",
+    "battery charge/fuel-gauge qualification",
+    "dock voltage-margin test",
+    "AMOLED FPC/electrical documentation",
+    "touch level compatibility",
+    "physical Main-Bio connector",
+    "antenna/RF tuning",
+    "Bio electrode disconnect"
+  ]
 }
