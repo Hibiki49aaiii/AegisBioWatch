@@ -1,0 +1,7 @@
+{
+  "MCU_RF_CLOCK.sch": {"component_blocks": 22, "endcomp_blocks": 22, "balanced": true, "wire_segments": 42, "header_ok": true, "footer_ok": true},
+  "PMIC_CHARGER.sch": {"component_blocks": 30, "endcomp_blocks": 30, "balanced": true, "wire_segments": 59, "header_ok": true, "footer_ok": true},
+  "STORAGE_HAPTIC.sch": {"component_blocks": 13, "endcomp_blocks": 13, "balanced": true, "wire_segments": 22, "header_ok": true, "footer_ok": true},
+  "DISPLAY_TOUCH.sch": {"component_blocks": 7, "endcomp_blocks": 7, "balanced": true, "wire_segments": 26, "header_ok": true, "footer_ok": true},
+  "BIO_INTERFACE.sch": {"component_blocks": 5, "endcomp_blocks": 5, "balanced": true, "wire_segments": 29, "header_ok": true, "footer_ok": true}
+}
