@@ -3,49 +3,32 @@
   "archive_sha256": "0ae6add055be68e26ba0f948880e70874608b98f1bcb3f42e0b8c9385c558092",
   "archive_bytes": 53395,
   "files": {
-    "AegisBioWatch-MainBoard-Rev0.kicad_sch": {
-      "sha256": "64e094304b6b35234f0dd9397231d50cc98aa9c642e815d7ad36fba828cb4bcc",
-      "bytes": 3728
-    },
-    "AegisBioWatch-MainBoard-Rev0.kicad_pro": {
-      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
-      "bytes": 3
-    },
-    "MCU_RF_CLOCK.kicad_sch": {
-      "sha256": "b219b2d1127cde4d35be905025193d5c1f8fab77c45c7d733af658d785fa6e3f",
-      "bytes": 90636
-    },
-    "PMIC_CHARGER.kicad_sch": {
-      "sha256": "e5b96e73e353700605873dd53278fe0b415a053476db9a1c832ba95c9a3700af",
-      "bytes": 99435
-    },
-    "STORAGE_HAPTIC.kicad_sch": {
-      "sha256": "f55147b8f6efc64631dec4a786a8b6976552c14850a4d8551fa137a466747844",
-      "bytes": 46357
-    },
-    "DISPLAY_TOUCH.kicad_sch": {
-      "sha256": "4227a38fe4a1154e9bb9a659802428ef254d8df014d8be9d3fb8c7d2ca961e8e",
-      "bytes": 37188
-    },
-    "BIO_INTERFACE.kicad_sch": {
-      "sha256": "46419ae0fd9ccd3726deffe26db6d88d1afc9c9eb36a87d09e507dfeb2fd04fa",
-      "bytes": 40024
-    },
-    "DEBUG_POWER.kicad_sch": {
-      "sha256": "49f2e99ecbc37f21121840b55bd02b23221506c70e31c79d972304ea06971df5",
-      "bytes": 22180
-    },
-    "AegisBioWatch.kicad_sym": {
-      "sha256": "67ce040ca5016ffb70a7812c0ee93052afde484a9f1ece6025a80e298f4a646c",
-      "bytes": 32193
-    },
-    "sym-lib-table": {
-      "sha256": "f81a98371838e4fc7a1aa336bd92133db02f880a8f5dfe435cd039a622241041",
-      "bytes": 193
-    },
-    "README.md": {
-      "sha256": "653f08cbf2e163827cce9a91017b0b591bd12a05146e4d3f7abda5ff40881844",
-      "bytes": 528
-    }
+    "AegisBioWatch-MainBoard-Rev0.kicad_sch": {"sha256": "64e094304b6b35234f0dd9397231d50cc98aa9c642e815d7ad36fba828cb4bcc", "bytes": 3728},
+    "AegisBioWatch-MainBoard-Rev0.kicad_pro": {"sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356", "bytes": 3},
+    "MCU_RF_CLOCK.kicad_sch": {"sha256": "b219b2d1127cde4d35be905025193d5c1f8fab77c45c7d733af658d785fa6e3f", "bytes": 90636},
+    "PMIC_CHARGER.kicad_sch": {"sha256": "e5b96e73e353700605873dd53278fe0b415a053476db9a1c832ba95c9a3700af", "bytes": 99435},
+    "STORAGE_HAPTIC.kicad_sch": {"sha256": "f55147b8f6efc64631dec4a786a8b6976552c14850a4d8551fa137a466747844", "bytes": 46357},
+    "DISPLAY_TOUCH.kicad_sch": {"sha256": "4227a38fe4a1154e9bb9a659802428ef254d8df014d8be9d3fb8c7d2ca961e8e", "bytes": 37188},
+    "BIO_INTERFACE.kicad_sch": {"sha256": "46419ae0fd9ccd3726deffe26db6d88d1afc9c9eb36a87d09e507dfeb2fd04fa", "bytes": 40024},
+    "DEBUG_POWER.kicad_sch": {"sha256": "49f2e99ecbc37f21121840b55bd02b23221506c70e31c79d972304ea06971df5", "bytes": 22180},
+    "AegisBioWatch.kicad_sym": {"sha256": "67ce040ca5016ffb70a7812c0ee93052afde484a9f1ece6025a80e298f4a646c", "bytes": 32193},
+    "sym-lib-table": {"sha256": "f81a98371838e4fc7a1aa336bd92133db02f880a8f5dfe435cd039a622241041", "bytes": 193},
+    "README.md": {"sha256": "653f08cbf2e163827cce9a91017b0b591bd12a05146e4d3f7abda5ff40881844", "bytes": 528}
+  },
+  "footprint_assignments": {
+    "C1": "Capacitor_SMD:C_0402_1005Metric", "C2": "Capacitor_SMD:C_0201_0603Metric", "C3": "Capacitor_SMD:C_0201_0603Metric", "C4": "Capacitor_SMD:C_0201_0603Metric", "C5": "Capacitor_SMD:C_0201_0603Metric", "C6": "Capacitor_SMD:C_0201_0603Metric", "C7": "Capacitor_SMD:C_0201_0603Metric", "C8": "Capacitor_SMD:C_0201_0603Metric", "C9": "Capacitor_SMD:C_0201_0603Metric", "C10": "Capacitor_SMD:C_0201_0603Metric", "C11": "Capacitor_SMD:C_0201_0603Metric", "C12": "Capacitor_SMD:C_0201_0603Metric", "C13": "Capacitor_SMD:C_0201_0603Metric", "FB1": "Inductor_SMD:L_0201_0603Metric", "L1": "Inductor_SMD:L_0603_1608Metric", "L2": "Inductor_SMD:L_0201_0603Metric", "L3": "Inductor_SMD:L_0201_0603Metric", "L4": "Inductor_SMD:L_0201_0603Metric", "R1": "Resistor_SMD:R_0201_0603Metric", "J2": "Connector_Hirose:Hirose_DF57H-3P-1.2V_1x03_P1.2mm_Socket", "C301": "Capacitor_SMD:C_0201_0603Metric", "C302": "Capacitor_SMD:C_0402_1005Metric", "C303": "Capacitor_SMD:C_0402_1005Metric", "C304": "Capacitor_SMD:C_0201_0603Metric", "C305": "Capacitor_SMD:C_0402_1005Metric", "R301": "Resistor_SMD:R_0201_0603Metric", "R302": "Resistor_SMD:R_0201_0603Metric", "R303": "Resistor_SMD:R_0201_0603Metric", "R304": "Resistor_SMD:R_0201_0603Metric", "C401": "Capacitor_SMD:C_0201_0603Metric", "R401": "Resistor_SMD:R_0201_0603Metric", "R402": "Resistor_SMD:R_0201_0603Metric", "R403": "Resistor_SMD:R_0201_0603Metric", "R404": "Resistor_SMD:R_0201_0603Metric", "J7": "Connector_FFC-FPC:Hirose_FH12-20S-0.5SH_1x20-1MP_P0.50mm_Horizontal", "Q501": "Package_TO_SOT_SMD:SOT-23", "R501": "Resistor_SMD:R_0201_0603Metric", "R502": "Resistor_SMD:R_0201_0603Metric", "R503": "Resistor_SMD:R_0201_0603Metric", "L101": "Inductor_SMD:L_Murata_DFE201610P", "L102": "Inductor_SMD:L_Murata_DFE201610P"
+  },
+  "materialized_files": {
+    "AegisBioWatch-MainBoard-Rev0.kicad_sch": {"sha256": "64e094304b6b35234f0dd9397231d50cc98aa9c642e815d7ad36fba828cb4bcc", "bytes": 3728},
+    "AegisBioWatch-MainBoard-Rev0.kicad_pro": {"sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356", "bytes": 3},
+    "MCU_RF_CLOCK.kicad_sch": {"sha256": "fd223d74cecb93b66d5d53717f1ee40445f74898f5d6f02908834c3660991ada", "bytes": 91219},
+    "PMIC_CHARGER.kicad_sch": {"sha256": "6c9c6f683771f7f86a08e81b497b5c7309b7aa1fdc548650bb88b2ad1c9f49fe", "bytes": 99495},
+    "STORAGE_HAPTIC.kicad_sch": {"sha256": "4771b8d085e78dbf5d88c7bd9d8a070e73ea26c866204e5ed86b21dd62aa6f12", "bytes": 46632},
+    "DISPLAY_TOUCH.kicad_sch": {"sha256": "18d5bca83cb070750532156de045df7bb287a26ba29755a71a0298d45f9857bb", "bytes": 37339},
+    "BIO_INTERFACE.kicad_sch": {"sha256": "4d1e18c194dd454c96982fafe228929441b3a49a882a66bb75d18e88336ccebe", "bytes": 40206},
+    "DEBUG_POWER.kicad_sch": {"sha256": "49f2e99ecbc37f21121840b55bd02b23221506c70e31c79d972304ea06971df5", "bytes": 22180},
+    "AegisBioWatch.kicad_sym": {"sha256": "67ce040ca5016ffb70a7812c0ee93052afde484a9f1ece6025a80e298f4a646c", "bytes": 32193},
+    "sym-lib-table": {"sha256": "f81a98371838e4fc7a1aa336bd92133db02f880a8f5dfe435cd039a622241041", "bytes": 193},
+    "README.md": {"sha256": "653f08cbf2e163827cce9a91017b0b591bd12a05146e4d3f7abda5ff40881844", "bytes": 528}
   }
 }
