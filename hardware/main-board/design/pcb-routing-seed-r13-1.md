@@ -8,12 +8,16 @@ Route-1 starts copper only for the nPM1300 critical local power loops. It delibe
 
 ## Mandatory entry gate
 
-`tools/materialize-pcb-r13-route1.py` refuses to generate a routed PCB unless an executed KiCad r13 placement DRC JSON reports:
+`tools/materialize-pcb-r13-route1.py` first regenerates the r13 placement, then refuses to add copper unless all of the following agree:
 
-- rule violations = **0**
-- unconnected items = **186**
+- executed KiCad version contains **9.0.9**;
+- placement rule violations = **0**;
+- placement unconnected items = **186**;
+- the packaged placement result is marked `EXECUTED_KICAD_CLI`;
+- the freshly generated placement PCB SHA-256 exactly matches the PCB SHA stored in that executed result;
+- the supplied DRC JSON SHA-256 exactly matches the DRC SHA stored in that executed result.
 
-The 186 count is the known r11/r13 placement-only topology baseline. This gate prevents routing on top of an unvalidated placement generated only by Python.
+The 186 count is the known r11/r13 placement-only topology baseline. The SHA binding prevents stale KiCad evidence from authorizing routing on a different placement build.
 
 ## Route-1 scope
 
@@ -21,23 +25,27 @@ The routing seed adds only:
 
 1. U2 SW1 → L101
 2. U2 SW2 → L102
-3. L101 +1V8 output → C107
-4. L102 +3V0 output → C108
-5. U2 VSYS/PVDD local connection → C103 / C104 / C114
-6. compact `PVSS1_LOCAL` return tree across U2 / C103 / C107 / NT101
-7. compact `PVSS2_LOCAL` return tree across U2 / C104 / C108 / NT102
-8. short NT101/NT102 GND-side escapes to provisional through-vias for entry into the continuous board GND system
+3. L101 → C107 on the local +1V8 output node
+4. C107 → U2 pin 1 `VOUT1`
+5. L102 → C108 on the local +3V0 output node
+6. C108 → U2 pin 32 `VOUT2`
+7. U2 pin 4 `PVDD` / project `VSYS` net → C103 / C104 / C114
+8. compact `PVSS1_LOCAL` return tree across U2 / C103 / C107 / NT101
+9. compact `PVSS2_LOCAL` return tree across U2 / C104 / C108 / NT102
+10. short NT101/NT102 GND-side escapes to provisional through-vias for entry into the continuous board GND system
 
-The PVSS return tree is generated from actual pad coordinates with a small Euclidean minimum-spanning tree. This minimizes local-return track length without inventing third-party coordinates.
+The VOUT1/VOUT2 connections are mandatory parts of the regulated output nodes; Nordic defines QFN32 pin 1 as `VOUT1`, pin 4 as BUCK `PVDD`, and pin 32 as `VOUT2`.
+
+The PVSS return tree is generated from actual pad coordinates with a small Euclidean minimum-spanning tree. This minimizes local-return track length without importing third-party coordinates.
 
 ## Routing-seed geometry
 
 Current seed values:
 
 - SW1/SW2: 0.25 mm
-- local VSYS: 0.30 mm
+- local VSYS/PVDD: 0.30 mm
 - local PVSS: 0.35 mm
-- BUCK output-to-cap: 0.35 mm
+- BUCK VOUT local node: 0.35 mm
 - NetTie GND escape: 0.30 mm
 - provisional through-via: 0.60 mm / 0.30 mm drill
 
@@ -75,7 +83,7 @@ Route-1 does **not** route or alter:
 
 ## Reproduction
 
-The script expects the executed placement DRC JSON through `R13_PLACEMENT_DRC_JSON` or `/tmp/drc-r13.json`.
+The script expects both the committed/generated executed placement result and its matching raw KiCad DRC JSON. The raw DRC path is supplied through `R13_PLACEMENT_DRC_JSON` or defaults to `/tmp/drc-r13.json`.
 
 ```bash
 R13_PLACEMENT_DRC_JSON=/tmp/drc-r13.json \
@@ -117,6 +125,7 @@ python3 tools/package-pcb-r13-route1-evidence.py
 Before expanding routing beyond route-1:
 
 - route-1 rule violations must be 0;
+- VOUT1 and VOUT2 must be part of the correct post-inductor output nodes;
 - no PMIC component/track may intrude into RF/crystal or Bio sensitive reserves;
 - local switching-current geometry must be visually reviewed against Nordic authority;
 - SW copper must remain compact;
