@@ -1,42 +1,34 @@
 {
   "project": "AegisBioWatch",
   "revision": "Rev.0",
-  "phase": "1",
-  "capture_revision": "r7",
-  "status": "NATIVE_KICAD9_ERC_CLEAN_REPRODUCIBLE",
+  "phase": 1,
+  "capture_revision": "r8",
+  "status": "NATIVE_KICAD9_ERC_CLEAN_INTERFACE_R8",
   "manufacturing_ready": false,
   "kicad_cli": "9.0.9",
-  "canonical_materialization": "python3 tools/materialize-native-r7.py",
-  "canonical_output": "hardware/main-board/kicad/native-r7/AegisBioWatch-MainBoard-Rev0.kicad_sch",
-  "erc": {
-    "violations": 0,
-    "severity_all": true
-  },
-  "netlist_validation": {
-    "checks": 63,
-    "passed": 63,
-    "failed": 0
-  },
-  "footprints": {
-    "assigned": 72,
-    "empty_or_unfrozen": 7,
-    "empty_refs": ["J3", "J101", "J4", "J5", "J6", "J8", "J9"]
-  },
-  "interface_status": {
-    "battery": "DF57H-3P-1.2V footprint assigned",
-    "main_bio": "FH12-20S-0.5SH footprint assigned",
-    "swd": "TC2030-IDC-NL is the target, but r7 still contains the older 8-pin debug connector and requires pin-map reconciliation before PCB release"
+  "canonical_materialization": "python3 tools/materialize-native-r8.py",
+  "canonical_output": "hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-Rev0.kicad_sch",
+  "erc": {"violations": 0, "severity_all": true},
+  "interface_netlist_validation": {"checks": 12, "passed": 12, "failed": 0},
+  "footprints": {"bom_rows": 79, "assigned": 76, "empty_or_unfrozen": 3, "empty_refs": ["J3", "J5", "J6"]},
+  "frozen_interfaces": {
+    "SWD": "Tag-Connect TC2030 6-pin; 1 VTRef, 2 SWDIO, 3 nRESET, 4 SWCLK, 5 GND, 6 SWO",
+    "SideButton": "Panasonic EVQPUK02K",
+    "ShipWakeButton": "Panasonic EVQPLDA15",
+    "LRA": "Precision Microdrives C10-100 direct solder with strain relief",
+    "Main-Bio": "Hirose FH12-20S-0.5SH(55)",
+    "Battery": "Hirose DF57H-3P-1.2V(21)"
   },
   "open_hard_gates": [
-    "resolve seven remaining physical footprints/interfaces",
-    "reconcile debug interface to 6-pin TC2030 mapping",
-    "freeze performance-critical RF/PMIC passive MPNs",
-    "record procured nPM1300 build code and applicable errata",
-    "freeze protected battery pack drawing/PCM/NTC/charge limits",
-    "qualify charger contact drop and fuel-gauge battery model",
-    "obtain AMOLED/touch FPC pinout, rails, sequence and timing",
-    "capture/review Bio Board electrode-disconnect hardware",
-    "create PCB stackup/RF geometry/antenna keepout and run PCB DRC/DFM"
+    "J3 magnetic dock contact geometry/spacing",
+    "J5 AMOLED supplier FPC pinout/rails/power sequence",
+    "J6 touch physical interface and I/O voltage",
+    "performance-critical RF/PMIC passive MPN closure",
+    "procured nPM1300 build code / applicable errata",
+    "protected battery-pack drawing/PCM/charge limits",
+    "PCB stackup / controlled-impedance RF geometry / antenna keepout",
+    "Bio Board charging-time electrode disconnect/high-Z hardware",
+    "PCB DRC/DFM and prototype bring-up"
   ],
   "privacy": "No individual case history, private messages, medication details, or identifying health data stored."
 }
