@@ -5,8 +5,8 @@ EELAYER END
 $Descr A4 11693 8268
 Sheet 1 1
 Title "AegisBioWatch MCU / RF / Clock"
-Date "2026-08-07"
-Rev "Rev.0 / Phase 1 r4"
+Date "2026-08-08"
+Rev "Rev.0 / Phase 1 r6"
 Comp "AegisBioWatch"
 Comment1 "CAPTURE DRAFT - ERC pending"
 Comment2 "PCB release prohibited until reference gates close"
@@ -127,9 +127,9 @@ L Device:Crystal_Small Y1
 U 1 1 5F9AB0
 P 2600 2000
 F 0 "Y1" H 2750 2100 50  0000 C CNN
-F 1 "32MHz" H 2850 1900 50  0000 C CNN
-F 2 "" H 2600 2000 50  0001 C CNN
-F 3 "~" H 2600 2000 50  0001 C CNN
+F 1 "MP06003 32MHz 8pF" H 3100 1900 50  0000 C CNN
+F 2 "AegisBioWatch:XTAL_2016_4P_MP06003_VERIFY" H 2600 2000 50  0001 C CNN
+F 3 "https://www.golledge.com/media/5605/mp06003.pdf" H 2600 2000 50  0001 C CNN
 	1    2600 2000
 	1 0 0 -1
 $EndComp
@@ -142,9 +142,9 @@ L Device:Crystal_Small Y2
 U 1 1 C737FC
 P 2600 2500
 F 0 "Y2" H 2750 2600 50  0000 C CNN
-F 1 "32.768kHz" H 2850 2400 50  0000 C CNN
-F 2 "" H 2600 2500 50  0001 C CNN
-F 3 "~" H 2600 2500 50  0001 C CNN
+F 1 "ABS06-32.768KHZ-9-T" H 3250 2400 50  0000 C CNN
+F 2 "AegisBioWatch:XTAL_2012_2P_ABS06_VERIFY" H 2600 2500 50  0001 C CNN
+F 3 "https://abracon.com/parametric/crystals/ABS06-32.768KHZ-9-T" H 2600 2500 50  0001 C CNN
 	1    2600 2500
 	1 0 0 -1
 $EndComp
@@ -551,4 +551,8 @@ Wire Wire Line
 	9800 6600 9800 6750
 Text Notes 700 7500 0    36   ~ 0
 WIRE_AUDIT_R4_END
+Text Notes 700 1200 0    42   ~ 0
+r6 crystal freeze: Y1=Golledge MP06003 (32MHz, CL=8pF); Y2=Abracon ABS06-32.768KHZ-9-T (32.768kHz, CL=9pF).
+Text Notes 700 1350 0    42   ~ 0
+Both oscillators may use nRF54L15 internal load capacitors; final firmware capacitance setting and custom landing patterns remain validation items.
 $EndSCHEMATC
