@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/phase1-r13-kicad.yml'
       - 'tools/recover-pcb-r11-payload-from-history.py'
+      - 'tools/rebuild-pcb-r11-payload-from-git-objects.py'
       - 'tools/inspect-pcb-r11.py'
       - 'tools/materialize-pcb-r11.py'
       - 'hardware/main-board/pcb/placement-r11-payload/**'
@@ -28,6 +29,7 @@ on:
     paths:
       - '.github/workflows/phase1-r13-kicad.yml'
       - 'tools/recover-pcb-r11-payload-from-history.py'
+      - 'tools/rebuild-pcb-r11-payload-from-git-objects.py'
       - 'tools/inspect-pcb-r11.py'
       - 'tools/materialize-pcb-r11.py'
       - 'hardware/main-board/pcb/placement-r11-payload/**'
@@ -55,25 +57,38 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Recover r11 payload only from certified Git history
+      - name: Recover r11 payload from exact repository evidence
         shell: bash
         run: |
-          set -euxo pipefail
-          python3 tools/recover-pcb-r11-payload-from-history.py --restore | tee /tmp/r11-payload-recovery.json
-          git diff --check -- hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64
+          set -uo pipefail
+          if python3 tools/recover-pcb-r11-payload-from-history.py --restore | tee /tmp/r11-payload-history-recovery.json; then
+            echo "Recovered original archive container from Git history."
+          else
+            echo "No exact archive container survived in history; searching Git objects for every exact r11 file identity."
+            python3 tools/rebuild-pcb-r11-payload-from-git-objects.py --restore | tee /tmp/r11-payload-object-recovery.json
+          fi
+          git diff --check -- \
+            hardware/main-board/pcb/placement-r11-payload/manifest.json \
+            hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64 \
+            docs/pcb-r11-payload-recovery.json
 
-      - name: Commit certified r11 payload restoration back to branch
+      - name: Commit certified r11 payload repair back to branch
         if: github.event_name == 'push'
         shell: bash
         run: |
           set -euxo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64
+          git add \
+            hardware/main-board/pcb/placement-r11-payload/manifest.json \
+            hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64
+          if test -f docs/pcb-r11-payload-recovery.json; then
+            git add docs/pcb-r11-payload-recovery.json
+          fi
           if git diff --cached --quiet; then
-            echo "r11 payload already matches the certified historical blob."
+            echo "r11 payload already matches certified repository evidence."
           else
-            git commit -m "Restore hash-verified r11 payload [skip ci]"
+            git commit -m "Repair hash-verified r11 payload [skip ci]"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
 
@@ -220,7 +235,9 @@ jobs:
           name: phase1-r13-kicad-evidence
           if-no-files-found: warn
           path: |
-            /tmp/r11-payload-recovery.json
+            /tmp/r11-payload-history-recovery.json
+            /tmp/r11-payload-object-recovery.json
+            docs/pcb-r11-payload-recovery.json
             /tmp/drc-r11.json
             /tmp/drc-r13.json
             /tmp/drc-r13-route1.json
