@@ -33,25 +33,25 @@ J6,Touch logical interface,6-signal logical placeholder,TBD,TBD,LOGICAL_ONLY,Pro
 R401-R402,0 Ω,Touch I2C direct-link option,0201,TBD,PROVISIONAL,Fit only if selected touch I/O is 1.8 V compatible
 R403-R404,4.7 kΩ,SYS_I2C pull-ups,0201,TBD,PROVISIONAL,Single Main Board pull-up pair; tune from bus capacitance
 C401,100 nF,Touch local decoupling placeholder,0201,TBD,PROVISIONAL,Value/domain recheck after touch MPN freeze
-J7,Main-Bio logical interface,20-signal logical placeholder,TBD,TBD,LOGICAL_ONLY,Physical connector and pin ordering not frozen
+J7,FH12-20S-0.5SH(55),20-position 0.5mm pitch bottom-contact ZIF FPC connector,Hirose FH12 1x20 0.5mm horizontal,Hirose,FROZEN_MPN_MECH_ORIENTATION_GATE,14.1x6.4x2.0mm; 0.5A/contact; FPC routing/contact-side orientation remains mechanical gate
 Q501,2N7002-class,Hardware charge-present open-drain switch,SOT-23/TBD,TBD,PROVISIONAL,CHG_PRESENT_N independent of MCU firmware
 R501,100 kΩ,Charge-sense gate series resistor,0201,TBD,PROVISIONAL,CHG_5V to Q501 gate
 R502,1 MΩ,Charge-sense gate pull-down,0201,TBD,PROVISIONAL,Default gate low when charger absent
 R503,47 kΩ,CHG_PRESENT_N pull-up to 1.8 V,0201,TBD,PROVISIONAL,Active-low hardware charge indication
-L101-L102,2.2 uH,nPM1300 BUCK inductors; DCR <400mΩ,0806,TBD,FROZEN_SPEC,"Isat >350mA, rated >200mA; final MPN pending"
+L101-L102,DFE201610P-2R2M=P2,"2.2 uH, ±20%, 2 A, DCR 168mΩ max nPM1300 BUCK inductors",Murata DFE201610P 2016 (2.0x1.6mm),Murata,FROZEN_MPN,Exceeds Nordic DCR/current requirements; use KiCad L_Murata_DFE201610P footprint
 R101,47 kΩ 1%,nPM VSET1,0201,TBD,FROZEN,BUCK1 startup 1.8 V
 R102,150 kΩ 1%,nPM VSET2,0201,TBD,FROZEN,BUCK2 startup 3.0 V
 R103-R104,10 kΩ DNP/TUNE,Optional nPM/shared TWI pull-ups,0201,TBD,PROVISIONAL,Populate only once for shared bus; final value from bus capacitance/speed
 R105-R106,0 Ω OPTION,VSYS to VINLDO1/VINLDO2 option links,0201,TBD,DNP_OPTION,Populate only after LS/LDO mode and power budget freeze
-C101,1.0 µF X5R 10V,nPM VBUS input capacitor,0603,TBD,REFERENCE_LOCKED,At VBUS pin
-C102,10 µF X5R 25V,nPM VSYS bulk capacitor,0603,TBD,REFERENCE_LOCKED,Effective capacitance review required
-C103-C104,10 µF X5R 25V,nPM local BUCK input capacitors,0603,TBD,REFERENCE_LOCKED,VSYS/PVDD to local PVSS1/PVSS2 returns
-C105,1.0 µF X5R 10V,nPM VBUSOUT capacitor,0603,TBD,REFERENCE_LOCKED,Required even if VBUSOUT is unused
-C106,2.2 µF X7R 16V,nPM VBAT capacitor,0603,TBD,REFERENCE_LOCKED,At VBAT pin
-C107-C108,10 µF X5R 25V,nPM BUCK output capacitors,0603,TBD,REFERENCE_LOCKED,VOUT1/VOUT2; effective 4–20µF required
-C109-C112,10 µF X5R 25V,nPM LS/LDO output capacitors,0603,TBD,REFERENCE_LOCKED_FOR_LDO,Two per output; only if configured as LDO
-C113,100 nF X5R,nPM VDDIO bypass,0201,TBD,REFERENCE_LOCKED,At VDDIO
-C114,100 nF X5R,RF-sensitive extra VSYS/PVDD HF bypass,0201,TBD,APPLICATION_ADD,Nordic recommends 10–100nF parallel HF decoupling for RF-sensitive designs
+C101,GRM188R61A105KA61D,nPM VBUS input capacitor,0603,Murata,FROZEN_MPN,1uF 10V X5R ±10%; active/current stock verified
+C102,GRM188R61E106MA73D,nPM VSYS bulk capacitor,0603,Murata,MPN_SELECTED_DC_BIAS_GATE,10uF 25V X5R ±20%; verify effective capacitance at actual rail bias before release
+C103-C104,GRM188R61E106MA73D,nPM local BUCK input capacitors,0603,Murata,MPN_SELECTED_DC_BIAS_GATE,10uF 25V X5R ±20%; verify effective capacitance at actual rail bias before release
+C105,GRM188R61A105KA61D,nPM VBUSOUT capacitor,0603,Murata,FROZEN_MPN,1uF 10V X5R ±10%; active/current stock verified
+C106,GRM188Z71C225KE43D,nPM VBAT capacitor,0603,Murata,FROZEN_MPN,2.2uF 16V X7R ±10%; active/current stock verified
+C107-C108,GRM188R61E106MA73D,nPM BUCK output capacitors,0603,Murata,MPN_SELECTED_DC_BIAS_GATE,10uF 25V X5R ±20%; verify effective capacitance at actual rail bias before release
+C109-C112,GRM188R61E106MA73D,nPM LS/LDO output capacitors,0603,Murata,MPN_SELECTED_DC_BIAS_GATE,10uF 25V X5R ±20%; verify effective capacitance at actual rail bias before release
+C113,GRM033R61A104KE15D,nPM VDDIO bypass,0201,Murata,FROZEN_MPN,100nF 10V X5R ±10%; active/current stock verified
+C114,GRM033R61A104KE15D,RF-sensitive extra VSYS/PVDD HF bypass,0201,Murata,FROZEN_MPN,100nF 10V X5R ±10%; active/current stock verified
 NT101-NT102,Net tie,PVSS1/PVSS2 local return to main GND,LAYOUT_SPECIFIC,N/A,LAYOUT_CRITICAL_TBD,Nordic QFN reference-style local PVSS return into continuous L2 GND; custom copper/via geometry at PCB layout
 J101,SHIP_WAKE_BUTTON,SHPHLD wake button interface,TBD,TBD,PROVISIONAL,Physical button integration pending
 M1,C10-100,"10 mm coin LRA, 175 Hz, 2 Vrms rated",10mm dia x 3.7mm,Precision Microdrives,FROZEN_MPN_MECH_VALIDATE,"2.05 Vrms max; 67mA typical, 90mA max; validate mounted auto-resonance in enclosure"
@@ -60,3 +60,5 @@ B1,LP372435TB cell candidate,3.7 V 300 mAh Li-polymer bare cell,24.5x36x4.0mm po
 TH101,NXRT15XH103FA5B030,"10 kΩ battery NTC, B25/50=3380K","lead type, 30mm",Murata,FROZEN_MPN_PACK_INTEGRATION,Thermally couple to cell; ±1% R25 and beta; nPM1300-supported thermistor class
 D101,PMEG2010AEJ,20 V 1 A Schottky reverse-polarity protection,SOD323F,Nexperia,FROZEN_MPN,Series dock input protection; small package; verify forward-drop margin on assembled dock
 D102,PESD5V0S1UL,5 V unidirectional ESD protection diode,SOD882 / DFN1006-2,Nexperia,FROZEN_MPN,Shunt at raw dock input; 30kV IEC61000-4-2; 5V VRWM
+J1,TC2030-IDC-NL,6-pin no-legs Tag-Connect SWD target,Tag-Connect TC2030-IDC-NL 2x3 P1.27mm,Tag-Connect,FROZEN_INTERFACE,No permanent board connector; production/debug cable target footprint
+J2,DF57H-3P-1.2V(21),3-position 1.2mm battery-pack header,Hirose DF57H 1x03 P1.2mm,Hirose,FROZEN_MPN,2A; mating housing DF57H-3S-1.2C; pack pinout VBAT/NTC/GND
