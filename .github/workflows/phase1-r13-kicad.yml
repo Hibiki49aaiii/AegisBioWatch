@@ -7,6 +7,7 @@ on:
     types: [opened, reopened, synchronize, edited]
     paths:
       - '.github/workflows/phase1-r13-kicad.yml'
+      - 'tools/probe-kicad-pcbnew.py'
       - 'tools/recover-pcb-r11-payload-from-history.py'
       - 'tools/rebuild-pcb-r11-payload-from-git-objects.py'
       - 'tools/inspect-pcb-r11.py'
@@ -28,6 +29,7 @@ on:
       - agent/phase1-mainboard-schematic
     paths:
       - '.github/workflows/phase1-r13-kicad.yml'
+      - 'tools/probe-kicad-pcbnew.py'
       - 'tools/recover-pcb-r11-payload-from-history.py'
       - 'tools/rebuild-pcb-r11-payload-from-git-objects.py'
       - 'tools/inspect-pcb-r11.py'
@@ -61,19 +63,26 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
+          R11_OK=0
           if python3 tools/recover-pcb-r11-payload-from-history.py --restore | tee /tmp/r11-payload-history-recovery.json; then
+            R11_OK=1
             echo "Recovered original archive container from Git history."
           else
             echo "No exact archive container survived in history; searching Git objects for every exact r11 file identity."
-            python3 tools/rebuild-pcb-r11-payload-from-git-objects.py --restore | tee /tmp/r11-payload-object-recovery.json
+            if python3 tools/rebuild-pcb-r11-payload-from-git-objects.py --restore | tee /tmp/r11-payload-object-recovery.json; then
+              R11_OK=1
+            fi
           fi
-          git diff --check -- \
-            hardware/main-board/pcb/placement-r11-payload/manifest.json \
-            hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64 \
-            docs/pcb-r11-payload-recovery.json
+          if [ "$R11_OK" -eq 1 ]; then
+            echo "R11_PAYLOAD_READY=1" >> "$GITHUB_ENV"
+          else
+            echo "R11_PAYLOAD_READY=0" >> "$GITHUB_ENV"
+            echo "R11_REBUILD_REQUIRED=1" >> "$GITHUB_ENV"
+            echo "No exact historical r11 container/files survive; authoritative r8+r10 rebuild is required."
+          fi
 
       - name: Commit certified r11 payload repair back to branch
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && env.R11_PAYLOAD_READY == '1'
         shell: bash
         run: |
           set -euxo pipefail
@@ -82,9 +91,7 @@ jobs:
           git add \
             hardware/main-board/pcb/placement-r11-payload/manifest.json \
             hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64
-          if test -f docs/pcb-r11-payload-recovery.json; then
-            git add docs/pcb-r11-payload-recovery.json
-          fi
+          if test -f docs/pcb-r11-payload-recovery.json; then git add docs/pcb-r11-payload-recovery.json; fi
           if git diff --cached --quiet; then
             echo "r11 payload already matches certified repository evidence."
           else
@@ -106,13 +113,26 @@ jobs:
           printf '%s\n' "$KICAD_VERSION" | grep -E '(^|[[:space:]])9\.0\.9([[:space:]]|$)'
           echo "KICAD_VERSION=$KICAD_VERSION" >> "$GITHUB_ENV"
 
+      - name: Probe KiCad PCB Python API for authoritative r11 rebuild
+        if: env.R11_REBUILD_REQUIRED == '1'
+        run: python3 tools/probe-kicad-pcbnew.py | tee /tmp/kicad-pcbnew-probe.json
+
+      - name: Stop until authoritative r11 rebuild implementation is selected
+        if: env.R11_REBUILD_REQUIRED == '1'
+        run: |
+          echo "Existing r11 payload cannot be recovered exactly. Probe evidence above defines the available KiCad API for rebuilding from r8+r10."
+          exit 1
+
       - name: Materialize hash-verified r11
+        if: env.R11_PAYLOAD_READY == '1'
         run: python3 tools/materialize-pcb-r11.py
 
       - name: Inspect r11 critical PMIC and nRF source geometry
+        if: env.R11_PAYLOAD_READY == '1'
         run: python3 tools/inspect-pcb-r11.py | tee /tmp/r11-critical-placement.json
 
       - name: KiCad r11 PCB DRC baseline
+        if: env.R11_PAYLOAD_READY == '1'
         shell: bash
         run: |
           set -euxo pipefail
@@ -121,6 +141,7 @@ jobs:
             -o /tmp/drc-r11.json AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pcb
 
       - name: Assert documented r11 baseline
+        if: env.R11_PAYLOAD_READY == '1'
         shell: bash
         run: |
           python3 - <<'PY'
@@ -137,9 +158,11 @@ jobs:
           PY
 
       - name: Materialize r13 nPM1300 placement
+        if: env.R11_PAYLOAD_READY == '1'
         run: python3 tools/materialize-pcb-r13.py | tee /tmp/r13-materialize.log
 
       - name: KiCad r13 placement DRC and retain JSON even on findings
+        if: env.R11_PAYLOAD_READY == '1'
         shell: bash
         run: |
           set +e
@@ -152,12 +175,13 @@ jobs:
           exit 0
 
       - name: Package executed r13 placement evidence
+        if: env.R11_PAYLOAD_READY == '1'
         env:
           R13_DRC_JSON: /tmp/drc-r13.json
         run: python3 tools/package-pcb-r13-evidence.py | tee /tmp/r13-evidence.log
 
       - name: Commit r13 placement evidence back to branch
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && env.R11_PAYLOAD_READY == '1'
         shell: bash
         run: |
           set -euxo pipefail
@@ -175,6 +199,7 @@ jobs:
           fi
 
       - name: Assert r13 placement-only electrical state before routing
+        if: env.R11_PAYLOAD_READY == '1'
         shell: bash
         run: |
           python3 - <<'PY'
@@ -191,11 +216,13 @@ jobs:
           PY
 
       - name: Materialize r13 route-1 PMIC critical loops
+        if: env.R11_PAYLOAD_READY == '1'
         env:
           R13_PLACEMENT_DRC_JSON: /tmp/drc-r13.json
         run: python3 tools/materialize-pcb-r13-route1.py | tee /tmp/r13-route1-materialize.log
 
       - name: KiCad r13 route-1 PCB DRC and retain JSON even on findings
+        if: env.R11_PAYLOAD_READY == '1'
         shell: bash
         run: |
           set +e
@@ -208,12 +235,13 @@ jobs:
           exit 0
 
       - name: Package executed r13 route-1 evidence
+        if: env.R11_PAYLOAD_READY == '1'
         env:
           R13_ROUTE1_DRC_JSON: /tmp/drc-r13-route1.json
         run: python3 tools/package-pcb-r13-route1-evidence.py | tee /tmp/r13-route1-evidence.log
 
       - name: Commit r13 route-1 evidence back to branch
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && env.R11_PAYLOAD_READY == '1'
         shell: bash
         run: |
           set -euxo pipefail
@@ -238,6 +266,7 @@ jobs:
             /tmp/r11-payload-history-recovery.json
             /tmp/r11-payload-object-recovery.json
             docs/pcb-r11-payload-recovery.json
+            /tmp/kicad-pcbnew-probe.json
             /tmp/drc-r11.json
             /tmp/drc-r13.json
             /tmp/drc-r13-route1.json
@@ -246,20 +275,15 @@ jobs:
             /tmp/r13-evidence.log
             /tmp/r13-route1-materialize.log
             /tmp/r13-route1-evidence.log
-            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
-            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pro
-            hardware/main-board/pcb/placement-r13/placement-implementation-r13.json
+            hardware/main-board/pcb/placement-r13/**
             docs/pcb-placement-implementation-r13-kicad-result.json
-            hardware/main-board/pcb/placement-r13-payload/manifest.json
-            hardware/main-board/pcb/placement-r13-payload/r13-placement-kicad-evidence.tar.gz.b64
-            hardware/main-board/pcb/route-r13-1/AegisBioWatch-MainBoard-Route1-r13.kicad_pcb
-            hardware/main-board/pcb/route-r13-1/AegisBioWatch-MainBoard-Route1-r13.kicad_pro
-            hardware/main-board/pcb/route-r13-1/routing-seed-r13-1.json
+            hardware/main-board/pcb/placement-r13-payload/**
+            hardware/main-board/pcb/route-r13-1/**
             docs/pcb-routing-r13-1-kicad-result.json
-            hardware/main-board/pcb/route-r13-1-payload/manifest.json
-            hardware/main-board/pcb/route-r13-1-payload/r13-route1-kicad-evidence.tar.gz.b64
+            hardware/main-board/pcb/route-r13-1-payload/**
 
       - name: Assert r13 route-1 rule state
+        if: env.R11_PAYLOAD_READY == '1'
         shell: bash
         run: |
           python3 - <<'PY'
