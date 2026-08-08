@@ -1,57 +1,46 @@
-# AegisBioWatch Main Board — KiCad Phase 1 r7
+# AegisBioWatch Main Board — capture/migration sources
 
-## Source of truth
+## Canonical r7 source
 
-The authoritative design is now the native KiCad 9 hierarchical project:
+Do **not** use the legacy/intermediate files in this directory as the Phase 1 r7 electrical authority.
 
-- `AegisBioWatch-MainBoard-Rev0.kicad_pro`
-- `AegisBioWatch-MainBoard-Rev0.kicad_sch`
+Materialize the validated native KiCad 9 project from the repository root:
 
-Child sheets:
-
-- `MCU_RF_CLOCK.kicad_sch`
-- `PMIC_CHARGER.kicad_sch`
-- `STORAGE_HAPTIC.kicad_sch`
-- `DISPLAY_TOUCH.kicad_sch`
-- `BIO_INTERFACE.kicad_sch`
-- `SYSTEM_POWER.kicad_sch`
-
-Native local libraries:
-
-- `AegisBioWatch.kicad_sym`
-- `AegisBioWatch.pretty/`
-- `sym-lib-table`
-- `fp-lib-table`
-
-The legacy `.sch`, `.lib` and cache files are retained only for migration/history
-and must not be treated as the r7 electrical authority.
-
-## Verified toolchain
-
-`kicad-cli 9.0.9`
-
-## ERC
-
-The complete hierarchical project passes:
-
-```text
-Found 0 violations
+```bash
+python3 tools/materialize-native-r7.py
 ```
 
-The machine-readable result is stored in `docs/erc-r7.json`.
+The canonical project will be written to:
 
-## Generated outputs
+```text
+hardware/main-board/kicad/native-r7/
+```
 
-`../generated/` contains:
+Open:
 
-- `AegisBioWatch-MainBoard-Rev0.net`
-- `BOM-r7.csv`
+```text
+hardware/main-board/kicad/native-r7/AegisBioWatch-MainBoard-Rev0.kicad_sch
+```
 
-These are generated from the native root schematic.
+The payload and materializer are hash-verified. See:
 
-## Manufacturing status
+- `hardware/main-board/kicad/native-r7-payload/manifest.json`
+- `tools/materialize-native-r7.py`
+- `docs/native-kicad-r7.md`
+- `docs/erc-r7.json`
 
-**NOT manufacturing-ready.** ERC is clean and 71/77 BOM rows have footprints,
-but six enclosure/mechanical-interface footprints, display FPC/electrical data,
-PCB stack-up/RF layout, protected battery-pack details, and Bio Board safety
-circuitry remain open release gates.
+## Validation
+
+KiCad CLI: **9.0.9**
+
+Integrated native ERC with `--severity-all`: **0 violations**.
+
+Critical pin-to-net checks: **63/63 pass**.
+
+Footprints: **72 assigned / 7 deliberately unresolved**.
+
+## This directory
+
+The `.sch`, `.lib`, cache and other files retained here are migration/history inputs. They may be useful for audit and comparison but are not the r7 release source.
+
+**Do not release Gerbers yet.** Physical interfaces, PCB stack-up/RF layout, Bio Board safety hardware and PCB DRC/DFM remain open release gates.
