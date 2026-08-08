@@ -1,0 +1,19 @@
+{
+  "tool": "kicad-cli 9.0.9",
+  "checks": 12,
+  "passed": 12,
+  "results": [
+    {"ref":"J8","pin":"1","expected":"+1V8","actual":"+1V8","pass":true},
+    {"ref":"J8","pin":"2","expected":"SWDIO","actual":"SWDIO","pass":true},
+    {"ref":"J8","pin":"3","expected":"NRF_RESET_N","actual":"NRF_RESET_N","pass":true},
+    {"ref":"J8","pin":"4","expected":"SWDCLK","actual":"SWDCLK","pass":true},
+    {"ref":"J8","pin":"5","expected":"GND","actual":"GND","pass":true},
+    {"ref":"J8","pin":"6","expected":"SWO","actual":"SWO","pass":true},
+    {"ref":"J9","pin":"1","expected":"GND","actual":"GND","pass":true},
+    {"ref":"J9","pin":"2","expected":"SIDE_BUTTON","actual":"SIDE_BUTTON","pass":true},
+    {"ref":"J101","pin":"2","expected":"GND","actual":"GND","pass":true},
+    {"ref":"J4","pin":"1","expected":"/STORAGE_HAPTIC/HAPTIC_OUT_P","actual":"/STORAGE_HAPTIC/HAPTIC_OUT_P","pass":true},
+    {"ref":"J4","pin":"2","expected":"/STORAGE_HAPTIC/HAPTIC_OUT_N","actual":"/STORAGE_HAPTIC/HAPTIC_OUT_N","pass":true},
+    {"ref":"J101","pin":"1","expected_suffix":"SHIP_HOLD","actual":"/PMIC_CHARGER/SHIP_HOLD","pass":true}
+  ]
+}
