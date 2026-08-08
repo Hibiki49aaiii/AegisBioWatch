@@ -1,22 +1,25 @@
 {
-  "revision": "r4",
-  "status": "SCHEMATIC_CAPTURE_R4_ELECTRICAL_WIRES_VALIDATED",
-  "manufacturing_ready": false,
-  "wire_count": 130,
-  "endpoint_checks": 124,
-  "endpoint_checks_passed": 124,
-  "open_hard_gates": [
-    "native KiCad 9 conversion",
-    "ERC",
-    "nPM1300 passives/decoupling",
-    "final crystals",
-    "final Flash",
-    "final LRA",
-    "battery/NTC",
-    "dock ESD/surge",
-    "display/touch freeze",
-    "antenna/RF tuning",
-    "physical Main-Bio connector",
-    "Bio electrode disconnect"
-  ]
+  "project": "AegisBioWatch",
+  "revision": "Rev.0",
+  "phase": "1",
+  "capture_revision": "r5",
+  "status": "schematic-capture-r5-pmic-layout-review",
+  "pmic": {
+    "device": "nPM1300-QFN32",
+    "full_functional_passives_captured": false,
+    "power_budget_gate": true,
+    "errata_build_code_gate": true,
+    "reference_passive_network_captured": true,
+    "pvss_net_tie_intent": "local_top_return_to_continuous_L2_GND",
+    "pvss_physical_net_tie_geometry_frozen": false,
+    "lsldo_input_source_frozen": false
+  },
+  "layout": {
+    "minimum_layers": 4,
+    "layer2": "continuous_GND",
+    "rf_impedance": "calculate_after_fab_stackup_freeze"
+  },
+  "erc": "not-run: kicad-cli unavailable in current execution environment",
+  "pcb_release_allowed": false,
+  "privacy": "No personal case history or medication details stored"
 }
