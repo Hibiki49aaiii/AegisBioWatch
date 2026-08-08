@@ -1,32 +1,51 @@
 {
-  "MCU_RF_CLOCK.kicad_sch": {
-    "sha256": "7bc733a0ce844bbf0d3f2e0b6b3195fc8b85f8b3fc994186c5093a227820594c",
-    "bytes": 101775,
-    "payload": "hardware/main-board/kicad/native-r7-payload/MCU_RF_CLOCK.kicad_sch.gz.b64"
-  },
-  "PMIC_CHARGER.kicad_sch": {
-    "sha256": "853b8756237134f00bfcdf5ff9a20e14abfcfaa9470591d26f95d7f7e8605e85",
-    "bytes": 95250,
-    "payload": "hardware/main-board/kicad/native-r7-payload/PMIC_CHARGER.kicad_sch.gz.b64"
-  },
-  "STORAGE_HAPTIC.kicad_sch": {
-    "sha256": "7c70e1f6a10482d8648439c5e90106372f2a383a9664fe63dcf5794c6dd95b30",
-    "bytes": 45561,
-    "payload": "hardware/main-board/kicad/native-r7-payload/STORAGE_HAPTIC.kicad_sch.gz.b64"
-  },
-  "DISPLAY_TOUCH.kicad_sch": {
-    "sha256": "85d88cdc60da3789478adfeb55296503b297d963d3f694a342853afd4c625318",
-    "bytes": 36695,
-    "payload": "hardware/main-board/kicad/native-r7-payload/DISPLAY_TOUCH.kicad_sch.gz.b64"
-  },
-  "BIO_INTERFACE.kicad_sch": {
-    "sha256": "496cf262c83e28ea12ff04c12e9054c5b556991cadd8d82a7b63103fc66da0db",
-    "bytes": 39537,
-    "payload": "hardware/main-board/kicad/native-r7-payload/BIO_INTERFACE.kicad_sch.gz.b64"
-  },
-  "AegisBioWatch.kicad_sym": {
-    "sha256": "8dcffc1a4767422443f5b1db2eb163afc4861ac999e000c1333412d781b93106",
-    "bytes": 40479,
-    "payload": "hardware/main-board/kicad/native-r7-payload/AegisBioWatch.kicad_sym.gz.b64"
+  "archive": "hardware/main-board/kicad/native-r7-payload/native-r7.tar.gz.b64",
+  "archive_sha256": "0ae6add055be68e26ba0f948880e70874608b98f1bcb3f42e0b8c9385c558092",
+  "archive_bytes": 53395,
+  "files": {
+    "AegisBioWatch-MainBoard-Rev0.kicad_sch": {
+      "sha256": "64e094304b6b35234f0dd9397231d50cc98aa9c642e815d7ad36fba828cb4bcc",
+      "bytes": 3728
+    },
+    "AegisBioWatch-MainBoard-Rev0.kicad_pro": {
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "bytes": 3
+    },
+    "MCU_RF_CLOCK.kicad_sch": {
+      "sha256": "b219b2d1127cde4d35be905025193d5c1f8fab77c45c7d733af658d785fa6e3f",
+      "bytes": 90636
+    },
+    "PMIC_CHARGER.kicad_sch": {
+      "sha256": "e5b96e73e353700605873dd53278fe0b415a053476db9a1c832ba95c9a3700af",
+      "bytes": 99435
+    },
+    "STORAGE_HAPTIC.kicad_sch": {
+      "sha256": "f55147b8f6efc64631dec4a786a8b6976552c14850a4d8551fa137a466747844",
+      "bytes": 46357
+    },
+    "DISPLAY_TOUCH.kicad_sch": {
+      "sha256": "4227a38fe4a1154e9bb9a659802428ef254d8df014d8be9d3fb8c7d2ca961e8e",
+      "bytes": 37188
+    },
+    "BIO_INTERFACE.kicad_sch": {
+      "sha256": "46419ae0fd9ccd3726deffe26db6d88d1afc9c9eb36a87d09e507dfeb2fd04fa",
+      "bytes": 40024
+    },
+    "DEBUG_POWER.kicad_sch": {
+      "sha256": "49f2e99ecbc37f21121840b55bd02b23221506c70e31c79d972304ea06971df5",
+      "bytes": 22180
+    },
+    "AegisBioWatch.kicad_sym": {
+      "sha256": "67ce040ca5016ffb70a7812c0ee93052afde484a9f1ece6025a80e298f4a646c",
+      "bytes": 32193
+    },
+    "sym-lib-table": {
+      "sha256": "f81a98371838e4fc7a1aa336bd92133db02f880a8f5dfe435cd039a622241041",
+      "bytes": 193
+    },
+    "README.md": {
+      "sha256": "653f08cbf2e163827cce9a91017b0b591bd12a05146e4d3f7abda5ff40881844",
+      "bytes": 528
+    }
   }
 }
