@@ -1,4 +1,4 @@
-# KiCad Phase 1 capture — r5
+# KiCad Phase 1 capture — r6
 
 This directory contains **real KiCad schematic capture sources** in legacy
 Eeschema v4 interchange format. The design remains pre-freeze and is not yet
@@ -98,7 +98,6 @@ Important:
 - `DISP_SW` and `BIO_SW` remain **provisional** because nPM1300 LS/LDO output-current limits may be below the final display/PPG peak-current requirement.
 - no Gerber release is permitted until the power-budget gate is closed.
 
-
 ### STORAGE_HAPTIC
 
 Captured:
@@ -147,3 +146,15 @@ Still gated:
 ## Manufacturing status
 
 **NOT manufacturing-ready. Do not order PCBs from this capture yet.**
+
+## r6 selected-part delta
+
+- HFXO: MP06003
+- LFXO: ABS06-32.768KHZ-9-T
+- Flash: W25Q256JWPIQ (32 MB)
+- LRA: C10-100
+- Haptic rail: VSYS_HAPTIC
+- Cell candidate: LP372435TB; protected 3-wire pack required
+- NTC: NXRT15XH103FA5B030
+- Dock protection: PMEG2010AEJ + PESD5V0S1UL
+- AMOLED preferred candidate: GL175AMC10C, logical-only pending FPC documentation
