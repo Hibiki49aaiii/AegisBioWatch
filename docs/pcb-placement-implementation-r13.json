@@ -1,0 +1,42 @@
+{
+  "revision": "r13-npm1300-reference-placement-implementation",
+  "source_revision": "r11-placement-seed",
+  "source_pcb_sha256": "f31211be596c4435faa7bdf116bc16239b70e668b6e9377ef26f0909ebce19e2",
+  "authority": {
+    "vendor": "Nordic Semiconductor",
+    "device": "nPM1300-QEAA/QFN32",
+    "reference_layout_release": "1.2",
+    "third_party_coordinates_used": false,
+    "third_party_density_review_only": true
+  },
+  "implementation": {
+    "materializer": "tools/materialize-pcb-r13.py",
+    "u2_datum": "retained_from_r11",
+    "placement_frame": "derived_from_actual_U2_QFN_pad_geometry",
+    "critical_pin_net_invariants_checked": true,
+    "moved_groups": [
+      "BUCK1_SW/output/input-return",
+      "BUCK2_SW/output/input-return",
+      "PVSS1/PVSS2_NetTie",
+      "VBUS/VSYS/VBAT/VBUSOUT_decoupling",
+      "VDDIO_decoupling",
+      "VSET1/VSET2",
+      "LOADSW/LDO_local_passives",
+      "TWI_optional_pullups"
+    ],
+    "routing_started": false,
+    "rf_impedance_frozen": false,
+    "ground_plane_split": false
+  },
+  "kicad_validation": {
+    "required_version": "9.0.9",
+    "workflow": ".github/workflows/phase1-r13-kicad.yml",
+    "status": "PENDING_EXECUTED_KICAD_EVIDENCE",
+    "expected_placement_only_unconnected_items": 186,
+    "rule_violations": null,
+    "unconnected_items": null,
+    "note": "Do not claim DRC clean until KiCad CLI evidence is available."
+  },
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}
