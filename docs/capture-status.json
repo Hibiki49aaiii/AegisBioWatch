@@ -3,7 +3,8 @@
   "revision": "Rev.0",
   "phase": 1,
   "capture_revision": "r8",
-  "status": "NATIVE_KICAD9_ERC_CLEAN_INTERFACE_R8",
+  "design_review_revision": "r9",
+  "status": "R8_NATIVE_ERC_CLEAN_R9_INTERFACE_SELECTION_REVIEW",
   "manufacturing_ready": false,
   "kicad_cli": "9.0.9",
   "canonical_materialization": "python3 tools/materialize-native-r8.py",
@@ -19,10 +20,16 @@
     "Main-Bio": "Hirose FH12-20S-0.5SH(55)",
     "Battery": "Hirose DF57H-3P-1.2V(21)"
   },
+  "r9_selected_not_yet_footprint_frozen": {
+    "J3_watch_contact": "Harwin S70-125161545R",
+    "J3_dock_pogo": "Harwin P70-7000045",
+    "J5_display_candidate": "GL175AMC10C / CO5300AF-41 / CST820B / 24-pin OK-118RM024-35"
+  },
+  "r9_tracking_issue": 3,
   "open_hard_gates": [
-    "J3 magnetic dock contact geometry/spacing",
-    "J5 AMOLED supplier FPC pinout/rails/power sequence",
-    "J6 touch physical interface and I/O voltage",
+    "J3 Harwin S70 verified land pattern plus dock contact pitch/compression stack",
+    "J5 GL175AMC10C supplier 24-pin map / rails / sequence / timing",
+    "J6 CST820B physical integration and I/O voltage from module supplier data",
     "performance-critical RF/PMIC passive MPN closure",
     "procured nPM1300 build code / applicable errata",
     "protected battery-pack drawing/PCM/charge limits",
