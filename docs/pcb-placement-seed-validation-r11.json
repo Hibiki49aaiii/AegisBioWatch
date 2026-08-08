@@ -1,0 +1,47 @@
+{
+  "revision": "r11-placement-seed",
+  "source_electrical_revision": "r8",
+  "source_floorplan_revision": "r10",
+  "kicad_cli": "9.0.9",
+  "components_total": 79,
+  "footprints_imported": 76,
+  "footprint_refs_found": 76,
+  "intentionally_missing_footprint_refs": ["J3", "J5", "J6"],
+  "nets": 86,
+  "xml_nodes_for_imported_components": 268,
+  "pad_net_mismatches": [],
+  "unexpected_pad_nets": [],
+  "source_footprint_missing_pin_nodes": [],
+  "drc": {
+    "violations": 0,
+    "unconnected_items": 186,
+    "violation_types": {}
+  },
+  "hard_geometry_checks": {
+    "courtyard_overlap": 0,
+    "clearance": 0,
+    "shorting_items": 0,
+    "drill_out_of_range": 0,
+    "copper_edge_clearance": 0,
+    "solder_mask_bridge": 0
+  },
+  "routing_status": "UNROUTED_RATSNEST_EXPECTED",
+  "planning_rules": {
+    "min_through_hole_diameter_mm": 0.2,
+    "min_clearance_mm": 0.1,
+    "min_copper_edge_clearance_mm": 0.2,
+    "frozen_for_fab": false
+  },
+  "critical_placement_status": {
+    "nRF54L15_RF": "SEED_ONLY_COPY_NORDIC_QFAA_REFERENCE_BEFORE_ROUTING",
+    "nPM1300": "SEED_ONLY_COPY_NORDIC_QFN_REFERENCE_BEFORE_ROUTING",
+    "PVSS_NetTies": "STAGED_NOT_FINAL"
+  },
+  "sha256": {
+    "AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pcb": "f31211be596c4435faa7bdf116bc16239b70e668b6e9377ef26f0909ebce19e2",
+    "AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pro": "fc004fb190200d58f1b6442a83de97237e5f3a5d6878c81f791d5532a7b57906",
+    "drc-r11.json": "5cdf2a034a5c90465ef243c90d1157593d2b51db74a984ce23c602b144001473",
+    "AegisBioWatch-MainBoard-PlacementSeed-r11.d356": "554a9994beceed929fddbdcbb064d5263fc4c366a133980bc6160ffcc2b614c7",
+    "placement-seed-manifest-r11.json": "004dccd041cd27fc7d7e109f8df5a52d4f231752df39950e3839f48d193cf928"
+  }
+}
