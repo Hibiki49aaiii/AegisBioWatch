@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Diagnose r7 archive and r8 patch integrity
+        run: python3 tools/diagnose-native-r7-r8-chain.py | tee /tmp/native-chain-diagnostic.json
+
       - name: Install and assert KiCad 9.0.9 plus footprint libraries
         shell: bash
         run: |
@@ -94,6 +97,7 @@ jobs:
           name: phase1-r11-rebuilt-evidence
           if-no-files-found: warn
           path: |
+            /tmp/native-chain-diagnostic.json
             /tmp/erc-r8.json
             /tmp/aegis-r8.xml
             /tmp/r8-footprint-probe.json
