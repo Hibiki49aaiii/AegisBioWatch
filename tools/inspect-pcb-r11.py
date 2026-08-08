@@ -2,22 +2,51 @@
 """Inspect critical r11 PCB footprint and pad geometry without replacing KiCad DRC.
 
 This tool is diagnostic only. KiCad's own DRC remains the validation authority.
+It reports both critical PMIC and nRF54L15 reference-placement source geometry.
 """
 from __future__ import annotations
 
 import json
 import math
 import re
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PCB = ROOT / "hardware/main-board/pcb/placement-r11/AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pcb"
-TARGETS = [
+
+PMIC_TARGETS = [
     "U2", "L101", "L102",
     "C101", "C102", "C103", "C104", "C105", "C106", "C107", "C108", "C109", "C110", "C111", "C112", "C113", "C114",
     "NT101", "NT102", "R101", "R102", "R103", "R104", "R105", "R106",
 ]
+NRF_TARGETS = [
+    "U1", "Y1", "Y2", "L1", "L2", "L3", "L4", "FB1", "R1",
+    "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13",
+]
+TARGETS = PMIC_TARGETS + NRF_TARGETS
+
+U1_CRITICAL_NETS = {
+    "1": "NRF_XL1",
+    "2": "NRF_XL2",
+    "10": "+1V8",
+    "22": "+1V8",
+    "25": "SWDIO",
+    "26": "SWDCLK",
+    "30": "NRF_RESET_RAW",
+    "31": "RF_MCU",
+    "32": "GND",
+    "33": "NRF_DECA_RF",
+    "34": "NRF_XC1",
+    "35": "NRF_XC2",
+    "36": "+1V8",
+    "43": "NRF_DECA_RF",
+    "44": "GND",
+    "45": "NRF_DECD",
+    "46": "NRF_DCC",
+    "47": "+1V8",
+    "48": "+1V8",
+    "49": "GND",
+}
 
 
 def balanced_blocks(text: str, token: str):
@@ -64,7 +93,7 @@ def parse_at(block: str):
 def reference(block: str):
     for pat in [
         r'\(property\s+"Reference"\s+"([^"]+)"',
-        r'\(fp_text\s+reference\s+"([^"]+)"',
+        r'\(fp_text\s+reference\s+"?([^"\s\)]+)"?',
     ]:
         m = re.search(pat, block)
         if m:
@@ -114,10 +143,33 @@ def main():
             "at_mm": [round(at[0], 4), round(at[1], 4), round(at[2], 3)],
             "pads": pad_info(block, at),
         }
+
     missing = [r for r in TARGETS if r not in found]
     if missing:
         raise SystemExit(f"critical footprints not found: {missing}")
-    print(json.dumps({"pcb": str(PCB.relative_to(ROOT)), "footprints": found}, indent=2, sort_keys=True))
+
+    u1_nets = {p["pad"]: p["net"] for p in found["U1"]["pads"]}
+    mismatches = []
+    for pin, expected in U1_CRITICAL_NETS.items():
+        actual = u1_nets.get(pin)
+        if actual != expected:
+            mismatches.append({"pin": pin, "expected": expected, "actual": actual})
+    if mismatches:
+        raise SystemExit(f"U1 critical pad/net mismatch: {mismatches}")
+
+    report = {
+        "pcb": str(PCB.relative_to(ROOT)),
+        "groups": {
+            "npm1300": PMIC_TARGETS,
+            "nrf54l15_qfaa": NRF_TARGETS,
+        },
+        "u1_critical_pin_net_audit": {
+            "checked": len(U1_CRITICAL_NETS),
+            "mismatches": 0,
+        },
+        "footprints": found,
+    }
+    print(json.dumps(report, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":
