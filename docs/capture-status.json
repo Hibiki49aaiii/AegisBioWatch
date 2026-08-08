@@ -1,32 +1,31 @@
 {
-  "revision": "r6",
-  "status": "SCHEMATIC_CAPTURE_R6_PART_SELECTION",
+  "project": "AegisBioWatch",
+  "revision": "Rev.0",
+  "phase": "1",
+  "capture_revision": "r7",
+  "status": "NATIVE_KICAD9_ERC_CLEAN",
   "manufacturing_ready": false,
-  "selected_parts": {
-    "hfxo": "MP06003",
-    "lfxo": "ABS06-32.768KHZ-9-T",
-    "flash": "W25Q256JWPIQ",
-    "haptic_driver": "DRV2605LDGSR",
-    "lra": "C10-100",
-    "cell": "LP372435TB",
-    "battery_ntc": "NXRT15XH103FA5B030",
-    "dock_reverse_diode": "PMEG2010AEJ",
-    "dock_esd": "PESD5V0S1UL",
-    "display_candidate": "GL175AMC10C"
+  "kicad_cli": "9.0.9",
+  "erc_violations": 0,
+  "native_authority": "hardware/main-board/kicad/capture/AegisBioWatch-MainBoard-Rev0.kicad_sch",
+  "native_custom_symbols": 8,
+  "reviewed_custom_footprints": 4,
+  "bom_rows": 77,
+  "bom_rows_without_footprint": 6,
+  "frozen_interfaces": {
+    "SWD": "Tag-Connect TC2030-IDC-NL",
+    "Main-Bio": "Hirose FH12-20S-0.5SH(55)",
+    "Battery": "Hirose DF57H-3P-1.2V(21)"
   },
   "open_hard_gates": [
-    "native KiCad 9 conversion",
-    "ERC",
-    "selected-part landing patterns",
-    "PMIC inductor/MLCC MPNs",
-    "nPM1300 build code/errata",
-    "qualified protected battery pack",
-    "battery charge/fuel-gauge qualification",
-    "dock voltage-margin test",
-    "AMOLED FPC/electrical documentation",
-    "touch level compatibility",
-    "physical Main-Bio connector",
-    "antenna/RF tuning",
-    "Bio electrode disconnect"
-  ]
+    "six enclosure/mechanical footprint decisions",
+    "10uF 25V MLCC effective-capacitance validation",
+    "AMOLED/touch FPC and power sequence",
+    "protected battery pack drawing",
+    "dock mechanical/electrical qualification",
+    "fab stackup and RF geometry",
+    "Bio Board electrode disconnect",
+    "PCB DRC/DFM"
+  ],
+  "privacy": "No individual case history, private messages, medication details, or identifying health data stored."
 }
