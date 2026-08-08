@@ -6,7 +6,7 @@ $Descr A4 11693 8268
 Sheet 1 1
 Title "AegisBioWatch PMIC / Charger"
 Date "2026-08-08"
-Rev "Rev.0 / Phase 1 r5"
+Rev "Rev.0 / Phase 1 r6"
 Comp "AegisBioWatch"
 Comment1 "nPM1300 full passive capture - ERC pending"
 Comment2 "PCB release prohibited until remaining freeze gates close"
@@ -551,7 +551,7 @@ L Connector_Generic:Conn_01x03 J2
 U 1 1 487111
 P 1600 5750
 F 0 "J2" H 1750 5850 50  0000 C CNN
-F 1 "BATTERY_1S_NTC" H 1850 5650 50  0000 C CNN
+F 1 "BATTERY_PACK_300mAh_3WIRE" H 2050 5650 50  0000 C CNN
 F 2 "" H 1600 5750 50  0001 C CNN
 F 3 "~" H 1600 5750 50  0001 C CNN
 	1    1600 5750
@@ -574,14 +574,14 @@ L Connector_Generic:Conn_01x02 J3
 U 1 1 094F64
 P 1600 6350
 F 0 "J3" H 1750 6450 50  0000 C CNN
-F 1 "MAG_DOCK_5V" H 1850 6250 50  0000 C CNN
+F 1 "MAG_DOCK_RAW_5V" H 1900 6250 50  0000 C CNN
 F 2 "" H 1600 6350 50  0001 C CNN
 F 3 "~" H 1600 6350 50  0001 C CNN
 	1    1600 6350
 	1 0 0 -1
 $EndComp
 Text Label 1250 6350 0    35   ~ 0
-CHG_5V
+DOCK_5V_RAW
 Text Label 1250 6450 0    35   ~ 0
 GND
 Wire Wire Line
@@ -631,4 +631,48 @@ Text Notes 650 2150 0    42   ~ 0
 nPM1300 Rev.1 build-code errata must be checked against the procured lot before LDO/charger firmware freeze.
 Text Notes 650 2300 0    42   ~ 0
 Bio-electrode acquisition remains inhibited whenever external charging is present or charge state is uncertain.
+$Comp
+L AegisBioWatch:PMEG2010AEJ D101
+U 1 1 610101
+P 3050 6550
+F 0 "D101" H 3050 6750 50  0000 C CNN
+F 1 "PMEG2010AEJ" H 3050 6350 50  0000 C CNN
+F 2 "Diode_SMD:D_SOD-323F" H 3050 6250 50  0001 C CNN
+F 3 "https://www.nexperia.com/product/PMEG2010AEJ" H 3050 6150 50  0001 C CNN
+	1    3050 6550
+	1 0 0 -1
+$EndComp
+Text Label 2500 6550 2    35   ~ 0
+DOCK_5V_RAW
+Text Label 3600 6550 0    35   ~ 0
+CHG_5V
+Wire Wire Line
+	2500 6550 2650 6550
+Wire Wire Line
+	3450 6550 3600 6550
+$Comp
+L AegisBioWatch:PESD5V0S1UL D102
+U 1 1 610102
+P 3050 7050
+F 0 "D102" H 3050 7250 50  0000 C CNN
+F 1 "PESD5V0S1UL" H 3050 6850 50  0000 C CNN
+F 2 "AegisBioWatch:SOD882_PESD5V0S1UL_VERIFY" H 3050 6750 50  0001 C CNN
+F 3 "https://www.nexperia.com/product/PESD5V0S1UL" H 3050 6650 50  0001 C CNN
+	1    3050 7050
+	1 0 0 -1
+$EndComp
+Text Label 2500 7050 2    35   ~ 0
+GND
+Text Label 3600 7050 0    35   ~ 0
+DOCK_5V_RAW
+Wire Wire Line
+	2500 7050 2650 7050
+Wire Wire Line
+	3450 7050 3600 7050
+Text Notes 650 2450 0    42   ~ 0
+r6 battery cell candidate: EEMB LP372435TB, 3.7V/300mAh, 24.5x36x4.0mm. It is a bare cell and MUST NOT connect directly without pack protection.
+Text Notes 650 2600 0    42   ~ 0
+Battery pack spec: cell + OV/UV/overcurrent protection + thermally coupled 10k NTC. Preferred NTC: Murata NXRT15XH103FA5B030 (B25/50=3380K).
+Text Notes 650 2750 0    42   ~ 0
+r6 dock protection: DOCK_5V_RAW -> PMEG2010AEJ Schottky -> CHG_5V; PESD5V0S1UL shunts ESD at raw dock node. Mechanical keying remains mandatory.
 $EndSCHEMATC
