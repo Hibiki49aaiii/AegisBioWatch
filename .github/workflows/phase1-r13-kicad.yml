@@ -38,7 +38,7 @@ jobs:
         run: |
           kicad-cli sch erc --format json --severity-all \
             -o /tmp/erc-r8.json \
-            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-r8.kicad_sch
+            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-Rev0.kicad_sch
           cat /tmp/erc-r8.json
 
       - name: Export authoritative r8 XML netlist
@@ -46,7 +46,7 @@ jobs:
         run: |
           kicad-cli sch export netlist --format kicadxml \
             -o /tmp/aegis-r8.xml \
-            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-r8.kicad_sch
+            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-Rev0.kicad_sch
 
       - name: Probe footprint assignments
         env:
