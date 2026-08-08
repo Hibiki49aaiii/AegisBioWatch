@@ -3,7 +3,7 @@
 
 Route-1 is deliberately narrow in scope:
   * SW1 / SW2 package-to-inductor connections
-  * BUCK output inductor-to-output-cap connections
+  * BUCK VOUT1 / VOUT2 local output nodes and first output capacitors
   * VSYS local input-cap distribution at U2
   * PVSS1/PVSS2 local return trees to their explicit NetTies
   * short GND escape from each NetTie to a provisional through-via
@@ -335,9 +335,14 @@ def main():
     connect(pad_by_number(index, "U2", "3"), pad_by_net(index, "L101", "PMIC_SW1"), WIDTH_SW_MM, "SW1_U2_L101")
     connect(pad_by_number(index, "U2", "5"), pad_by_net(index, "L102", "PMIC_SW2"), WIDTH_SW_MM, "SW2_U2_L102")
 
-    # Inductor output to first local output capacitor.
-    connect(pad_by_net(index, "L101", "+1V8"), pad_by_net(index, "C107", "+1V8"), WIDTH_VOUT_MM, "BUCK1_L101_C107")
-    connect(pad_by_net(index, "L102", "+3V0"), pad_by_net(index, "C108", "+3V0"), WIDTH_VOUT_MM, "BUCK2_L102_C108")
+    # Complete each regulated output node locally: inductor -> output cap ->
+    # nPM1300 VOUT pin. VOUT1 is pin 1; VOUT2 is pin 32 in QFN32.
+    c107_vout = pad_by_net(index, "C107", "+1V8")
+    c108_vout = pad_by_net(index, "C108", "+3V0")
+    connect(pad_by_net(index, "L101", "+1V8"), c107_vout, WIDTH_VOUT_MM, "BUCK1_L101_C107")
+    connect(c107_vout, pad_by_number(index, "U2", "1"), WIDTH_VOUT_MM, "BUCK1_C107_U2_VOUT1")
+    connect(pad_by_net(index, "L102", "+3V0"), c108_vout, WIDTH_VOUT_MM, "BUCK2_L102_C108")
+    connect(c108_vout, pad_by_number(index, "U2", "32"), WIDTH_VOUT_MM, "BUCK2_C108_U2_VOUT2")
 
     # Local VSYS/PVDD input network.
     u2_vsys = pad_by_number(index, "U2", "4")
