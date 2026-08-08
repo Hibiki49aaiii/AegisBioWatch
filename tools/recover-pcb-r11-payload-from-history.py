@@ -56,9 +56,10 @@ def validate_blob(raw: bytes, expected_bytes: int, expected_sha: str) -> tuple[b
 
 
 def git_commits_for_path() -> list[str]:
-    cp = run(
-        "git", "log", "--all", "--format=%H", "--follow", "--", PAYLOAD_REL.as_posix()
-    )
+    # The path has not been renamed; searching all refs gives us branch, base and
+    # merge history without relying on GitHub API indexing. Full history is
+    # supplied by actions/checkout fetch-depth: 0.
+    cp = run("git", "log", "--all", "--format=%H", "--", PAYLOAD_REL.as_posix())
     commits = []
     seen = set()
     for line in cp.stdout.decode("ascii", errors="strict").splitlines():
