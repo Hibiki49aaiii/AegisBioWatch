@@ -1,0 +1,69 @@
+name: Phase 1 r13 KiCad validation
+
+on:
+  push:
+    branches:
+      - agent/phase1-mainboard-schematic
+    paths:
+      - '.github/workflows/phase1-r13-kicad.yml'
+      - 'tools/inspect-pcb-r11.py'
+      - 'tools/materialize-pcb-r11.py'
+      - 'hardware/main-board/pcb/placement-r11-payload/**'
+      - 'tools/materialize-pcb-r13.py'
+      - 'hardware/main-board/pcb/placement-r13-payload/**'
+      - 'docs/pcb-placement-implementation-r13.json'
+      - 'hardware/main-board/design/pcb-placement-implementation-r13.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-r11-source:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0 series
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad
+          kicad-cli --version
+          kicad-cli --version | grep -E '(^|[[:space:]])9\.0\.9([[:space:]]|$)'
+
+      - name: Materialize hash-verified r11
+        run: python3 tools/materialize-pcb-r11.py
+
+      - name: Inspect nPM1300 cluster geometry
+        run: python3 tools/inspect-pcb-r11.py | tee /tmp/r11-critical-placement.json
+
+      - name: KiCad r11 PCB DRC
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd hardware/main-board/pcb/placement-r11
+          kicad-cli pcb drc --format json --severity-all \
+            -o /tmp/drc-r11.json AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pcb
+          cat /tmp/drc-r11.json
+
+      - name: Assert documented r11 baseline
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('/tmp/drc-r11.json')
+          d = json.loads(p.read_text())
+          violations = d.get('violations', [])
+          unconnected = d.get('unconnected_items', [])
+          print(f'KiCad r11: rule violations={len(violations)}, unconnected={len(unconnected)}')
+          if len(violations) != 0:
+              raise SystemExit('r11 rule-violation baseline changed')
+          if len(unconnected) != 186:
+              raise SystemExit(f'r11 unconnected baseline changed: expected 186, got {len(unconnected)}')
+          PY
