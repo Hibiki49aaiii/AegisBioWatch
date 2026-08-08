@@ -1,41 +1,48 @@
-# Phase 1 capture status — Rev.0 r7
+# Phase 1 capture status — Rev.0 r8
 
-## Completed
+## Verified through r8
 
-- Native KiCad **9.0.9** hierarchical schematic is reproducible from the hash-verified r7 payload.
-- Integrated ERC with `--severity-all`: **0 violations**.
-- Critical exported-netlist validation: **63/63 pass**.
-- Production/package footprints assigned to **72** schematic components.
-- Battery connector uses the KiCad Hirose DF57H-3P footprint.
-- Main↔Bio connector uses the KiCad Hirose FH12-20S-0.5SH footprint.
-- nRF54L15-QFAA / nPM1300 pin-to-net mapping remains validated after footprint assignment.
-- PVSS1/PVSS2 local switching returns retain explicit NetTie semantics into the same continuous GND plane.
+- KiCad CLI: **9.0.9**
+- Integrated native ERC (`--severity-all`): **0 violations**
+- BOM rows: **79**
+- Footprints assigned: **76/79**
+- Remaining physical-interface footprint gates: **3** — J3, J5, J6
+- r8 interface netlist checks: **12/12 PASS**
+- Battery connector remains Hirose DF57H-3P.
+- Main↔Bio connector remains Hirose FH12-20S-0.5SH.
+- nRF54L15-QFAA / nPM1300 validated pin-to-net mapping and PVSS NetTie semantics are retained.
+- Privacy scan: **PASS**
 
 ## Reproducing the native project
 
 Run from the repository root:
 
 ```bash
-python3 tools/materialize-native-r7.py
-cd hardware/main-board/kicad/native-r7
+python3 tools/materialize-native-r8.py
+cd hardware/main-board/kicad/native-r8
 kicad-cli sch erc --format json --severity-all \
-  -o erc-r7.json AegisBioWatch-MainBoard-Rev0.kicad_sch
+  -o erc-r8.json AegisBioWatch-MainBoard-Rev0.kicad_sch
 ```
 
-The materializer verifies the archive SHA-256, source-file hashes, applies the reviewed footprint assignments deterministically, and verifies the resulting native files against post-materialization hashes.
+The r8 materializer first hash-verifies/materializes r7, verifies the expected r7 base hashes, applies the compact hash-verified r7→r8 unified diff, and then verifies every authoritative r8 file against its final SHA-256.
+
+## Interfaces closed in r8
+
+- `J8`: Tag-Connect TC2030 six-pin SWD target.
+- `J9`: Panasonic EVQPUK02K side button.
+- `J101`: Panasonic EVQPLDA15 ship/wake button.
+- `J4`: C10-100 LRA direct-solder lead termination with strain-relief footprint.
 
 ## PCB-release status
 
 **NOT manufacturing-ready.**
 
-Seven physical interfaces/footprints remain intentionally unresolved:
+Three physical interfaces/footprints remain intentionally unresolved:
 
-- `J3` magnetic charging dock
-- `J4` C10-100 LRA mechanical/electrical attachment
-- `J5` AMOLED physical FPC/module interface
-- `J6` touch physical interface
-- `J8` debug connector: canonical r7 still uses the earlier 8-pin debug header; target is TC2030-IDC-NL 6-pin and requires a deliberate pin-map refactor
-- `J9` side button contact
-- `J101` ship/wake button
+- `J3` magnetic charging dock physical contact geometry
+- `J5` AMOLED supplier FPC pinout, rails and power sequence
+- `J6` touch physical connector and I/O voltage decision
 
-The next phase is physical-interface/footprint freeze and PCB floorplanning, not Gerber release.
+PCB stack-up/controlled impedance/antenna keep-out, Bio Board charging-time electrode disconnect, PCB DRC/DFM and prototype bring-up also remain release gates.
+
+**Do not release Gerbers yet.**
