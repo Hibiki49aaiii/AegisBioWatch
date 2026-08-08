@@ -1,0 +1,50 @@
+{
+  "revision": "r13-route1-npm1300-critical-loops",
+  "status": "PREPARED_PENDING_EXECUTED_PLACEMENT_DRC",
+  "materializer": "tools/materialize-pcb-r13-route1.py",
+  "entry_gate": {
+    "evidence": "executed_kicad_cli_placement_drc_json",
+    "required_rule_violations": 0,
+    "required_unconnected_items": 186
+  },
+  "scope": [
+    "U2_SW1_to_L101",
+    "U2_SW2_to_L102",
+    "L101_to_C107_plus1V8_local",
+    "L102_to_C108_plus3V0_local",
+    "U2_VSYS_to_C103_C104_C114",
+    "PVSS1_LOCAL_return_tree_to_NT101",
+    "PVSS2_LOCAL_return_tree_to_NT102",
+    "NT101_NT102_GND_escape_to_provisional_through_vias"
+  ],
+  "seed_geometry_mm": {
+    "SW": 0.25,
+    "VSYS_local": 0.30,
+    "PVSS_local": 0.35,
+    "BUCK_output_local": 0.35,
+    "GND_escape": 0.30,
+    "via_diameter": 0.60,
+    "via_drill": 0.30
+  },
+  "geometry_authority": "routing_seed_only_not_manufacturing_release",
+  "excluded": [
+    "nRF54L15_RF",
+    "nRF54L15_crystals",
+    "nRF54L15_internal_regulator_cluster",
+    "final_RF_impedance_geometry",
+    "J3",
+    "J5",
+    "J6",
+    "Bio_electrode_paths_and_charging_interlock",
+    "ordinary_digital_routing"
+  ],
+  "post_generation_validation": {
+    "tool": "kicad-cli pcb drc --severity-all",
+    "rule_violations": null,
+    "unconnected_items": null,
+    "result_file": "docs/pcb-routing-r13-1-kicad-result.json",
+    "evidence_packager": "tools/package-pcb-r13-route1-evidence.py"
+  },
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}
