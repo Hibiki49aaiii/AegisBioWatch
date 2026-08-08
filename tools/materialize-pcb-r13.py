@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 """Materialize AegisBioWatch Main Board r13 from the hash-verified r11 seed.
 
-r13 is the first placement implementation revision. It compacts the nPM1300
-(QFN32) support network around U2 using the actual U2 pad geometry and Nordic's
-current-loop/component-adjacency rules. It deliberately does not freeze RF
-controlled impedance or unresolved supplier interfaces.
-
-KiCad's own PCB DRC remains mandatory after materialization; the structural
-checks in this script are not a substitute for DRC.
+r13 compacts the nPM1300-QEAA/QFN32 support network around U2 using the actual
+U2 pad geometry plus Nordic current-loop/component-adjacency rules. Third-party
+absolute coordinates are never imported. KiCad PCB DRC remains mandatory.
 """
 from __future__ import annotations
 
@@ -31,8 +27,6 @@ R13_REPORT = R13_DIR / "placement-implementation-r13.json"
 
 EXPECTED_R11_PCB_SHA256 = "f31211be596c4435faa7bdf116bc16239b70e668b6e9377ef26f0909ebce19e2"
 
-# Nordic nPM1300-QEAA QFN32 functional pin mapping used as an invariant.
-# Aegis net names are intentionally project-local and contain no user health data.
 U2_CRITICAL_NETS = {
     "1": "+1V8", "2": "PVSS1_LOCAL", "3": "PMIC_SW1", "4": "VSYS",
     "5": "PMIC_SW2", "6": "PVSS2_LOCAL", "12": "+1V8",
@@ -109,8 +103,7 @@ def footprint_at(block: str) -> tuple[float, float, float]:
 def replace_footprint_at(block: str, x: float, y: float, angle_deg: float) -> str:
     angle_deg = ((angle_deg + 180.0) % 360.0) - 180.0
     pat = re.compile(r"(\n\s*)\(at\s+-?[0-9.]+\s+-?[0-9.]+(?:\s+-?[0-9.]+)?\)")
-    repl = lambda m: f"{m.group(1)}(at {x:.4f} {y:.4f} {angle_deg:.3f})"
-    out, n = pat.subn(repl, block, count=1)
+    out, n = pat.subn(lambda m: f"{m.group(1)}(at {x:.4f} {y:.4f} {angle_deg:.3f})", block, count=1)
     if n != 1:
         raise ValueError("unable to replace footprint at")
     return out
@@ -171,10 +164,7 @@ def pad_records(block: str):
 
 def abs_pad_map(block: str):
     x, y, a = footprint_at(block)
-    out = {}
-    for p in pad_records(block):
-        out[p["num"]] = add((x, y), rotate(p["local"], a))
-    return out
+    return {p["num"]: add((x, y), rotate(p["local"], a)) for p in pad_records(block)}
 
 
 def pad_by_net(block: str, net: str):
@@ -184,16 +174,23 @@ def pad_by_net(block: str, net: str):
     return pads[0]
 
 
-def place_2t(block: str, net_a: str, net_b: str, midpoint: tuple[float, float], axis_a_to_b: tuple[float, float]):
-    """Return block with a two-terminal footprint placed/oriented by its net pads."""
+def place_2t(block: str, net_a: str, net_b: str, midpoint, axis_a_to_b):
     pa = pad_by_net(block, net_a)
     pb = pad_by_net(block, net_b)
-    lv = sub(pb["local"], pa["local"])
-    desired = norm(axis_a_to_b)
-    rot = angle(desired) - angle(lv)
+    local_axis = sub(pb["local"], pa["local"])
+    rot = angle(norm(axis_a_to_b)) - angle(local_axis)
     local_mid = mul(add(pa["local"], pb["local"]), 0.5)
-    world_mid_offset = rotate(local_mid, rot)
-    center = sub(midpoint, world_mid_offset)
+    center = sub(midpoint, rotate(local_mid, rot))
+    return replace_footprint_at(block, center[0], center[1], rot)
+
+
+def place_2t_anchor(block: str, net_a: str, net_b: str, anchor_a, axis_a_to_b):
+    """Place a 2-terminal part with its net_a pad exactly on anchor_a."""
+    pa = pad_by_net(block, net_a)
+    pb = pad_by_net(block, net_b)
+    local_axis = sub(pb["local"], pa["local"])
+    rot = angle(norm(axis_a_to_b)) - angle(local_axis)
+    center = sub(anchor_a, rotate(pa["local"], rot))
     return replace_footprint_at(block, center[0], center[1], rot)
 
 
@@ -201,10 +198,6 @@ def passive_abs_pad(block: str, net: str):
     x, y, a = footprint_at(block)
     p = pad_by_net(block, net)
     return add((x, y), rotate(p["local"], a))
-
-
-def outer_mid(pin, outward, distance):
-    return add(pin, mul(outward, distance))
 
 
 def build_index(text: str):
@@ -251,51 +244,65 @@ def main():
         if actual != expected_net:
             raise SystemExit(f"U2 pin {pin}: expected {expected_net!r}, got {actual!r}")
 
-    # Frame follows the actual QFN footprint. Pins 2..6 define the BUCK side.
-    buck_side_point = mean([up[str(i)] for i in range(2, 7)])
+    # Derive the physical BUCK-side frame from the complete QFN side (pins 1..8),
+    # not from a subset of function pins. This keeps the normal insensitive to the
+    # asymmetric positions of PVSS/SW/PVDD within that side.
+    buck_side_point = mean([up[str(i)] for i in range(1, 9)])
     n = norm(sub(buck_side_point, uc))
-    t = norm(sub(up["6"], up["2"]))
-    # QFN library corruption must not be hidden.
-    if abs(n[0] * t[0] + n[1] * t[1]) > 0.20:
-        raise SystemExit("unexpected U2 QFN pad geometry: BUCK side frame is not orthogonal")
+    t = norm(sub(up["8"], up["1"]))
+    if abs(n[0] * t[0] + n[1] * t[1]) > 0.05:
+        raise SystemExit("unexpected U2 QFN geometry: BUCK-side frame is not orthogonal")
 
-    repl = {"U2": u2}  # U2 center/orientation stays fixed in the r11 PMIC reserve.
+    repl = {"U2": u2}
 
-    # Critical BUCK input network: C103/C104 return directly to PVSS1/PVSS2,
-    # while C114 is the short high-frequency VSYS/AVSS application decoupler.
-    repl["C103"] = place_2t(idx["C103"]["block"], "VSYS", "PVSS1_LOCAL",
-                            outer_mid(mean([up["2"], up["4"]]), n, 0.85), t)
-    repl["C104"] = place_2t(idx["C104"]["block"], "VSYS", "PVSS2_LOCAL",
-                            outer_mid(mean([up["4"], up["6"]]), n, 0.85), t)
-    repl["C114"] = place_2t(idx["C114"]["block"], "VSYS", "GND",
-                            outer_mid(up["4"], n, 0.34), t)
+    # Input capacitors bridge the PVDD neighborhood toward the corresponding
+    # PVSS side while leaving the SW lanes free to escape diagonally. Their
+    # exact board-level clearances are subsequently checked by KiCad DRC.
+    cap_ring = 0.95
+    c103_vs = add(add(up["4"], mul(n, cap_ring)), mul(t, -0.12))
+    c104_vs = add(add(up["4"], mul(n, cap_ring)), mul(t, 0.12))
+    c103_ret_target = add(up["2"], mul(n, cap_ring))
+    c104_ret_target = add(up["6"], mul(n, cap_ring))
+    repl["C103"] = place_2t_anchor(
+        idx["C103"]["block"], "VSYS", "PVSS1_LOCAL", c103_vs, sub(c103_ret_target, c103_vs))
+    repl["C104"] = place_2t_anchor(
+        idx["C104"]["block"], "VSYS", "PVSS2_LOCAL", c104_vs, sub(c104_ret_target, c104_vs))
 
-    # SW nodes: inductors leave pins 3/5 radially, keeping SW copper compact.
-    repl["L101"] = place_2t(idx["L101"]["block"], "PMIC_SW1", "+1V8",
-                            outer_mid(up["3"], n, 1.95), n)
-    repl["L102"] = place_2t(idx["L102"]["block"], "PMIC_SW2", "+3V0",
-                            outer_mid(up["5"], n, 1.95), n)
+    # 0201 high-frequency PVDD application decoupler remains centered between
+    # the two larger input capacitors with a very short VSYS escape.
+    repl["C114"] = place_2t_anchor(
+        idx["C114"]["block"], "VSYS", "GND", add(up["4"], mul(n, 0.48)), n)
 
-    # Output capacitors sit just beyond each inductor; their local-return pads
-    # face the PMIC-side return region rather than expanding the current loop.
+    # SW inductors use pad anchoring: the SW pad itself is placed in a diagonal
+    # escape lane from pin 3/5, instead of only positioning the component center.
+    sw1_axis = norm(add(mul(n, 1.00), mul(t, -0.72)))
+    sw2_axis = norm(add(mul(n, 1.00), mul(t, 0.72)))
+    sw1_anchor = add(up["3"], mul(sw1_axis, 1.40))
+    sw2_anchor = add(up["5"], mul(sw2_axis, 1.40))
+    repl["L101"] = place_2t_anchor(
+        idx["L101"]["block"], "PMIC_SW1", "+1V8", sw1_anchor, sw1_axis)
+    repl["L102"] = place_2t_anchor(
+        idx["L102"]["block"], "PMIC_SW2", "+3V0", sw2_anchor, sw2_axis)
+
+    # Output capacitors start just beyond the inductor output pads and orient
+    # their local-return pads back toward the centerline between both BUCKs.
     l101_out = passive_abs_pad(repl["L101"], "+1V8")
     l102_out = passive_abs_pad(repl["L102"], "+3V0")
-    repl["C107"] = place_2t(idx["C107"]["block"], "+1V8", "PVSS1_LOCAL",
-                            add(l101_out, mul(n, 0.95)), mul(t, 1.0))
-    repl["C108"] = place_2t(idx["C108"]["block"], "+3V0", "PVSS2_LOCAL",
-                            add(l102_out, mul(n, 0.95)), mul(t, -1.0))
+    c107_out_anchor = add(l101_out, mul(n, 0.78))
+    c108_out_anchor = add(l102_out, mul(n, 0.78))
+    repl["C107"] = place_2t_anchor(
+        idx["C107"]["block"], "+1V8", "PVSS1_LOCAL", c107_out_anchor, t)
+    repl["C108"] = place_2t_anchor(
+        idx["C108"]["block"], "+3V0", "PVSS2_LOCAL", c108_out_anchor, mul(t, -1.0))
 
-    # Local power-ground to continuous-GND transition is deliberately explicit.
-    # NetTie copper itself remains short; In1.Cu is not split.
-    c107_g = passive_abs_pad(repl["C107"], "PVSS1_LOCAL")
-    c108_g = passive_abs_pad(repl["C108"], "PVSS2_LOCAL")
-    repl["NT101"] = place_2t(idx["NT101"]["block"], "PVSS1_LOCAL", "GND",
-                             add(c107_g, mul(t, -0.70)), n)
-    repl["NT102"] = place_2t(idx["NT102"]["block"], "PVSS2_LOCAL", "GND",
-                             add(c108_g, mul(t, 0.70)), n)
+    # Explicit local switching-return transition to continuous board GND.
+    c107_ret = passive_abs_pad(repl["C107"], "PVSS1_LOCAL")
+    c108_ret = passive_abs_pad(repl["C108"], "PVSS2_LOCAL")
+    repl["NT101"] = place_2t_anchor(
+        idx["NT101"]["block"], "PVSS1_LOCAL", "GND", add(c107_ret, mul(t, 0.32)), mul(n, -1.0))
+    repl["NT102"] = place_2t_anchor(
+        idx["NT102"]["block"], "PVSS2_LOCAL", "GND", add(c108_ret, mul(t, -0.32)), mul(n, -1.0))
 
-    # Remaining PMIC-local decoupling/configuration passives are tied to their
-    # relevant package pins and placed outside the corresponding package side.
     def pin_out(pin: str):
         return norm(sub(up[pin], uc))
 
@@ -303,47 +310,49 @@ def main():
         o = pin_out(pin)
         return (-o[1], o[0])
 
+    # Remaining PMIC-local passives are placed from the relevant package pins.
+    # Distances are deliberately conservative until executed KiCad courtyard
+    # evidence is available; electrical topology is unchanged.
     simple = {
-        # ref: (pin, functional net, second net, radial distance, tangent offset)
-        "C101": ("21", "CHG_5V", "GND", 1.00, -0.55),
-        "C102": ("20", "VSYS", "GND", 1.00, 0.55),
-        "C105": ("22", "VBUSOUT_SENSE", "GND", 1.00, 0.55),
-        "C106": ("19", "VBAT", "GND", 1.00, -0.55),
-        "C113": ("12", "+1V8", "GND", 0.72, 0.00),
-        "R101": ("17", "PMIC_VSET1", "GND", 0.75, 0.45),
-        "R102": ("16", "PMIC_VSET2", "GND", 0.75, -0.45),
+        "C101": ("21", "CHG_5V", "GND", 1.28, -0.70),
+        "C102": ("20", "VSYS", "GND", 1.28, 0.70),
+        "C105": ("22", "VBUSOUT_SENSE", "GND", 1.28, 0.70),
+        "C106": ("19", "VBAT", "GND", 1.28, -0.70),
+        "C113": ("12", "+1V8", "GND", 0.92, 0.00),
+        "R101": ("17", "PMIC_VSET1", "GND", 0.95, 0.48),
+        "R102": ("16", "PMIC_VSET2", "GND", 0.95, -0.48),
     }
     for ref, (pin, net_a, net_b, dist, tang_off) in simple.items():
         o = pin_out(pin)
         q = pin_tangent(pin)
-        mid = add(add(up[pin], mul(o, dist)), mul(q, tang_off))
-        repl[ref] = place_2t(idx[ref]["block"], net_a, net_b, mid, q)
+        midpoint = add(add(up[pin], mul(o, dist)), mul(q, tang_off))
+        repl[ref] = place_2t(idx[ref]["block"], net_a, net_b, midpoint, q)
 
-    # LOADSW/LDO sections. Duplicate output capacitors are staggered around LSOUT pins.
     for ref, pin, net, off in (
-        ("C109", "29", "DISP_SW", -0.55), ("C110", "29", "DISP_SW", 0.55),
-        ("C111", "31", "BIO_SW", -0.55), ("C112", "31", "BIO_SW", 0.55),
+        ("C109", "29", "DISP_SW", -0.78), ("C110", "29", "DISP_SW", 0.78),
+        ("C111", "31", "BIO_SW", -0.78), ("C112", "31", "BIO_SW", 0.78),
     ):
-        o = pin_out(pin); q = pin_tangent(pin)
-        mid = add(add(up[pin], mul(o, 1.10)), mul(q, off))
-        repl[ref] = place_2t(idx[ref]["block"], net, "GND", mid, q)
+        o = pin_out(pin)
+        q = pin_tangent(pin)
+        midpoint = add(add(up[pin], mul(o, 1.38)), mul(q, off))
+        repl[ref] = place_2t(idx[ref]["block"], net, "GND", midpoint, q)
 
     for ref, pin, net_b, off in (
-        ("R105", "28", "LDO1_IN", -0.40),
-        ("R106", "30", "LDO2_IN", 0.40),
+        ("R105", "28", "LDO1_IN", -0.46),
+        ("R106", "30", "LDO2_IN", 0.46),
     ):
-        o = pin_out(pin); q = pin_tangent(pin)
-        mid = add(add(up[pin], mul(o, 0.78)), mul(q, off))
-        repl[ref] = place_2t(idx[ref]["block"], "VSYS", net_b, mid, q)
+        o = pin_out(pin)
+        q = pin_tangent(pin)
+        midpoint = add(add(up[pin], mul(o, 1.02)), mul(q, off))
+        repl[ref] = place_2t(idx[ref]["block"], "VSYS", net_b, midpoint, q)
 
-    # Optional TWI pull-ups remain DNP/TUNE but stay close to SDA/SCL escape.
     for ref, pin, net in (("R103", "13", "SYS_I2C_SDA"), ("R104", "14", "SYS_I2C_SCL")):
-        o = pin_out(pin); q = pin_tangent(pin)
-        repl[ref] = place_2t(idx[ref]["block"], "+1V8", net,
-                             add(up[pin], mul(o, 0.82)), q)
+        o = pin_out(pin)
+        q = pin_tangent(pin)
+        repl[ref] = place_2t(
+            idx[ref]["block"], "+1V8", net, add(up[pin], mul(o, 1.00)), q)
 
     out_text = replace_blocks(text, repl)
-    # Syntax integrity guard; KiCad DRC is still required.
     if out_text.count("(") != out_text.count(")"):
         raise SystemExit("r13 PCB parenthesis balance failed")
 
@@ -369,6 +378,7 @@ def main():
         "u2_center_mm": [ux, uy, ua],
         "pmic_cluster_bbox_mm": bbox,
         "moved_refs": sorted(PMIC_REFS - {"U2"}),
+        "placement_method": "actual_U2_pad_geometry_plus_pad_anchored_power_passives",
         "routing_status": "NOT_STARTED_IN_MATERIALIZER__RUN_KICAD_DRC_BEFORE_POWER_ROUTING",
         "validation_authority": "kicad-cli pcb drc --severity-all",
         "release_status": "NOT_FOR_GERBER",
