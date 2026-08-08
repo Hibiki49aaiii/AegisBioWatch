@@ -67,3 +67,39 @@ This is a safety interlock signal only, not medical isolation.
 - Nordic nRF54L15 QFN48 pin assignments
 - Nordic nRF54L15-DK public schematic (PCA10156)
 - KiCad 5.1.9 `Connector_Generic.lib` symbol geometry for legacy-import checking
+
+
+## r5 — nPM1300 full passive capture
+
+The current Nordic nPM1300 reference circuitry and Hardware Design Guidelines
+were used as the electrical authority.
+
+Captured functional requirements include VBUS, VBUSOUT, VBAT, VSYS/PVDD,
+BUCK output, LS/LDO output, VDDIO, TWI, and local power-ground return passives.
+
+For RF-sensitive applications, a 100 nF high-frequency bypass was added at the
+VSYS/PVDD region in addition to the larger capacitors.
+
+### Power rail caution
+
+`DISP_SW` and `BIO_SW` remain provisional. nPM1300 limits are 50 mA in LDO mode
+and 100 mA in load-switch mode; exact AMOLED/PPG/haptic current data is required
+before those rails can be frozen.
+
+### Errata gate
+
+nPM1300 Revision 1 build-code-specific charger/LDO anomalies are now a
+manufacturing and firmware release gate.
+
+
+### PVSS net-tie interpretation
+
+The current nPM1300 QFN Configuration 1 schematic explicitly shows a `Net tie`
+for both PVSS1 and PVSS2 with a via into the GND layer. r5 therefore retains
+`PVSS1_LOCAL` / `PVSS2_LOCAL` and net-tie symbols. This does **not** authorize a
+split ground plane: L2 remains one uninterrupted GND plane. The net-ties encode
+the short top-layer switching-current return geometry and the intended nearby
+GND-layer transition.
+
+The production net-tie copper/via geometry is layout-specific and is not frozen
+to a generic KiCad net-tie footprint.
