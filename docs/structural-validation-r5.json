@@ -1,0 +1,10 @@
+{
+  "revision": "Phase 1 r5",
+  "schematics": [
+    {"file":"BIO_INTERFACE.sch","components":5,"component_closures":5,"explicit_wires":29,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true},
+    {"file":"DISPLAY_TOUCH.sch","components":7,"component_closures":7,"explicit_wires":26,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true},
+    {"file":"MCU_RF_CLOCK.sch","components":22,"component_closures":22,"explicit_wires":42,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true},
+    {"file":"PMIC_CHARGER.sch","components":28,"component_closures":28,"explicit_wires":55,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true},
+    {"file":"STORAGE_HAPTIC.sch","components":12,"component_closures":12,"explicit_wires":20,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true}
+  ]
+}
