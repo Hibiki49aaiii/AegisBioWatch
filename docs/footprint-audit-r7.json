@@ -1,0 +1,19 @@
+{
+  "summary": {"ASSIGNED": 72, "EMPTY": 7},
+  "empty_or_unfrozen": [
+    {"ref":"J3","value":"MAG_DOCK_RAW_5V","reason":"magnetic dock contact/mechanical geometry not frozen"},
+    {"ref":"J101","value":"SHIP_WAKE_BUTTON","reason":"physical ship/wake button not frozen"},
+    {"ref":"J4","value":"C10-100 LRA","reason":"LRA attachment/interconnect geometry not frozen"},
+    {"ref":"J5","value":"GL175AMC10C_LOGIC_ONLY","reason":"AMOLED FPC/module pinout and mating geometry not frozen"},
+    {"ref":"J6","value":"TOUCH_LOGIC_PLACEHOLDER","reason":"touch physical interface not frozen"},
+    {"ref":"J8","value":"SWD_DEBUG_POGO_1x08","reason":"validated schematic still has the earlier 8-pin debug header; target TC2030 6-pin mapping must be deliberately refactored before footprint assignment"},
+    {"ref":"J9","value":"SIDE_BUTTON_CONTACT","reason":"side-button mechanical contact not frozen"}
+  ],
+  "reviewed_assignments": {
+    "J2":"Connector_Hirose:Hirose_DF57H-3P-1.2V_1x03_P1.2mm_Socket",
+    "J7":"Connector_FFC-FPC:Hirose_FH12-20S-0.5SH_1x20-1MP_P0.50mm_Horizontal",
+    "L101":"Inductor_SMD:L_Murata_DFE201610P",
+    "L102":"Inductor_SMD:L_Murata_DFE201610P",
+    "U3":"Package_SON:WSON-8-1EP_8x6mm_P1.27mm_EP3.4x4.3mm"
+  }
+}
