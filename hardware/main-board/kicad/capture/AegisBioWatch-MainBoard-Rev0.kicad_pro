@@ -1,0 +1,26 @@
+{
+  "board": {},
+  "boards": [],
+  "cvpcb": {},
+  "erc": {},
+  "libraries": {},
+  "meta": {
+    "filename": "AegisBioWatch-MainBoard-Rev0.kicad_pro",
+    "version": 1
+  },
+  "net_settings": {
+    "classes": [],
+    "meta": {
+      "version": 3
+    },
+    "net_colors": null,
+    "netclass_assignments": {}
+  },
+  "pcbnew": {},
+  "schematic": {},
+  "text_variables": {
+    "PROJECT": "AegisBioWatch",
+    "REVISION": "Rev.0",
+    "PHASE": "Phase 1 r7"
+  }
+}
