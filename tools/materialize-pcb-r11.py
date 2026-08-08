@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import base64, gzip, hashlib, io, json, shutil, tarfile, tempfile
+import base64, gzip, hashlib, io, json, shutil, string, tarfile, tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 PAY = ROOT / 'hardware/main-board/pcb/placement-r11-payload'
 OUT = ROOT / 'hardware/main-board/pcb/placement-r11'
 manifest = json.loads((PAY / 'manifest.json').read_text(encoding='utf-8'))
 encoded_path = ROOT / manifest['archive']
-encoded = ''.join(encoded_path.read_text(encoding='ascii').split())
+raw_encoded = encoded_path.read_text(encoding='ascii')
+allowed = set(string.ascii_letters + string.digits + '+/=')
+bad = [(i, ch, ord(ch)) for i, ch in enumerate(raw_encoded) if not ch.isspace() and ch not in allowed]
+if bad:
+    preview = bad[:20]
+    raise SystemExit(f'r11 payload contains non-base64 characters: count={len(bad)}, first={preview}')
+encoded = ''.join(raw_encoded.split())
+if len(encoded) % 4:
+    raise SystemExit(f'r11 payload base64 length is not divisible by 4: {len(encoded)}')
 archive = base64.b64decode(encoded, validate=True)
 if len(archive) != manifest['archive_bytes']:
-    raise SystemExit('r11 archive size mismatch')
+    raise SystemExit(f"r11 archive size mismatch: expected={manifest['archive_bytes']}, got={len(archive)}")
 if hashlib.sha256(archive).hexdigest() != manifest['archive_sha256']:
     raise SystemExit('r11 archive SHA-256 mismatch')
 
