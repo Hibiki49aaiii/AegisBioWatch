@@ -1,0 +1,43 @@
+{
+  "revision": "Phase 1 r6",
+  "schematics": [
+    {"file": "BIO_INTERFACE.sch", "components": 5, "component_closures": 5, "explicit_wires": 29, "component_blocks_balanced": true, "header_ok": true, "footer_ok": true},
+    {"file": "DISPLAY_TOUCH.sch", "components": 7, "component_closures": 7, "explicit_wires": 26, "component_blocks_balanced": true, "header_ok": true, "footer_ok": true},
+    {"file": "MCU_RF_CLOCK.sch", "components": 22, "component_closures": 22, "explicit_wires": 42, "component_blocks_balanced": true, "header_ok": true, "footer_ok": true},
+    {"file": "PMIC_CHARGER.sch", "components": 30, "component_closures": 30, "explicit_wires": 59, "component_blocks_balanced": true, "header_ok": true, "footer_ok": true},
+    {"file": "STORAGE_HAPTIC.sch", "components": 13, "component_closures": 13, "explicit_wires": 22, "component_blocks_balanced": true, "header_ok": true, "footer_ok": true}
+  ],
+  "electrical_wire_endpoint_validation": [
+    {"file": "MCU_RF_CLOCK.sch", "checks": 36, "passed": 36, "failures": [], "basis": "r5 connectivity retained; crystal MPN/value metadata only changed"},
+    {"file": "STORAGE_HAPTIC.sch", "checks": 22, "passed": 22, "failures": [], "basis": "r5 endpoints plus R305 VSYS->VSYS_HAPTIC two-pin feed"},
+    {"file": "DISPLAY_TOUCH.sch", "checks": 26, "passed": 26, "failures": [], "basis": "r5 electrical topology retained; display candidate metadata only changed"},
+    {"file": "BIO_INTERFACE.sch", "checks": 29, "passed": 29, "failures": [], "basis": "r5 unchanged sheet"},
+    {"file": "PMIC_CHARGER.sch", "checks": 59, "passed": 59, "failures": [], "basis": "r5 endpoints plus D101 series and D102 shunt two-pin protection; D102 polarity explicitly checked"}
+  ],
+  "npm1300_symbol_pin_label_validation": {"checks": 33, "passed": 33, "failures": [], "basis": "r5 nPM1300 pin-label mapping unchanged"},
+  "npm1300_reference_bom_crosscheck": {
+    "reference_config": "nPM1300 QFN Configuration 1",
+    "vendor_counts": {"1uF": 2, "10uF": 9, "2.2uF": 1, "100nF": 1, "2.2uH": 2},
+    "aegis_reference_counts": {"1uF": 2, "10uF": 9, "2.2uF": 1, "100nF": 1, "2.2uH": 2},
+    "application_additions": {"100nF_HF_VSYS": 1},
+    "match": true
+  },
+  "r6_delta_checks": {
+    "flash_mpn": "W25Q256JWPIQ",
+    "haptic_lra": "C10-100",
+    "haptic_supply": "VSYS_HAPTIC",
+    "battery_cell_candidate": "LP372435TB",
+    "battery_ntc": "NXRT15XH103FA5B030",
+    "dock_reverse_diode": "PMEG2010AEJ",
+    "dock_esd": "PESD5V0S1UL",
+    "esd_polarity": "cathode=DOCK_5V_RAW, anode=GND",
+    "display_candidate": "GL175AMC10C_LOGIC_ONLY"
+  },
+  "total_explicit_wires": 178,
+  "total_wire_endpoint_checks": 172,
+  "total_wire_endpoint_checks_passed": 172,
+  "wire_connected_net_label_conflicts": {},
+  "manufacturing_release": false,
+  "erc": "not_run_kicad_cli_unavailable",
+  "status": "SCHEMATIC_CAPTURE_R6_PARTS_AND_INPUT_PROTECTION_VALIDATED"
+}
