@@ -6,7 +6,8 @@
   "design_review_revision": "r9",
   "pcb_floorplan_revision": "r10",
   "pcb_placement_seed_revision": "r11",
-  "status": "R8_ELECTRICAL_R9_INTERFACE_R10_FLOORPLAN_R11_UNROUTED_PLACEMENT_SEED",
+  "pcb_reference_placement_review_revision": "r12",
+  "status": "R8_ELECTRICAL_R9_INTERFACE_R10_FLOORPLAN_R11_UNROUTED_SEED_R12_REFERENCE_REVIEW",
   "manufacturing_ready": false,
   "kicad_cli": "9.0.9",
   "electrical_authority": {
@@ -44,10 +45,23 @@
     "drc": {"rule_violations": 0, "unconnected_items": 186, "routing_started": false},
     "planning_rules_frozen_for_fab": false,
     "critical_placement": {
-      "nRF54L15_RF": "seed_only_copy_Nordic_QFAA_reference_before_routing",
-      "nPM1300": "seed_only_copy_Nordic_QFN_reference_before_routing",
+      "nRF54L15_RF": "seed_only_keep_until_authoritative_QFAA_placement",
+      "nPM1300": "seed_only_replace_with_reviewed_Nordic_QFN_placement",
       "PVSS_NetTies": "staged_not_final"
     }
+  },
+  "pcb_reference_placement_review": {
+    "revision": "r12",
+    "board_coordinate_changes": false,
+    "npm1300_density_crosscheck": {
+      "source": "hlord2000/nPM1300-Stamp",
+      "license": "CERN-OHL-P-2.0",
+      "sample_relative_bounds_mm": [12.17, 5.94],
+      "use": "density_and_adjacency_crosscheck_only",
+      "final_authority": "Nordic nPM1300 reference layout"
+    },
+    "nrf54l15_raw_qfn_third_party_coordinates_accepted": false,
+    "nrf54l15_reason": "inspected public raw-QFN layouts did not yet satisfy the required license/authority confidence for coordinate reuse"
   },
   "frozen_interfaces": {
     "SWD": "Tag-Connect TC2030 6-pin; 1 VTRef, 2 SWDIO, 3 nRESET, 4 SWCLK, 5 GND, 6 SWO",
