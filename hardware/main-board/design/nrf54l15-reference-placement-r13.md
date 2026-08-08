@@ -8,15 +8,17 @@ It does **not** replace the Nordic reference layout, does not freeze final RF im
 
 ## Authority
 
-For the selected `nRF54L15-QFAA` QFN48 package, the physical authority is Nordic Semiconductor's current QFN48 reference layout plus the current nRF54L15 reference circuitry / PCB-layout guidance.
+For the selected `nRF54L15-QFAA` QFN48 package, physical authority is Nordic Semiconductor's reference design that corresponds to the **actual procured nRF54L15 silicon revision**, together with that revision's datasheet/errata and the current PCB-layout guidance.
 
-At the time of this r13 review, Nordic's nRF54L15 product reference-layout page selects:
+The Nordic nRF54L15 compatibility matrix currently maps QFAA revisions to different recommended design-file releases:
 
-- package: QFN48 / QFAA
-- reference layout: `nRF54L15-QFAA Reference Layout 0_8`
-- package: 6.0 mm × 6.0 mm nominal, 0.40 mm pitch, exposed die pad
+- Engineering B → QFAA reference design `0.8`
+- Revision 1 → QFAA reference design `0.7`
+- Revision 2 → QFAA reference design `1.0`
 
-The project must re-check Nordic's product page and applicable silicon errata before release; a cached or third-party copy is not release authority.
+Therefore **QFAA does not imply one universal reference-layout version**. r13 must not freeze the RF/DC-DC/crystal geometry against `0.8` until the actual device revision/build code is known. The project must identify the procured silicon revision, select the matching Nordic design files, and re-check the applicable errata before release.
+
+Package geometry remains QFN48, nominal 6.0 mm × 6.0 mm, 0.40 mm pitch, exposed die pad.
 
 ## Official QFAA dedicated-pin mapping used by r13
 
@@ -43,7 +45,7 @@ The exposed die pad must be connected to the device ground system as required by
 
 ## AegisBioWatch functional mapping
 
-The project does not reuse Nordic reference designators blindly. Functional identity is the authority when translating the reference circuit into AegisBioWatch designators.
+The project does not reuse Nordic reference designators blindly. Functional identity is the authority when translating a Nordic reference circuit into AegisBioWatch designators.
 
 ### Internal regulator / RF supply
 
@@ -57,7 +59,7 @@ AegisBioWatch currently implements:
 - `C9`: `NRF_DECA_RF` → GND, 2.2 nF
 - `DECA` pin 43 and `DECRF` pin 33 share `NRF_DECA_RF`
 
-These values/topology are electrically consistent with the project's r8 authority; performance-critical exact MPN and high-frequency behavior remain release gates.
+These values/topology are the project's current r8 electrical authority. Final performance-critical passive values/MPNs must be re-checked against the Nordic design files recommended for the actual procured silicon revision; the reference circuitry has changed across nRF54L15 revisions during product maturation.
 
 ### RF matching / harmonic filter
 
@@ -70,11 +72,11 @@ AegisBioWatch currently implements:
 - `L4`: 3.5 nH, `RF_B` → `RF_ANT`
 - `C12`: 0.3 pF, `RF_ANT` → GND
 
-The current Nordic QFN48 configuration-1 BOM uses the same RF nominal sequence: 2.7 nH series, 1.5 pF shunt, 3.5 nH series, 2.0 pF shunt, 3.5 nH series, 0.3 pF shunt.
+These nominal values match the configuration reviewed for the current r8 capture, but the **actual-revision Nordic BOM/layout remains release authority**. Antenna/RF filtering components are performance-critical and remain subject to final tuning.
 
 ### Critical designator translation: Nordic C6 != Aegis C6
 
-Nordic's PCB-layout note states that **Nordic reference capacitor C6**, the first 1.5 pF RF shunt capacitor, is not grounded directly to the general ground plane. Its return is routed via pin 32 `VSS_PA` and the exposed VSS die-pad structure for additional harmonic filtering.
+In the Nordic QFN48 PCB-layout example that uses a first 1.5 pF RF shunt designated `C6`, Nordic notes that this capacitor is not grounded directly to the general ground plane; its return is routed via pin 32 `VSS_PA` and the exposed VSS die-pad structure for additional harmonic filtering.
 
 In AegisBioWatch, that functional component is:
 
@@ -84,29 +86,29 @@ It is **not** Aegis `C6`, which is the 2.2 µF `DECD` capacitor.
 
 Therefore the PCB rule is:
 
-> Aegis C10 RF-ground return must reproduce the Nordic first-shunt / VSS_PA / die-pad return topology. Do not give Aegis C10 a generic nearest-GND-via return, and do not apply this special RF return rule to Aegis C6 merely because of the designator name.
+> When the selected silicon-revision reference design uses this first-shunt VSS_PA/die-pad topology, Aegis C10 must reproduce that functional return. Do not give Aegis C10 a generic nearest-GND-via return, and do not apply the special RF-return rule to Aegis C6 merely because of the designator name.
 
-This functional translation is a hard r13/routing constraint.
+Functional translation, not equal reference numbers, is the hard rule.
 
 ## Placement constraints
 
 ### U1 and crystals
 
-- `Y1` 32 MHz must remain immediately adjacent to `XC1/XC2` and follow the Nordic reference orientation/return geometry as closely as the board allows.
+- `Y1` 32 MHz must remain immediately adjacent to `XC1/XC2` and follow the selected revision's Nordic reference orientation/return geometry as closely as the board allows.
 - `Y2` 32.768 kHz must remain immediately adjacent to `XL1/XL2` with short, symmetric, quiet traces.
 - Crystal traces must not run beside PMIC switching nodes, display QSPI clocks, or RF feed structures.
 
 ### DCC / DECD / DECA / DECRF
 
-- `L1`, `C6`, `FB1`, `C7`, `C8`, and `C9` must be treated as one reference-layout-controlled cluster.
+- `L1`, `C6`, `FB1`, `C7`, `C8`, and `C9` are one reference-layout-controlled cluster.
 - DCC-to-L1-to-DECD copper must be short and compact.
-- DECA and DECRF must remain connected as required by the Nordic reference circuitry.
+- DECA/DECRF circuitry must follow the design files and errata for the actual silicon revision.
 - High-frequency decoupling placement and return paths take precedence over cosmetic alignment.
 
 ### RF path
 
-- U1 pin 31 `ANT` → `L2` → shunt → `L3` → shunt → `L4` → shunt → antenna feed must remain a compact monotonic path.
-- The first 1.5 pF shunt return uses the special VSS_PA/die-pad topology described above.
+- U1 pin 31 `ANT` → `L2` → first shunt → `L3` → second shunt → `L4` → final shunt → antenna feed remains a compact monotonic path.
+- The first shunt return must reproduce the selected Nordic revision's reference-return topology; in the reviewed QFN48 layout this is the VSS_PA/die-pad return described above.
 - Matching-component relative placement, geometry and local ground/via pattern must be reference-faithful; third-party PCB coordinates are not authority.
 - The all-layer antenna keep-out from r10 remains in force.
 - No PMIC switching node, display QSPI clock, or noisy digital escape may intrude into the RF reserve.
@@ -123,38 +125,44 @@ The final feed geometry is gated on:
 4. impedance calculation / fab confirmation;
 5. assembled-board RF tuning / VNA verification.
 
-Until then, r13 may reserve the route corridor and enforce topology/keep-outs, but it must not present a provisional width as manufacturing authority.
+Nordic also advises a very thin RF reference dielectric for QFN designs; the final Aegis stack-up must be reviewed against the selected reference design rather than assuming the provisional layer spacing is acceptable.
+
+Until the stack-up is frozen, r13 may reserve route corridors and enforce topology/keep-outs, but it must not present a provisional width as manufacturing authority.
 
 ## Why exact U1 RF coordinates are not generated from generic geometry
 
-Nordic explicitly recommends following the QFN reference design closely for RF component values, geometry, relative placement, stack-up and trace lengths. A generic QFN48 polar/radial placement algorithm would therefore be weaker authority than the official reference design.
+Nordic recommends following the QFN reference design closely for RF component values, geometry, relative placement, stack-up and trace lengths. A generic QFN48 polar/radial placement algorithm would therefore be weaker authority than the official revision-matched reference design.
 
 Accordingly:
 
 - exact U1 RF/reference coordinates are not inferred from nRF52 boards or unrelated nRF54 boards;
 - third-party coordinates are not copied;
-- the current r11 U1 seed may be inspected, but RF-critical placement is frozen only after the Nordic QFAA reference geometry is available for direct cross-check;
+- the current r11 U1 seed may be inspected, but RF-critical placement is frozen only after the **actual silicon revision is known** and its recommended Nordic QFAA design geometry is directly cross-checked;
 - non-RF work continues in parallel.
 
 ## r13 validation requirements
 
 Before U1 placement is declared frozen:
 
+- identify the actual procured nRF54L15 silicon revision/build code;
+- select the corresponding Nordic QFAA design-file release from the compatibility matrix;
+- review that revision's errata;
 - verify U1 pad/net mapping against the official QFAA pin table;
-- verify all r8 functional components are present in the PCB footprint set;
-- compare RF/DC-DC/crystal relative placement against the Nordic QFAA reference layout;
+- verify all required electrical functions are represented in the PCB footprint set;
+- compare RF/DC-DC/crystal relative placement against the selected Nordic QFAA reference design;
 - run KiCad 9.0.9 PCB DRC;
 - report rule violations and unconnected items separately;
 - keep final RF impedance geometry open until fab stack-up is known.
 
 ## Release gates added/clarified
 
-- current Nordic QFAA reference-layout version re-check at release;
-- applicable nRF54L15 silicon revision / errata review;
-- direct QFAA reference geometry review before RF placement freeze;
-- RF capacitor/inductor MPN closure, including high-Q/tolerance requirements;
+- actual nRF54L15 silicon revision/build code identification;
+- revision-matched Nordic QFAA reference-design selection;
+- applicable nRF54L15 errata review;
+- direct revision-matched QFAA reference geometry review before RF placement freeze;
+- RF/internal-supply capacitor and inductor MPN closure, including high-frequency characteristics;
 - final stack-up and impedance geometry;
-- VNA / antenna tuning and pre-compliance RF verification.
+- VNA / antenna tuning and RF pre-compliance verification.
 
 ## Privacy boundary
 
