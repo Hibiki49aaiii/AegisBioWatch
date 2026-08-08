@@ -1,0 +1,42 @@
+name: r11 rebuild probe
+
+on:
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+    paths:
+      - '.github/workflows/r11-rebuild-probe.yml'
+      - 'tools/probe-r8-netlist-footprints.py'
+      - 'tools/materialize-native-r8.py'
+      - 'hardware/main-board/kicad/native-r8-patch/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9 and footprint libraries
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y kicad kicad-footprints
+          kicad-cli --version | grep '9.0.9'
+      - name: Materialize r8
+        run: python3 tools/materialize-native-r8.py
+      - name: Export authoritative r8 XML netlist
+        shell: bash
+        run: |
+          kicad-cli sch export netlist --format kicadxml \
+            -o /tmp/aegis-r8.xml \
+            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-r8.kicad_sch
+      - name: Probe footprint assignments and installed library resolution
+        env:
+          R8_NETLIST: /tmp/aegis-r8.xml
+        run: python3 tools/probe-r8-netlist-footprints.py
