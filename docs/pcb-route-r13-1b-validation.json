@@ -1,0 +1,29 @@
+{
+  "revision": "r13-route1b-sw-only",
+  "status": "EXECUTED_KICAD_CLEAN_ROUTING_INCREMENT",
+  "kicad_cli": "9.0.9",
+  "workflow_run_id": 31310289217,
+  "artifact_id": 9037182269,
+  "artifact_name": "r13-route1b-sw-evidence",
+  "source_placement_sha256": "4c92bdc64de30097a6a9c81906c664e5f987a2afcc002eef71131a2721b1a089",
+  "output_pcb_sha256": "be3e4c8abc2245c42dba34b2d5431631be033334405912288ad405c5e846d638",
+  "rule_violations": 0,
+  "unconnected_items": 184,
+  "pin_net_audit": {
+    "audited_nodes": 268,
+    "mismatches": 0,
+    "unexpected_pad_nets": 0,
+    "result": "PASS"
+  },
+  "routing": {
+    "nets": ["PMIC_SW1", "PMIC_SW2"],
+    "track_width_mm": 0.2,
+    "track_segments_added": 7,
+    "vias_added": 0,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  },
+  "interpretation": "Rule geometry is clean for this narrow routing increment. The board remains incomplete because 184 unconnected/ratsnest items remain.",
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}
