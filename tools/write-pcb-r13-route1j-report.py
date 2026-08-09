@@ -35,6 +35,7 @@ def main() -> None:
         'gnd_track_width_mm': 0.30,
         'via_size_mm': 0.60,
         'via_drill_mm': 0.30,
+        'gnd_reference_layer': 'In1.Cu',
         'connections': {
             'NT101.2/GND': {
                 'pad_mm': [9.938265, 24.624113],
