@@ -56,10 +56,15 @@ def main():
     names={net.GetNetname(),pads(c103,'1')[0].GetNetname(),pads(c104,'1')[0].GetNetname()}
     if names!={'VSYS'}: raise SystemExit(f'VSYS net gate failed: {names}')
 
-    # U2.4 lies midway between the already-routed SW1/SW2 left-edge escapes.
-    # The 0.30 mm VSYS spine keeps >0.10 mm planning clearance to both 0.20 mm
-    # switching tracks, then continues across the two same-net input caps.
-    segs=add_track(b,net,pu,p103)+add_track(b,net,p103,p104)
+    # Executed DRC rejected a direct U2.4->C103.1 diagonal because the actual
+    # C103.1 pad is at y=29.8156 and that diagonal crossed SW2. Route through a
+    # measured corridor instead: left between the SW1/SW2 QFN escapes, then
+    # down just left of SW2's vertical leg, then into C103.1 and across C104.1.
+    w1=(7.75,pu[1])
+    w2=(7.75,p103[1])
+    segs=0
+    for x,y in [(pu,w1),(w1,w2),(w2,p103),(p103,p104)]:
+        segs+=add_track(b,net,x,y)
     b.SynchronizeNetsAndNetClasses(True); b.BuildConnectivity()
 
     if OUT_DIR.exists(): shutil.rmtree(OUT_DIR)
@@ -74,8 +79,8 @@ def main():
       'track_segments_added':segs,
       'vias_added':0,
       'routed_nets_added':['VSYS'],
-      'vsys_points_mm':[pu,p103,p104],
-      'scope':'U2.4 -> C103.1 -> C104.1 only',
+      'vsys_points_mm':[pu,w1,w2,p103,p104],
+      'scope':'U2.4 -> dogleg -> C103.1 -> C104.1 only',
       'c114_deferred':True,
       'gnd_plane_preserved':True,
       'rf_routing_touched':False,
