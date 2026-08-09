@@ -5,12 +5,12 @@ The historical compressed r11 payload in Git is truncated and cannot be
 recovered byte-for-byte. This tool therefore does NOT attempt to recreate the
 lost PCB coordinates. It constructs a new deterministic real-net seed from:
 
-  * r8 KiCad XML netlist (electrical authority)
+  * recovered r8-equivalent PCB topology XML (from retained capture evidence)
   * r10 KiCad floorplan board (mechanical/keep-out authority)
   * installed KiCad 9.0.9 footprint libraries
 
-J3/J5/J6 remain intentionally absent. KiCad's own PCB DRC and the exported r8
-netlist remain validation authority; this script is only the reconstruction
+J3/J5/J6 remain intentionally absent. KiCad's own PCB DRC plus explicit
+pin/net audit remain validation authority; this script is only the reconstruction
 mechanism.
 """
 from __future__ import annotations
@@ -37,7 +37,6 @@ OUT_REPORT = OUT_DIR / "placement-seed-manifest-r11-rebuilt.json"
 EXCLUDED = {"J3", "J5", "J6"}
 FP_ROOTS = [Path("/usr/share/kicad/footprints"), Path("/usr/local/share/kicad/footprints")]
 
-# Rectangles are inside the r10 functional reserve outlines by a small margin.
 ZONES = {
     "MCU_RF": (116.25, 72.25, 128.75, 85.75),
     "PMIC": (104.75, 87.25, 116.75, 97.75),
@@ -113,7 +112,6 @@ def component_zone(comp: dict) -> str:
         return "DISPLAY"
     if "POWER_INPUT" in text or "DOCK" in text or "PMEG" in text or "PESD" in text:
         return "DOCK"
-    # Battery/user-interface/misc low-speed parts go into quiet central reserves.
     return "MISC_A"
 
 
@@ -144,7 +142,6 @@ def bbox_local_mm(fp):
 
 def rect_for_fp_at_bbox_min(fp, bbox_min_x: float, bbox_min_y: float, margin: float = 0.25):
     lx, ly, w, h = bbox_local_mm(fp)
-    # Position footprint origin so its current full bounding box starts here.
     origin_x = bbox_min_x - lx
     origin_y = bbox_min_y - ly
     fp.SetPosition(pcbnew.VECTOR2I(iu(origin_x), iu(origin_y)))
@@ -219,11 +216,10 @@ def main():
     board = pcbnew.LoadBoard(str(R10_PCB))
     if board is None:
         raise SystemExit(f"failed to load r10 floorplan: {R10_PCB}")
-    if board.GetFootprintCount() != 0:
-        raise SystemExit(f"r10 floorplan unexpectedly contains {board.GetFootprintCount()} footprints")
+    existing_footprints = list(board.GetFootprints())
+    if existing_footprints:
+        raise SystemExit(f"r10 floorplan unexpectedly contains {len(existing_footprints)} footprints")
 
-    # Create all electrical nets exactly from r8. KiCad net code is board-local;
-    # electrical identity is the net name + pad-node relation.
     netinfo = {n["name"]: board_add_net(board, n["name"]) for n in nets}
 
     fps = {}
@@ -236,7 +232,6 @@ def main():
         fps[c["ref"]] = fp
         component_meta[c["ref"]] = c
 
-    # Assign pad nets from the authoritative r8 node list.
     assigned_nodes = 0
     missing_pads = []
     for n in nets:
@@ -263,8 +258,6 @@ def main():
     if assigned_nodes != expected_included_nodes:
         raise SystemExit(f"assigned nodes {assigned_nodes} != expected included nodes {expected_included_nodes}")
 
-    # Deterministic functional-zone placement. U1/U2 use fixed datums; all
-    # other parts are collision-scanned inside their r10 reserve.
     occupied_by_zone = {name: [] for name in ZONES}
     placement = {}
     for ref in ("U1", "U2"):
@@ -275,7 +268,6 @@ def main():
             p = fps[ref].GetPosition()
             placement[ref] = {"zone": zone_name, "x_mm": mm(p.x), "y_mm": mm(p.y), "fixed": True}
 
-    # Large parts first makes the scan packing deterministic and robust.
     rest = []
     for ref, fp in fps.items():
         if ref in FIXED_ANCHORS:
@@ -319,7 +311,7 @@ def main():
         "revision": "r11-rebuilt-from-r8-r10",
         "reason": "historical r11 compressed payload was truncated and exact source files were not recoverable from Git objects",
         "authority": {
-            "electrical": "r8 KiCad XML netlist",
+            "electrical": "recovered r8-equivalent PCB topology XML; validate with pin/net audit",
             "mechanical": str(R10_PCB.relative_to(ROOT)),
             "footprints": "KiCad 9.0.9 installed libraries using r8 footprint assignments",
         },
@@ -341,6 +333,7 @@ def main():
     }
     OUT_REPORT.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
+
 
 if __name__ == "__main__":
     main()
