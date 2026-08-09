@@ -30,21 +30,27 @@ def main() -> None:
         'revision': 'r13-route1i-pvss-trees',
         'source_route1h_sha256': srcsha,
         'output_sha256': sha(OUT_PCB),
-        'track_segments_added': 6,
+        'track_segments_added': 8,
         'vias_added': 2,
         'via_size_mm': 0.60,
         'via_drill_mm': 0.30,
         'pvss_width_mm': 0.20,
         'pvss1_tree': {
             'nodes': ['C107.2', 'NT101.1', 'accepted PVSS1 U2-side via'],
-            'branch_via_mm': [9.65, 23.65],
+            'branch_via_mm': [13.20, 25.30],
             'existing_u2_side_via_mm': [8.25, 27.20],
-            'top_segment': 'C107.2->NT101.1->branch via',
+            'top_points_mm': [
+                [11.957553, 23.51711],
+                [13.20, 23.51711],
+                [13.20, 25.30],
+                [9.938265, 25.30],
+                [9.938265, 24.624113]
+            ],
             'internal_segment_layer': 'In2.Cu'
         },
         'pvss2_tree': {
             'nodes': ['C108.2', 'NT102.1', 'accepted PVSS2 U2-side via'],
-            'branch_via_mm': [8.65, 33.00],
+            'branch_via_mm': [7.90, 33.10],
             'existing_u2_side_via_mm': [8.25, 29.30],
             'top_segment': 'C108.2->NT102.1->branch via',
             'internal_segment_layer': 'In2.Cu'
