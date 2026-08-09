@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Run the recovered-r11 builder with KiCad-9 text-free placement geometry.
+"""Run the recovered-r11 builder with KiCad-9 physical placement geometry.
 
 KiCad FOOTPRINT.GetBoundingBox() includes footprint fields/text by default.
-Those fields are display annotations, not component placement envelopes, and
-can make long connector value strings artificially consume a reserve.  r11
-packing therefore uses GetBoundingBox(False) while KiCad courtyard/clearance
-DRC remains the actual placement-rule authority after generation.
+Those annotations are not component placement envelopes, so packing uses
+GetBoundingBox(False).  The BIO reserve is widened 1.5 mm to the right so the
+selected Hirose FH12-20S connector's real ~13.3 mm body/MP span can fit without
+changing the 41 x 34 mm board envelope or entering the MCU/RF reserve.
+
+KiCad courtyard/clearance DRC remains placement-rule authority after generation.
 """
 from __future__ import annotations
 
@@ -36,4 +38,5 @@ def bbox_local_mm_no_text(fp):
 
 
 mod.bbox_local_mm = bbox_local_mm_no_text
+mod.ZONES["BIO"] = (100.25, 74.25, 114.25, 82.75)
 mod.main()
