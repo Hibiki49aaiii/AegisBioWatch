@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 """Materialize r13 nPM1300 placement from the validated recovered-r11 seed.
 
-The historical r11 archive is irrecoverably truncated, so this materializer is
-bound to a freshly rebuilt r11 whose exact PCB SHA has executed KiCad 9.0.9 DRC
-(0 rule violations / 186 unrouted items) and a 268-node physical-pad audit.
+The historical r11 archive is irrecoverably truncated, so r13 is bound to a
+freshly rebuilt r11 whose exact PCB SHA has executed KiCad 9.0.9 DRC (0 rule
+violations / 186 unrouted items) and a 268-node physical-pad audit.
 
-Unlike the earlier r13 pad-anchor prototype, this implementation places PMIC
-support components with KiCad's actual no-text footprint bounding geometry and
-collision checks. U2 remains fixed. Functional attraction targets come only
-from AegisBioWatch's actual U2 / inductor pad geometry; no third-party absolute
-coordinates are copied.
+Placement uses KiCad's actual no-text footprint bounding geometry and collision
+checks. U2 remains fixed. Functional attraction targets come only from the
+AegisBioWatch U2 / inductor pad geometry; no third-party absolute coordinates
+are copied. Each component has a preferred maximum attraction radius; if that
+radius is geometrically blocked, the legalizer may expand by at most 2.0 mm and
+records the exception explicitly for review rather than creating an overlap.
 
 Physical authority remains Nordic's nPM1300 QEAA reference-layout/current-loop
-guidance. The algorithm prioritizes compact SW/PVDD/PVSS/VOUT loops while
-allowing lower-speed VSET/I2C/LS-LDO support parts to sit farther away when
-necessary for legal placement.
+guidance. High-current SW/PVDD/PVSS/VOUT parts are placed first and kept as
+compact as the actual board occupancy permits. Lower-speed VSET/I2C/LS-LDO
+support parts may sit farther away.
 
-This is still an unrouted placement revision and is NOT fabrication authority.
+This is an unrouted placement revision and is NOT fabrication authority.
 """
 from __future__ import annotations
 
@@ -42,6 +43,7 @@ OUT_REPORT = OUT_DIR / "placement-implementation-r13.json"
 BOARD_INTERIOR = (2.35, 3.10, 42.65, 36.40)
 RF_ANTENNA_BLOCK = (30.80, 2.75, 43.0, 9.20)
 PLACEMENT_GAP_MM = 0.10
+BOUNDED_EXPANSION_MM = 2.00
 
 PMIC_SUPPORT = {
     *(f"C{i}" for i in range(101, 115)),
@@ -50,8 +52,6 @@ PMIC_SUPPORT = {
 }
 ALL_PMIC = PMIC_SUPPORT | {"U2"}
 
-# Logical pin/net guard copied from the retained electrical authority. This is a
-# gate, not a replacement for KiCad DRC or the 268-node source audit.
 U2_CRITICAL = {
     "1": "+1V8", "2": "PVSS1_LOCAL", "3": "PMIC_SW1", "4": "VSYS",
     "5": "PMIC_SW2", "6": "PVSS2_LOCAL", "12": "+1V8",
@@ -113,7 +113,6 @@ def set_angle(fp, deg: float):
 
 
 def place_bbox_center(fp, cx: float, cy: float, angle: float):
-    """Place footprint such that its no-text bbox center lands at cx/cy."""
     set_angle(fp, angle)
     fp.SetPosition(pcbnew.VECTOR2I(0, 0))
     b = fp.GetBoundingBox(False)
@@ -166,16 +165,10 @@ def validate_source(args, source_sha):
             "recovered r11 manifest/PCB SHA mismatch: "
             f"manifest={manifest.get('output_pcb_sha256')} actual={source_sha}"
         )
-    expected = {
-        "components_r8": 79,
-        "footprints_imported": 76,
-        "nets_r8": 86,
-        "net_nodes_r8": 268,
-    }
+    expected = {"components_r8": 79, "footprints_imported": 76, "nets_r8": 86, "net_nodes_r8": 268}
     for key, value in expected.items():
         if manifest.get(key) != value:
             raise SystemExit(f"recovered r11 invariant mismatch {key}: {manifest.get(key)} != {value}")
-
     drc = load_json(args.drc_summary)
     if drc.get("rule_violations") != 0 or drc.get("unconnected_items") != 186:
         raise SystemExit(
@@ -232,8 +225,6 @@ def main():
     u2_box = rect(u2)
     u2_center = fp_center(u2)
 
-    # Keep all non-PMIC seed footprints fixed. PMIC support placements are the
-    # only moving geometry in this r13 stage; U2 itself remains fixed.
     occupied = []
     for ref, fp in fps.items():
         if ref in PMIC_SUPPORT:
@@ -261,15 +252,16 @@ def main():
         direction = unit((direction_source[0] - u2_center[0], direction_source[1] - u2_center[1]))
         return base, direction
 
-    def place_radial(ref, base, direction, r_min, r_max, *, rotations=(0.0, 90.0), radial_step=0.20):
+    def place_radial(ref, base, direction, r_min, preferred_max, *, rotations=(0.0, 90.0), radial_step=0.20):
         fp = fps[ref]
+        hard_max = preferred_max + BOUNDED_EXPANSION_MM
         deltas = (0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 110, -110, 135, -135, 160, -160, 180)
         original_pos = fp.GetPosition()
         original_angle = fp.GetOrientation()
         attempts = 0
         r = r_min
         chosen = None
-        while r <= r_max + 1e-9 and chosen is None:
+        while r <= hard_max + 1e-9 and chosen is None:
             for delta in deltas:
                 d = rotate_vec(direction, delta)
                 cx, cy = base[0] + d[0] * r, base[1] + d[1] * r
@@ -277,7 +269,7 @@ def main():
                     attempts += 1
                     candidate = place_bbox_center(fp, cx, cy, angle)
                     if legal(candidate, ref):
-                        chosen = (candidate, angle, r, delta, (cx, cy))
+                        chosen = (candidate, angle, r, delta)
                         break
                 if chosen:
                     break
@@ -287,9 +279,9 @@ def main():
             fp.SetOrientation(original_angle)
             raise SystemExit(
                 f"unable to collision-legally place {ref} near functional target "
-                f"base={base} r={r_min}..{r_max}"
+                f"base={base} r={r_min}..{hard_max} (preferred <= {preferred_max})"
             )
-        candidate, angle, radius, delta, candidate_center = chosen
+        candidate, angle, radius, delta = chosen
         occupied.append((ref, candidate))
         placement[ref] = {
             "bbox_mm": [round(v, 4) for v in candidate],
@@ -297,33 +289,32 @@ def main():
             "target_mm": [round(v, 4) for v in base],
             "target_distance_mm": round(math.dist(center_of_rect(candidate), base), 4),
             "radial_candidate_mm": round(radius, 4),
+            "preferred_max_mm": preferred_max,
+            "hard_max_mm": hard_max,
+            "bounded_expansion_used": radius > preferred_max + 1e-9,
             "angular_deviation_deg": delta,
             "rotation_deg": angle,
             "attempts": attempts,
         }
         print(
-            f"placed {ref}: target={base} radius={radius:.2f} delta={delta:+d} "
-            f"rot={angle:.0f} bbox={candidate}"
+            f"placed {ref}: target={base} radius={radius:.2f} "
+            f"preferred<={preferred_max:.2f} expanded={radius > preferred_max + 1e-9} "
+            f"delta={delta:+d} rot={angle:.0f} bbox={candidate}"
         )
 
-    # Critical current-loop placement. The r_min values are deliberately small;
-    # physical bbox collision with U2/courtyards automatically sets the real
-    # legal minimum. Search expands only as needed.
     critical_specs = [
-        ("C103", (4, 2), 2, 0.70, 3.20),   # VSYS -> PVSS1 local input return
-        ("C104", (4, 6), 6, 0.70, 3.20),   # VSYS -> PVSS2 local input return
-        ("C114", (4,), 4, 0.80, 3.60),     # HF PVDD/VSYS bypass
-        ("L101", (3,), 3, 0.90, 3.80),     # SW1
-        ("L102", (5,), 5, 0.90, 3.80),     # SW2
-        ("NT101", (2,), 2, 0.80, 4.20),    # PVSS1 local -> continuous GND
-        ("NT102", (6,), 6, 0.80, 4.20),    # PVSS2 local -> continuous GND
+        ("C103", (4, 2), 2, 0.70, 3.20),
+        ("C104", (4, 6), 6, 0.70, 3.20),
+        ("C114", (4,), 4, 0.80, 3.60),
+        ("L101", (3,), 3, 0.90, 3.80),
+        ("L102", (5,), 5, 0.90, 3.80),
+        ("NT101", (2,), 2, 0.80, 4.20),
+        ("NT102", (6,), 6, 0.80, 4.20),
     ]
     for ref, pins, primary, r_min, r_max in critical_specs:
         base, direction = target_from_u2(pins, primary)
         place_radial(ref, base, direction, r_min, r_max)
 
-    # Output capacitors follow the corresponding inductor output pad, keeping the
-    # VOUT side compact without colliding with the switch node or U2 courtyard.
     for ref, lref, lpad, primary_pin in (
         ("C107", "L101", "2", 3),
         ("C108", "L102", "2", 5),
@@ -333,8 +324,6 @@ def main():
         direction = unit((base[0] - u2_primary[0], base[1] - u2_primary[1]))
         place_radial(ref, base, direction, 0.70, 4.00)
 
-    # Remaining local power decoupling. These still use U2 functional pad
-    # attraction, but may expand farther than the high-current switch loops.
     power_specs = [
         ("C102", (4,), 4, 1.00, 5.50),
         ("C106", (19,), 19, 0.90, 5.00),
@@ -346,8 +335,6 @@ def main():
         base, direction = target_from_u2(pins, primary)
         place_radial(ref, base, direction, r_min, r_max)
 
-    # Low-current configuration / I2C support. Keep electrically sensible
-    # adjacency, but prioritize legal placement over unnecessarily short copper.
     low_specs = [
         ("R101", (17,), 17, 1.20, 7.00),
         ("R102", (16,), 16, 1.20, 7.00),
@@ -380,16 +367,13 @@ def main():
         raise SystemExit("pcbnew.SaveBoard returned false for r13")
     shutil.copy2(args.source_pro, OUT_PRO)
 
-    # Geometry evidence useful for later route-1 and review. This is not a DRC
-    # substitute; the workflow must run kicad-cli pcb drc on this exact SHA.
     pmic_boxes = [rect(fps[ref]) for ref in ALL_PMIC]
     cluster = (
         min(r[0] for r in pmic_boxes), min(r[1] for r in pmic_boxes),
         max(r[2] for r in pmic_boxes), max(r[3] for r in pmic_boxes),
     )
-    critical_clearances = {}
-    for ref in sorted(PMIC_SUPPORT):
-        critical_clearances[ref] = round(bbox_distance(rect(fps[ref]), u2_box), 4)
+    u2_clearances = {ref: round(bbox_distance(rect(fps[ref]), u2_box), 4) for ref in sorted(PMIC_SUPPORT)}
+    expanded_refs = sorted(ref for ref, data in placement.items() if data["bounded_expansion_used"])
 
     report = {
         "revision": "r13-recovered-collision-aware-npm1300-placement",
@@ -399,12 +383,7 @@ def main():
         "source_manifest_sha256": sha256(args.source_manifest),
         "source_drc_summary_sha256": sha256(args.drc_summary),
         "source_pin_net_audit_sha256": sha256(args.pin_net_audit),
-        "source_gate": {
-            "rule_violations": 0,
-            "unconnected_items": 186,
-            "pin_net_nodes": 268,
-            "pin_net_result": "PASS",
-        },
+        "source_gate": {"rule_violations": 0, "unconnected_items": 186, "pin_net_nodes": 268, "pin_net_result": "PASS"},
         "authority": {
             "physical": "Nordic nPM1300 QEAA reference layout/current-loop guidance",
             "coordinate_method": "AegisBioWatch U2 and L101/L102 actual pad geometry + KiCad physical bbox collision legalization",
@@ -416,11 +395,13 @@ def main():
         "moved_ref_count": len(PMIC_SUPPORT),
         "non_pmic_seed_refs_moved": [],
         "placement_gap_mm": PLACEMENT_GAP_MM,
+        "bounded_expansion_limit_mm": BOUNDED_EXPANSION_MM,
+        "bounded_expansion_refs": expanded_refs,
         "pmic_cluster_bbox_mm": [round(v, 4) for v in cluster],
         "pmic_cluster_width_mm": round(cluster[2] - cluster[0], 4),
         "pmic_cluster_height_mm": round(cluster[3] - cluster[1], 4),
         "placement": placement,
-        "u2_bbox_clearance_mm_by_ref": critical_clearances,
+        "u2_bbox_clearance_mm_by_ref": u2_clearances,
         "output": str(OUT_PCB.relative_to(ROOT)),
         "output_sha256": sha256(OUT_PCB),
         "routing_status": "UNROUTED",
