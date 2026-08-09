@@ -55,23 +55,31 @@ jobs:
           python3 - <<'PY'
           import json
           from collections import Counter
-          p='/tmp/drc-r11-rebuilt.json'
-          d=json.load(open(p))
+          from pathlib import Path
+          d=json.load(open('/tmp/drc-r11-rebuilt.json'))
           v=d.get('violations',[]); u=d.get('unconnected_items',[])
-          print(f'KiCad rebuilt r11: rule violations={len(v)}, unconnected={len(u)}')
-          print('violation_types=',dict(Counter(x.get('type','?') for x in v if isinstance(x,dict))))
+          summary={
+              'rule_violations':len(v),
+              'unconnected_items':len(u),
+              'violation_types':dict(Counter(x.get('type','?') for x in v if isinstance(x,dict))),
+          }
+          Path('/tmp/drc-r11-rebuilt-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print(json.dumps(summary,indent=2))
           if v:
+              print('First DRC violations:')
               print(json.dumps(v[:30],indent=2))
-              raise SystemExit('rebuilt r11 has KiCad rule violations')
           PY
 
-      - name: Audit PCB pad/net assignments against recovered XML
+      - name: Audit every physical PCB pad against recovered XML
         shell: bash
+        if: always()
         run: |
           python3 - <<'PY'
           import json, xml.etree.ElementTree as ET
+          from collections import defaultdict
           from pathlib import Path
           import pcbnew
+
           xmlp=Path('hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml')
           pcbp=Path('hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb')
           r=ET.parse(xmlp).getroot()
@@ -80,21 +88,65 @@ jobs:
               name=n.attrib['name']
               for node in n.findall('node'):
                   expected[(node.attrib['ref'],node.attrib['pin'])]=name
+
           b=pcbnew.LoadBoard(str(pcbp))
-          actual={}
+          physical=defaultdict(list)
           for fp in b.GetFootprints():
               ref=fp.GetReference()
               for pad in fp.Pads():
-                  if pad.GetNetname(): actual[(ref,str(pad.GetNumber()))]=pad.GetNetname()
+                  physical[(ref,str(pad.GetNumber()))].append(pad.GetNetname() or '')
+
           audited=[k for k in expected if k[0] not in {'J3','J5','J6'}]
           mismatches=[]
           for k in audited:
-              if actual.get(k)!=expected[k]: mismatches.append({'ref':k[0],'pin':k[1],'expected':expected[k],'actual':actual.get(k)})
-          unexpected=[{'ref':r,'pin':p,'net':n} for (r,p),n in actual.items() if (r,p) not in expected]
-          report={'source_nodes':len(expected),'audited_present_nodes':len(audited),'mismatches':mismatches,'unexpected_pad_nets':unexpected,'result':'PASS' if not mismatches and not unexpected else 'FAIL'}
+              nets=physical.get(k,[])
+              if not nets or any(n != expected[k] for n in nets):
+                  mismatches.append({
+                      'ref':k[0], 'pin':k[1], 'expected':expected[k],
+                      'physical_pad_nets':nets,
+                  })
+
+          unexpected=[]
+          for (ref,pin), nets in physical.items():
+              if (ref,pin) not in expected:
+                  nonempty=[n for n in nets if n]
+                  if nonempty:
+                      unexpected.append({'ref':ref,'pin':pin,'physical_pad_nets':nets})
+
+          duplicate_groups={
+              f'{ref}.{pin}':nets for (ref,pin),nets in physical.items() if len(nets)>1
+          }
+          report={
+              'source_nodes':len(expected),
+              'audited_present_source_nodes':len(audited),
+              'physical_pad_count':sum(len(v) for v in physical.values()),
+              'duplicate_pad_number_groups':duplicate_groups,
+              'mismatches':mismatches,
+              'unexpected_pad_nets':unexpected,
+              'result':'PASS' if not mismatches and not unexpected else 'FAIL',
+          }
           Path('/tmp/r11-rebuilt-pin-net-audit.json').write_text(json.dumps(report,indent=2)+'\n')
           print(json.dumps(report,indent=2))
-          if mismatches or unexpected: raise SystemExit('pin/net audit failed')
+          PY
+
+      - name: Assert recovered r11 validation gate
+        shell: bash
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          drc=Path('/tmp/drc-r11-rebuilt-summary.json')
+          audit=Path('/tmp/r11-rebuilt-pin-net-audit.json')
+          if not drc.exists() or not audit.exists():
+              raise SystemExit('missing required executed validation evidence')
+          d=json.loads(drc.read_text())
+          a=json.loads(audit.read_text())
+          print(f"Recovered r11 gate: rule violations={d['rule_violations']}, unconnected={d['unconnected_items']}, pin/net={a['result']}")
+          if d['rule_violations'] != 0:
+              raise SystemExit('recovered r11 still has KiCad rule violations')
+          if a['result'] != 'PASS' or a['audited_present_source_nodes'] != 268:
+              raise SystemExit('recovered r11 pin/net audit failed')
           PY
 
       - name: Package executed evidence
@@ -107,7 +159,9 @@ jobs:
             hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
             hardware/main-board/pcb/placement-r11-rebuilt/placement-seed-manifest-r11-rebuilt.json \
             hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb \
+            hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pro \
             /tmp/drc-r11-rebuilt.json \
+            /tmp/drc-r11-rebuilt-summary.json \
             /tmp/r11-rebuilt-pin-net-audit.json; do
               test -f "$f" && cp "$f" /tmp/r11-recovered-evidence/
           done
