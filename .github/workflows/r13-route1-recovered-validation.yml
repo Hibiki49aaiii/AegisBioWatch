@@ -1,0 +1,242 @@
+name: recovered-source r13 route1 PMIC validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+    paths:
+      - '.github/workflows/r13-route1-recovered-validation.yml'
+      - 'tools/recover-r8-netlist-from-legacy.py'
+      - 'tools/rebuild-pcb-r11-from-r8-r10.py'
+      - 'tools/rebuild-pcb-r11-recovered.py'
+      - 'tools/materialize-pcb-r13-recovered.py'
+      - 'tools/materialize-pcb-r13-route1.py'
+      - 'tools/materialize-pcb-r13-route1-recovered.py'
+      - 'hardware/main-board/kicad/capture/**'
+      - 'hardware/main-board/kicad/generated/BOM-r8.csv'
+      - 'hardware/main-board/pcb/AegisBioWatch-MainBoard-Floorplan-r10.kicad_pcb'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  route1:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9 and footprints
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+          python3 -c 'import pcbnew; print(pcbnew.GetBuildVersion())'
+
+      - name: Recover topology and materialize validated r11
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 tools/recover-r8-netlist-from-legacy.py
+          python3 tools/rebuild-pcb-r11-recovered.py \
+            --netlist hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml
+          kicad-cli pcb drc --format json --severity-all \
+            -o /tmp/drc-r11.json \
+            hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/drc-r11.json'))
+          print(f"r11 executed gate: violations={len(d.get('violations',[]))} unconnected={len(d.get('unconnected_items',[]))}")
+          if len(d.get('violations',[])) != 0 or len(d.get('unconnected_items',[])) != 186:
+              raise SystemExit('r11 source gate failed')
+          PY
+
+      - name: Audit r11 physical pads
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, xml.etree.ElementTree as ET
+          from collections import defaultdict
+          from pathlib import Path
+          import pcbnew
+          root=ET.parse('hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml').getroot()
+          expected={}
+          for n in root.findall('./nets/net'):
+              for node in n.findall('node'):
+                  expected[(node.attrib['ref'],node.attrib['pin'])]=n.attrib['name']
+          board=pcbnew.LoadBoard('hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb')
+          physical=defaultdict(list)
+          for fp in board.GetFootprints():
+              for pad in fp.Pads(): physical[(fp.GetReference(),str(pad.GetNumber()))].append(pad.GetNetname() or '')
+          audited=[k for k in expected if k[0] not in {'J3','J5','J6'}]
+          mismatches=[{'ref':k[0],'pin':k[1],'expected':expected[k],'actual':physical.get(k,[])} for k in audited
+                      if not physical.get(k) or any(v != expected[k] for v in physical[k])]
+          unexpected=[{'ref':k[0],'pin':k[1],'nets':nets} for k,nets in physical.items()
+                      if k not in expected and any(nets)]
+          out={'audited_present_source_nodes':len(audited),'mismatches':mismatches,'unexpected_pad_nets':unexpected,
+               'result':'PASS' if not mismatches and not unexpected else 'FAIL'}
+          Path('/tmp/r11-pin-net-audit.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          if out['result']!='PASS' or len(audited)!=268: raise SystemExit('r11 pin/net gate failed')
+          PY
+
+      - name: Materialize collision-aware r13 placement
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/drc-r11.json'))
+          Path('/tmp/drc-r11-summary.json').write_text(json.dumps({'rule_violations':len(d.get('violations',[])),'unconnected_items':len(d.get('unconnected_items',[]))},indent=2)+'\n')
+          PY
+          python3 tools/materialize-pcb-r13-recovered.py \
+            --drc-summary /tmp/drc-r11-summary.json \
+            --pin-net-audit /tmp/r11-pin-net-audit.json
+
+      - name: Execute r13 placement KiCad DRC
+        shell: bash
+        run: |
+          set -euxo pipefail
+          kicad-cli pcb drc --format json --severity-all \
+            -o /tmp/drc-r13.json \
+            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/drc-r13.json'))
+          v=len(d.get('violations',[])); u=len(d.get('unconnected_items',[]))
+          print(f'r13 placement executed gate: violations={v} unconnected={u}')
+          if v!=0 or u!=186: raise SystemExit('r13 placement gate failed')
+          PY
+
+      - name: Audit r13 placement physical pads
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, xml.etree.ElementTree as ET
+          from collections import defaultdict
+          from pathlib import Path
+          import pcbnew
+          root=ET.parse('hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml').getroot(); expected={}
+          for n in root.findall('./nets/net'):
+              for node in n.findall('node'): expected[(node.attrib['ref'],node.attrib['pin'])]=n.attrib['name']
+          board=pcbnew.LoadBoard('hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb'); physical=defaultdict(list)
+          for fp in board.GetFootprints():
+              for pad in fp.Pads(): physical[(fp.GetReference(),str(pad.GetNumber()))].append(pad.GetNetname() or '')
+          audited=[k for k in expected if k[0] not in {'J3','J5','J6'}]
+          mismatches=[{'ref':k[0],'pin':k[1],'expected':expected[k],'actual':physical.get(k,[])} for k in audited
+                      if not physical.get(k) or any(v != expected[k] for v in physical[k])]
+          unexpected=[{'ref':k[0],'pin':k[1],'nets':nets} for k,nets in physical.items() if k not in expected and any(nets)]
+          out={'audited_present_source_nodes':len(audited),'mismatches':mismatches,'unexpected_pad_nets':unexpected,
+               'result':'PASS' if not mismatches and not unexpected else 'FAIL'}
+          Path('/tmp/r13-pin-net-audit.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          if out['result']!='PASS' or len(audited)!=268: raise SystemExit('r13 placement pin/net gate failed')
+          PY
+
+      - name: Materialize PMIC route1 copper
+        shell: bash
+        run: |
+          python3 tools/materialize-pcb-r13-route1-recovered.py \
+            --placement-drc-json /tmp/drc-r13.json \
+            --placement-pin-net-audit /tmp/r13-pin-net-audit.json \
+            --kicad-cli-version "$(kicad-cli --version | head -n1)"
+
+      - name: Execute KiCad DRC on route1
+        shell: bash
+        run: |
+          set -euxo pipefail
+          kicad-cli pcb drc --format json --severity-all \
+            -o /tmp/drc-route1.json \
+            hardware/main-board/pcb/route-r13-1/AegisBioWatch-MainBoard-Route1-r13.kicad_pcb
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          d=json.load(open('/tmp/drc-route1.json')); v=d.get('violations',[]); u=d.get('unconnected_items',[])
+          s={'rule_violations':len(v),'unconnected_items':len(u),
+             'violation_types':dict(Counter(x.get('type','?') for x in v if isinstance(x,dict)))}
+          Path('/tmp/drc-route1-summary.json').write_text(json.dumps(s,indent=2)+'\n')
+          print(json.dumps(s,indent=2))
+          if v:
+              print('First route1 violations:')
+              print(json.dumps(v[:50],indent=2))
+          PY
+
+      - name: Audit route1 physical pads
+        shell: bash
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, xml.etree.ElementTree as ET
+          from collections import defaultdict
+          from pathlib import Path
+          import pcbnew
+          pcbp=Path('hardware/main-board/pcb/route-r13-1/AegisBioWatch-MainBoard-Route1-r13.kicad_pcb')
+          if not pcbp.is_file(): raise SystemExit('route1 PCB missing')
+          root=ET.parse('hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml').getroot(); expected={}
+          for n in root.findall('./nets/net'):
+              for node in n.findall('node'): expected[(node.attrib['ref'],node.attrib['pin'])]=n.attrib['name']
+          board=pcbnew.LoadBoard(str(pcbp)); physical=defaultdict(list)
+          for fp in board.GetFootprints():
+              for pad in fp.Pads(): physical[(fp.GetReference(),str(pad.GetNumber()))].append(pad.GetNetname() or '')
+          audited=[k for k in expected if k[0] not in {'J3','J5','J6'}]
+          mismatches=[{'ref':k[0],'pin':k[1],'expected':expected[k],'actual':physical.get(k,[])} for k in audited
+                      if not physical.get(k) or any(v != expected[k] for v in physical[k])]
+          unexpected=[{'ref':k[0],'pin':k[1],'nets':nets} for k,nets in physical.items() if k not in expected and any(nets)]
+          out={'audited_present_source_nodes':len(audited),'mismatches':mismatches,'unexpected_pad_nets':unexpected,
+               'result':'PASS' if not mismatches and not unexpected else 'FAIL'}
+          Path('/tmp/route1-pin-net-audit.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+
+      - name: Assert route1 routing gate
+        shell: bash
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          ds=Path('/tmp/drc-route1-summary.json'); ap=Path('/tmp/route1-pin-net-audit.json')
+          rp=Path('hardware/main-board/pcb/route-r13-1/routing-seed-r13-1.json')
+          if not ds.exists() or not ap.exists() or not rp.exists(): raise SystemExit('missing route1 executed evidence')
+          d=json.loads(ds.read_text()); a=json.loads(ap.read_text()); r=json.loads(rp.read_text())
+          print(f"route1 gate: violations={d['rule_violations']} unconnected={d['unconnected_items']} pin/net={a['result']} segments={r.get('track_segments_added')} vias={r.get('vias_added')}")
+          if d['rule_violations']!=0: raise SystemExit('route1 has KiCad rule violations')
+          if d['unconnected_items']>=186: raise SystemExit('route1 did not reduce unrouted connectivity')
+          if a['result']!='PASS' or a['audited_present_source_nodes']!=268: raise SystemExit('route1 pin/net audit failed')
+          if r.get('track_segments_added')!=17 or r.get('vias_added')!=2: raise SystemExit('route1 routing scope changed unexpectedly')
+          PY
+
+      - name: Package route1 evidence
+        shell: bash
+        if: always()
+        run: |
+          mkdir -p /tmp/route1-evidence
+          for f in \
+            hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb \
+            hardware/main-board/pcb/placement-r13/placement-implementation-r13.json \
+            hardware/main-board/pcb/route-r13-1/AegisBioWatch-MainBoard-Route1-r13.kicad_pcb \
+            hardware/main-board/pcb/route-r13-1/AegisBioWatch-MainBoard-Route1-r13.kicad_pro \
+            hardware/main-board/pcb/route-r13-1/routing-seed-r13-1.json \
+            /tmp/drc-r13.json \
+            /tmp/r13-pin-net-audit.json \
+            /tmp/drc-route1.json \
+            /tmp/drc-route1-summary.json \
+            /tmp/route1-pin-net-audit.json; do
+              test -f "$f" && cp "$f" /tmp/route1-evidence/
+          done
+          sha256sum /tmp/route1-evidence/* | tee /tmp/route1-evidence/SHA256SUMS.txt || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1-recovered-evidence
+          path: /tmp/route1-evidence/**
+          if-no-files-found: warn
