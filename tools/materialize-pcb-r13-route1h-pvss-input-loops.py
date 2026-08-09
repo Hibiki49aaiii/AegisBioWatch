@@ -1,24 +1,11 @@
 #!/usr/bin/env python3
 """r13 route-1h: co-design PMIC input-return geometry and route PVSS input loops.
 
-This stage starts from the executed-KiCad-clean route-1g baseline. The existing
-C103/C104 placement leaves the SW1/SW2 and PVSS endpoint ordering reversed on
-F.Cu, so a planar top-only connection would force crossings. Route-1h keeps the
-SW nodes on F.Cu, shifts C103/C104 left to open controlled escape channels,
-moves the low-current VOUT2 sense trunk from In2.Cu to B.Cu, and uses In2.Cu
-for the two short local PVSS input-return crossings.
-
-Scope in this increment:
-  * move C103 and C104 only;
-  * replace route-1g SW1/SW2/VSYS local F.Cu geometry;
-  * move the existing +3V0 VOUT2 sense trunk In2.Cu -> B.Cu without changing
-    its endpoints or logical connectivity;
-  * connect U2.2 <-> C103.2 (PVSS1_LOCAL);
-  * connect U2.6 <-> C104.2 (PVSS2_LOCAL);
-  * preserve the continuous In1.Cu GND zone and refill it around new vias.
-
-NT101/NT102, C107.2/C108.2 and NetTie-to-GND completion are intentionally
-left for later increments. No RF or supplier-gated interface is touched.
+Starts from the executed-KiCad-clean route-1g baseline. C103/C104 are shifted
+left, the low-current VOUT2 sense trunk is moved In2.Cu -> B.Cu, and the two
+local PVSS input returns cross on In2.Cu. The KiCad-mutating process execs a
+fresh, pcbnew-free report writer after SaveBoard to avoid KiCad 9 SWIG teardown
+heap corruption observed during JSON encoding.
 
 Planning/evidence artifact only; not fabrication authority.
 """
@@ -28,7 +15,9 @@ import argparse
 import faulthandler
 import hashlib
 import json
+import os
 import shutil
+import sys
 from pathlib import Path
 
 import pcbnew  # type: ignore
@@ -43,7 +32,7 @@ SRC_REPORT = SRC_DIR / 'routing-seed-r13-1g.json'
 OUT_DIR = ROOT / 'hardware/main-board/pcb/route-r13-1h'
 OUT_PCB = OUT_DIR / 'AegisBioWatch-MainBoard-Route1h-r13.kicad_pcb'
 OUT_PRO = OUT_DIR / 'AegisBioWatch-MainBoard-Route1h-r13.kicad_pro'
-OUT_REPORT = OUT_DIR / 'routing-seed-r13-1h.json'
+REPORT_HELPER = ROOT / 'tools/write-pcb-r13-route1h-report.py'
 
 SW_WIDTH = 0.20
 VSYS_WIDTH = 0.30
@@ -51,7 +40,8 @@ PVSS_WIDTH = 0.20
 VIA_SIZE = 0.60
 VIA_DRILL = 0.30
 
-# Preserve Y/orientation; shift only X to open SW/VSYS/PVSS channels.
+C103_EXPECTED = (6.84638, 29.040584)
+C104_EXPECTED = (5.094124, 28.977213)
 C103_X = 6.35
 C104_X = 4.55
 SW_ESCAPE_X = 7.72
@@ -131,6 +121,10 @@ def refill_all_zones(board):
         raise SystemExit('zone refill failed')
 
 
+def near(a: float, b: float, tol: float = 0.00001) -> bool:
+    return abs(a - b) <= tol
+
+
 def main():
     stage('start')
     ap = argparse.ArgumentParser()
@@ -163,7 +157,6 @@ def main():
     c104 = fps['C104']
     stage('board loaded')
 
-    # Gate the exact local nets before moving anything.
     gates = {
         'U2.2': pads(u2, '2')[0].GetNetname(),
         'U2.3': pads(u2, '3')[0].GetNetname(),
@@ -188,17 +181,17 @@ def main():
         raise SystemExit(f'critical local-net gate failed: {gates}')
     stage('local net gates passed')
 
-    original_positions = {
-        'C103': [mm(c103.GetPosition().x), mm(c103.GetPosition().y)],
-        'C104': [mm(c104.GetPosition().x), mm(c104.GetPosition().y)],
-    }
-    c103_y = original_positions['C103'][1]
-    c104_y = original_positions['C104'][1]
-    c103.SetPosition(pcbnew.VECTOR2I(iu(C103_X), iu(c103_y)))
-    c104.SetPosition(pcbnew.VECTOR2I(iu(C104_X), iu(c104_y)))
+    c103_from = (mm(c103.GetPosition().x), mm(c103.GetPosition().y))
+    c104_from = (mm(c104.GetPosition().x), mm(c104.GetPosition().y))
+    if not all(near(x, y) for x, y in zip(c103_from, C103_EXPECTED)):
+        raise SystemExit(f'C103 source-position gate failed: {c103_from}')
+    if not all(near(x, y) for x, y in zip(c104_from, C104_EXPECTED)):
+        raise SystemExit(f'C104 source-position gate failed: {c104_from}')
+
+    c103.SetPosition(pcbnew.VECTOR2I(iu(C103_X), iu(c103_from[1])))
+    c104.SetPosition(pcbnew.VECTOR2I(iu(C104_X), iu(c104_from[1])))
     stage('C103/C104 moved')
 
-    # Resolve all post-move endpoints before removing controlled tracks.
     u2_p2 = point(u2, '2')
     u2_p3 = point(u2, '3')
     u2_p4 = point(u2, '4')
@@ -212,9 +205,6 @@ def main():
     c104_p2 = point(c104, '2')
     stage('post-move endpoints resolved')
 
-    # Remove only route-1g controlled local F.Cu geometry plus the single
-    # route-1e VOUT2 sense trunk on In2.Cu. Existing +1V8/+3V0 power paths,
-    # F.Cu sense stubs and the two sense vias remain untouched.
     removed = []
     for item in list(b.GetTracks()):
         if not isinstance(item, pcbnew.PCB_TRACK) or isinstance(item, pcbnew.PCB_VIA):
@@ -253,12 +243,10 @@ def main():
 
     added = 0
 
-    # SW1: long horizontal escape first, then a near-vertical climb to L101.1.
     sw1_escape = (SW_ESCAPE_X, u2_p3[1])
     added += add_track(b, n_sw1, u2_p3, sw1_escape, SW_WIDTH, pcbnew.F_Cu)
     added += add_track(b, n_sw1, sw1_escape, l101_p1, SW_WIDTH, pcbnew.F_Cu)
 
-    # SW2: same X escape channel, then down to the accepted lower dogleg.
     sw2_escape = (SW_ESCAPE_X, u2_p5[1])
     sw2_turn = (SW_ESCAPE_X, SW2_TURN_Y)
     sw2_pre_l = (l102_p1[0], SW2_TURN_Y)
@@ -267,8 +255,6 @@ def main():
     added += add_track(b, n_sw2, sw2_turn, sw2_pre_l, SW_WIDTH, pcbnew.F_Cu)
     added += add_track(b, n_sw2, sw2_pre_l, l102_p1, SW_WIDTH, pcbnew.F_Cu)
 
-    # VSYS remains a top-copper spine between the two input capacitors, but the
-    # vertical channel is shifted left of the SW turn channel.
     vsys_escape = (VSYS_ESCAPE_X, u2_p4[1])
     vsys_turn = (VSYS_ESCAPE_X, c103_p1[1])
     added += add_track(b, n_vsys, u2_p4, vsys_escape, VSYS_WIDTH, pcbnew.F_Cu)
@@ -277,14 +263,11 @@ def main():
     added += add_track(b, n_vsys, c103_p1, c104_p1, VSYS_WIDTH, pcbnew.F_Cu)
     stage('SW/VSYS replacement tracks added')
 
-    # Keep the existing VOUT2 sense endpoints/vias but free In2.Cu for local
-    # PVSS returns by moving only the low-current trunk to B.Cu.
     sense_top = (9.62, 25.30)
     sense_out = (4.80, 33.828194)
     added += add_track(b, n_3v0, sense_top, sense_out, 0.20, pcbnew.B_Cu)
     stage('VOUT2 sense trunk moved to B.Cu')
 
-    # PVSS1 local input return: short F.Cu stubs to two vias, then In2.Cu.
     pvss1_cap_via = (PVSS1_CAP_VIA_X, c103_p2[1])
     pvss1_bend = (PVSS1_IN2_BEND_X, PVSS1_U2_VIA[1])
     vias_added = 0
@@ -296,7 +279,6 @@ def main():
     added += add_track(b, n_pvss1, pvss1_cap_via, c103_p2, PVSS_WIDTH, pcbnew.F_Cu)
     stage('PVSS1 local loop added')
 
-    # PVSS2 local input return uses a lower In2 corridor and exits left of C104.
     pvss2_cap_via = (PVSS2_CAP_VIA_X, c104_p2[1])
     pvss2_b1 = (PVSS2_IN2_BEND_1_X, PVSS2_U2_VIA[1])
     pvss2_b2 = (PVSS2_IN2_BEND_2_X, PVSS2_U2_VIA[1])
@@ -308,6 +290,9 @@ def main():
     vias_added += add_via(b, n_pvss2, pvss2_cap_via)
     added += add_track(b, n_pvss2, pvss2_cap_via, c104_p2, PVSS_WIDTH, pcbnew.F_Cu)
     stage('PVSS2 local loop added')
+
+    if added != 20 or vias_added != 4:
+        raise SystemExit(f'route1h internal scope gate failed: added={added} vias={vias_added}')
 
     stage('refill zones begin')
     refill_all_zones(b)
@@ -329,37 +314,10 @@ def main():
     if SRC_PRO.exists():
         shutil.copy2(SRC_PRO, OUT_PRO)
 
-    out = {
-        'revision': 'r13-route1h-pvss-input-loops',
-        'source_route1g_sha256': srcsha,
-        'output_sha256': sha(OUT_PCB),
-        'moved_footprints': {
-            'C103': {'from_mm': original_positions['C103'], 'to_mm': [C103_X, c103_y]},
-            'C104': {'from_mm': original_positions['C104'], 'to_mm': [C104_X, c104_y]},
-        },
-        'track_segments_removed': len(removed),
-        'removed_by_net_layer': {f'{k[0]}@{k[1]}': v for k, v in sorted(counts.items())},
-        'track_segments_added': added,
-        'vias_added': vias_added,
-        'via_size_mm': VIA_SIZE,
-        'via_drill_mm': VIA_DRILL,
-        'sw_width_mm': SW_WIDTH,
-        'vsys_width_mm': VSYS_WIDTH,
-        'pvss_width_mm': PVSS_WIDTH,
-        'vout2_sense_trunk_layer': 'B.Cu',
-        'pvss1_points_mm': [u2_p2, PVSS1_U2_VIA, pvss1_bend, pvss1_cap_via, c103_p2],
-        'pvss2_points_mm': [u2_p6, PVSS2_U2_VIA, pvss2_b1, pvss2_b2, pvss2_cap_via, c104_p2],
-        'logical_connectivity_added': ['U2.2<->C103.2', 'U2.6<->C104.2'],
-        'deferred_same_net_nodes': ['C107.2', 'NT101.1', 'C108.2', 'NT102.1'],
-        'in1_gnd_plane_preserved_and_refilled': True,
-        'rf_routing_touched': False,
-        'supplier_gated_interfaces_touched': False,
-        'validation_status': 'PENDING_EXECUTED_KICAD_DRC',
-        'release_status': 'NOT_FOR_GERBER',
-    }
-    OUT_REPORT.write_text(json.dumps(out, indent=2) + '\n')
-    stage('report written')
-    print(json.dumps(out, indent=2))
+    if not REPORT_HELPER.is_file():
+        raise SystemExit('route1h report helper missing')
+    stage('exec SWIG-free report helper')
+    os.execv(sys.executable, [sys.executable, str(REPORT_HELPER)])
 
 
 if __name__ == '__main__':
