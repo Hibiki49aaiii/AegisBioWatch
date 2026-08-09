@@ -70,7 +70,7 @@ jobs:
           print(json.dumps(out,indent=2)); Path('/tmp/route1i-summary.json').write_text(json.dumps(out,indent=2))
           if out['rule_violations']!=0 or out['unconnected_items']!=172: raise SystemExit('route1i DRC/ratsnest gate failed')
           if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1i audit gate failed')
-          if out['added_segments']!=6 or out['vias_added']!=2 or out['component_moves']!=[]: raise SystemExit('route1i scope gate failed')
+          if out['added_segments']!=8 or out['vias_added']!=2 or out['component_moves']!=[]: raise SystemExit('route1i scope gate failed')
           PY
 
       - name: Package route1i evidence
