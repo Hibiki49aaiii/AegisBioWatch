@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install KiCad 9.0.9
+      - name: Install KiCad 9.0.9 with symbols
         shell: bash
         run: |
           set -euxo pipefail
@@ -24,8 +24,24 @@ jobs:
           sudo apt-get install -y software-properties-common
           sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends kicad
+          sudo apt-get install -y --no-install-recommends kicad kicad-symbols
           test "$(kicad-cli --version | head -n1)" = "9.0.9"
+          test -f /usr/share/kicad/symbols/Device.kicad_sym
+      - name: Upgrade project legacy symbol library
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd hardware/main-board/kicad/capture
+          kicad-cli sym upgrade --output AegisBioWatch.kicad_sym AegisBioWatch.lib
+          cat > sym-lib-table <<'EOF'
+          (sym_lib_table
+            (version 7)
+            (lib (name "AegisBioWatch")(type "KiCad")(uri "${KIPRJMOD}/AegisBioWatch.kicad_sym")(options "")(descr "Recovered project symbols"))
+            (lib (name "Device")(type "KiCad")(uri "/usr/share/kicad/symbols/Device.kicad_sym")(options "")(descr "KiCad Device"))
+            (lib (name "Connector_Generic")(type "KiCad")(uri "/usr/share/kicad/symbols/Connector_Generic.kicad_sym")(options "")(descr "KiCad Connector_Generic"))
+            (lib (name "Transistor_FET")(type "KiCad")(uri "/usr/share/kicad/symbols/Transistor_FET.kicad_sym")(options "")(descr "KiCad Transistor_FET"))
+          )
+          EOF
       - name: Probe legacy schematic netlist export
         shell: bash
         run: |
@@ -50,3 +66,5 @@ jobs:
           path: |
             /tmp/legacy-probe.log
             /tmp/legacy-netlists/**
+            hardware/main-board/kicad/capture/AegisBioWatch.kicad_sym
+            hardware/main-board/kicad/capture/sym-lib-table
