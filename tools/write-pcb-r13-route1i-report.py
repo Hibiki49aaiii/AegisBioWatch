@@ -30,21 +30,25 @@ def main() -> None:
         'revision': 'r13-route1i-pvss-trees',
         'source_route1h_sha256': srcsha,
         'output_sha256': sha(OUT_PCB),
-        'track_segments_added': 8,
+        'track_segments_added': 6,
         'vias_added': 2,
         'via_size_mm': 0.60,
         'via_drill_mm': 0.30,
         'pvss_width_mm': 0.20,
+        'component_moves': [],
+        'component_rotations': {
+            'NT101': {'from_deg': 0.0, 'to_deg': 180.0, 'center_mm': [10.438265, 24.624113]}
+        },
         'pvss1_tree': {
             'nodes': ['C107.2', 'NT101.1', 'accepted PVSS1 U2-side via'],
-            'branch_via_mm': [13.20, 25.30],
+            'nt101_pvss1_pad_after_rotation_mm': [10.938265, 24.624113],
+            'nt101_gnd_pad_after_rotation_mm': [9.938265, 24.624113],
+            'branch_via_mm': [11.30, 25.20],
             'existing_u2_side_via_mm': [8.25, 27.20],
             'top_points_mm': [
                 [11.957553, 23.51711],
-                [13.20, 23.51711],
-                [13.20, 25.30],
-                [9.938265, 25.30],
-                [9.938265, 24.624113]
+                [10.938265, 24.624113],
+                [11.30, 25.20]
             ],
             'internal_segment_layer': 'In2.Cu'
         },
@@ -60,7 +64,6 @@ def main() -> None:
             'C108.2<->NT102.1<->PVSS2 accepted loop'
         ],
         'nettied_gnd_side_connected': False,
-        'component_moves': [],
         'in1_gnd_plane_preserved_and_refilled': True,
         'rf_routing_touched': False,
         'supplier_gated_interfaces_touched': False,
