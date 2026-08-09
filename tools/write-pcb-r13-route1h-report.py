@@ -32,7 +32,7 @@ def main() -> None:
         'output_sha256': sha(OUT_PCB),
         'moved_footprints': {
             'C103': {'from_mm': [6.84638, 29.040584], 'to_mm': [6.35, 29.040584]},
-            'C104': {'from_mm': [5.094124, 28.977213], 'to_mm': [4.55, 28.977213]},
+            'C104': {'from_mm': [5.094124, 28.977213], 'to_mm': [4.82, 28.977213]},
         },
         'track_segments_removed': 11,
         'removed_by_net_layer': {
@@ -49,6 +49,11 @@ def main() -> None:
         'vsys_width_mm': 0.30,
         'pvss_width_mm': 0.20,
         'vout2_sense_trunk_layer': 'B.Cu',
+        'vout2_sense_points_mm': [
+            [9.62, 25.30],
+            [9.62, 31.00],
+            [4.80, 33.828194],
+        ],
         'pvss1_points_mm': [
             [8.9875, 27.25],
             [8.25, 27.20],
@@ -59,10 +64,9 @@ def main() -> None:
         'pvss2_points_mm': [
             [8.9875, 29.25],
             [8.25, 29.30],
-            [6.00, 29.30],
             [4.50, 29.30],
             [3.75, 28.202213],
-            [4.55, 28.202213],
+            [4.82, 28.202213],
         ],
         'logical_connectivity_added': ['U2.2<->C103.2', 'U2.6<->C104.2'],
         'deferred_same_net_nodes': ['C107.2', 'NT101.1', 'C108.2', 'NT102.1'],
