@@ -25,12 +25,15 @@ Planning/evidence artifact only; not fabrication authority.
 from __future__ import annotations
 
 import argparse
+import faulthandler
 import hashlib
 import json
 import shutil
 from pathlib import Path
 
 import pcbnew  # type: ignore
+
+faulthandler.enable()
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = ROOT / 'hardware/main-board/pcb/route-r13-1g'
@@ -62,6 +65,10 @@ PVSS2_CAP_VIA_X = 3.75
 PVSS1_IN2_BEND_X = 6.30
 PVSS2_IN2_BEND_1_X = 6.00
 PVSS2_IN2_BEND_2_X = 4.50
+
+
+def stage(name: str) -> None:
+    print(f'[route1h] {name}', flush=True)
 
 
 def sha(path: Path) -> str:
@@ -125,6 +132,7 @@ def refill_all_zones(board):
 
 
 def main():
+    stage('start')
     ap = argparse.ArgumentParser()
     ap.add_argument('--route1g-drc-json', required=True)
     ap.add_argument('--route1g-pin-net-audit', required=True)
@@ -140,6 +148,7 @@ def main():
         raise SystemExit('route1g DRC gate failed')
     if a.get('result') != 'PASS' or a.get('audited_present_source_nodes') != 268:
         raise SystemExit('route1g pin/net gate failed')
+    stage('source gates passed')
 
     b = pcbnew.LoadBoard(str(SRC_PCB))
     fps = {f.GetReference(): f for f in b.GetFootprints()}
@@ -152,6 +161,7 @@ def main():
     l102 = fps['L102']
     c103 = fps['C103']
     c104 = fps['C104']
+    stage('board loaded')
 
     # Gate the exact local nets before moving anything.
     gates = {
@@ -176,6 +186,7 @@ def main():
     }
     if gates != expected:
         raise SystemExit(f'critical local-net gate failed: {gates}')
+    stage('local net gates passed')
 
     original_positions = {
         'C103': [mm(c103.GetPosition().x), mm(c103.GetPosition().y)],
@@ -185,6 +196,7 @@ def main():
     c104_y = original_positions['C104'][1]
     c103.SetPosition(pcbnew.VECTOR2I(iu(C103_X), iu(c103_y)))
     c104.SetPosition(pcbnew.VECTOR2I(iu(C104_X), iu(c104_y)))
+    stage('C103/C104 moved')
 
     # Resolve all post-move endpoints before removing controlled tracks.
     u2_p2 = point(u2, '2')
@@ -198,6 +210,7 @@ def main():
     c103_p2 = point(c103, '2')
     c104_p1 = point(c104, '1')
     c104_p2 = point(c104, '2')
+    stage('post-move endpoints resolved')
 
     # Remove only route-1g controlled local F.Cu geometry plus the single
     # route-1e VOUT2 sense trunk on In2.Cu. Existing +1V8/+3V0 power paths,
@@ -214,6 +227,7 @@ def main():
         elif layer == pcbnew.In2_Cu and nn == '+3V0':
             removed.append((nn, 'In2.Cu'))
             b.Remove(item)
+    stage('controlled tracks removed')
 
     counts = {}
     for key in removed:
@@ -235,6 +249,7 @@ def main():
     n_3v0 = b.FindNet('+3V0')
     if any(n is None for n in (n_sw1, n_sw2, n_vsys, n_pvss1, n_pvss2, n_3v0)):
         raise SystemExit('required net reacquire failed')
+    stage('nets reacquired')
 
     added = 0
 
@@ -260,12 +275,14 @@ def main():
     added += add_track(b, n_vsys, vsys_escape, vsys_turn, VSYS_WIDTH, pcbnew.F_Cu)
     added += add_track(b, n_vsys, vsys_turn, c103_p1, VSYS_WIDTH, pcbnew.F_Cu)
     added += add_track(b, n_vsys, c103_p1, c104_p1, VSYS_WIDTH, pcbnew.F_Cu)
+    stage('SW/VSYS replacement tracks added')
 
     # Keep the existing VOUT2 sense endpoints/vias but free In2.Cu for local
     # PVSS returns by moving only the low-current trunk to B.Cu.
     sense_top = (9.62, 25.30)
     sense_out = (4.80, 33.828194)
     added += add_track(b, n_3v0, sense_top, sense_out, 0.20, pcbnew.B_Cu)
+    stage('VOUT2 sense trunk moved to B.Cu')
 
     # PVSS1 local input return: short F.Cu stubs to two vias, then In2.Cu.
     pvss1_cap_via = (PVSS1_CAP_VIA_X, c103_p2[1])
@@ -277,6 +294,7 @@ def main():
     added += add_track(b, n_pvss1, pvss1_bend, pvss1_cap_via, PVSS_WIDTH, pcbnew.In2_Cu)
     vias_added += add_via(b, n_pvss1, pvss1_cap_via)
     added += add_track(b, n_pvss1, pvss1_cap_via, c103_p2, PVSS_WIDTH, pcbnew.F_Cu)
+    stage('PVSS1 local loop added')
 
     # PVSS2 local input return uses a lower In2 corridor and exits left of C104.
     pvss2_cap_via = (PVSS2_CAP_VIA_X, c104_p2[1])
@@ -289,16 +307,25 @@ def main():
     added += add_track(b, n_pvss2, pvss2_b2, pvss2_cap_via, PVSS_WIDTH, pcbnew.In2_Cu)
     vias_added += add_via(b, n_pvss2, pvss2_cap_via)
     added += add_track(b, n_pvss2, pvss2_cap_via, c104_p2, PVSS_WIDTH, pcbnew.F_Cu)
+    stage('PVSS2 local loop added')
 
+    stage('refill zones begin')
     refill_all_zones(b)
+    stage('refill zones done')
+    stage('synchronize nets begin')
     b.SynchronizeNetsAndNetClasses(True)
+    stage('synchronize nets done')
+    stage('build connectivity begin')
     b.BuildConnectivity()
+    stage('build connectivity done')
 
     if OUT_DIR.exists():
         shutil.rmtree(OUT_DIR)
     OUT_DIR.mkdir(parents=True)
+    stage('save board begin')
     if not pcbnew.SaveBoard(str(OUT_PCB), b):
         raise SystemExit('SaveBoard failed')
+    stage('save board done')
     if SRC_PRO.exists():
         shutil.copy2(SRC_PRO, OUT_PRO)
 
@@ -331,6 +358,7 @@ def main():
         'release_status': 'NOT_FOR_GERBER',
     }
     OUT_REPORT.write_text(json.dumps(out, indent=2) + '\n')
+    stage('report written')
     print(json.dumps(out, indent=2))
 
 
