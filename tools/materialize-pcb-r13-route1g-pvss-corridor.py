@@ -53,10 +53,17 @@ def main():
 
     b=pcbnew.LoadBoard(str(SRC_PCB)); fps={f.GetReference():f for f in b.GetFootprints()}
     u2,l101,l102,c103,c104=fps['U2'],fps['L101'],fps['L102'],fps['C103'],fps['C104']
-    n_sw1=pads(u2,'3')[0].GetNet(); n_sw2=pads(u2,'5')[0].GetNet(); n_vsys=pads(u2,'4')[0].GetNet()
-    if {n_sw1.GetNetname(),n_sw2.GetNetname(),n_vsys.GetNetname()}!={'PMIC_SW1','PMIC_SW2','VSYS'}: raise SystemExit('critical net gate failed')
+
+    # Resolve every footprint/pad-derived datum before mutating the board.
+    # KiCad 9 SWIG wrappers for unrelated board items can become stale after
+    # BOARD.Remove(), so no cached FOOTPRINT/PAD wrapper is reused afterwards.
+    sw1_name=pads(u2,'3')[0].GetNetname(); sw2_name=pads(u2,'5')[0].GetNetname(); vsys_name=pads(u2,'4')[0].GetNetname()
+    if {sw1_name,sw2_name,vsys_name}!={'PMIC_SW1','PMIC_SW2','VSYS'}: raise SystemExit('critical net gate failed')
     if pads(l101,'1')[0].GetNetname()!='PMIC_SW1' or pads(l102,'1')[0].GetNetname()!='PMIC_SW2': raise SystemExit('inductor SW pad gate failed')
     if pads(c103,'1')[0].GetNetname()!='VSYS' or pads(c104,'1')[0].GetNetname()!='VSYS': raise SystemExit('VSYS cap gate failed')
+    u3=point(u2,'3'); u5=point(u2,'5'); u4=point(u2,'4')
+    l1=point(l101,'1'); l2=point(l102,'1'); p103=point(c103,'1'); p104=point(c104,'1')
+    e1=(SW_ESCAPE_X,u3[1]); e2=(SW_ESCAPE_X,u5[1]); ev=(VSYS_ESCAPE_X,u4[1])
 
     # Remove only F.Cu track segments on the three locally controlled nets.
     removed=[]
@@ -69,9 +76,10 @@ def main():
     if removed.count('PMIC_SW1')!=3 or removed.count('PMIC_SW2')!=4 or removed.count('VSYS')!=4:
         raise SystemExit(f'unexpected controlled-track counts removed: {removed}')
 
-    u3=point(u2,'3'); u5=point(u2,'5'); u4=point(u2,'4')
-    l1=point(l101,'1'); l2=point(l102,'1'); p103=point(c103,'1'); p104=point(c104,'1')
-    e1=(SW_ESCAPE_X,u3[1]); e2=(SW_ESCAPE_X,u5[1]); ev=(VSYS_ESCAPE_X,u4[1])
+    # Reacquire nets from the mutated board; do not reuse stale PAD-derived
+    # NETINFO_ITEM wrappers across Remove() calls.
+    n_sw1=b.FindNet(sw1_name); n_sw2=b.FindNet(sw2_name); n_vsys=b.FindNet(vsys_name)
+    if n_sw1 is None or n_sw2 is None or n_vsys is None: raise SystemExit('controlled net reacquire failed')
 
     # Short pad-row escape, then diverge away from PVSS pins instead of forming
     # vertical copper walls beside the QFN.
