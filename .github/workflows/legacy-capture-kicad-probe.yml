@@ -1,0 +1,57 @@
+name: legacy capture KiCad probe
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+      - name: Probe legacy schematic netlist export
+        shell: bash
+        run: |
+          set +e
+          mkdir -p /tmp/legacy-netlists
+          : > /tmp/legacy-probe.log
+          for f in hardware/main-board/kicad/capture/*.sch; do
+            b="$(basename "$f" .sch)"
+            echo "=== $f ===" | tee -a /tmp/legacy-probe.log
+            kicad-cli sch export netlist --format kicadxml -o "/tmp/legacy-netlists/$b.xml" "$f" >>/tmp/legacy-probe.log 2>&1
+            rc=$?
+            echo "rc=$rc" | tee -a /tmp/legacy-probe.log
+            if [ -s "/tmp/legacy-netlists/$b.xml" ]; then
+              python3 - "/tmp/legacy-netlists/$b.xml" <<'PY' | tee -a /tmp/legacy-probe.log
+import sys, xml.etree.ElementTree as ET
+p=sys.argv[1]; r=ET.parse(p).getroot()
+cs=r.findall('./components/comp'); ns=r.findall('./nets/net')
+print('components=',len(cs),'nets=',len(ns),'nodes=',sum(len(n.findall('node')) for n in ns))
+PY
+            fi
+          done
+          cat /tmp/legacy-probe.log
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: legacy-capture-kicad-probe
+          path: |
+            /tmp/legacy-probe.log
+            /tmp/legacy-netlists/**
