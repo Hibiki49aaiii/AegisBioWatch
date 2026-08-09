@@ -4,11 +4,15 @@
 Source: executed-KiCad-clean route-1h (0 violations / 176 unconnected /
 268-node physical audit PASS).
 
-This increment only adds PVSS1_LOCAL/PVSS2_LOCAL copper. The upper return is
-doglegged around the accepted +1V8 route; the lower branch via is moved away
-from C102. NetTie GND-side pads remain deferred for route-1j.
+The route-1h NT101 orientation leaves its PVSS1 pad on the side opposite C107,
+forcing any Top-copper return to wrap around the NetTie GND pad and nearby
+power circuitry. Route-1i therefore rotates NT101 in place by 180 degrees so
+PVSS1_LOCAL faces C107.2. This yields a short C107.2->NT101.1 Top-copper path,
+then branches through one deliberate via to the accepted PVSS1 U2-side loop.
+NT102 already has the correct orientation and is left unchanged.
 
-No component moves, no RF routing and no supplier-gated interfaces.
+NetTie GND-side pads remain deferred for route-1j. No other component moves,
+no RF routing and no supplier-gated interfaces.
 Planning/evidence artifact only; not fabrication authority.
 """
 from __future__ import annotations
@@ -41,16 +45,7 @@ VIA_SIZE = 0.60
 VIA_DRILL = 0.30
 PVSS1_EXISTING_VIA = (8.25, 27.20)
 PVSS2_EXISTING_VIA = (8.25, 29.30)
-
-# Upper return: leave C107.2 to the right, descend outside the PMIC top edge,
-# then approach NT101.1 vertically so neither C107.1 nor the accepted +1V8
-# track is crossed. The via at the outer dogleg also feeds In2.Cu back to the
-# accepted U2-side PVSS1 via.
-PVSS1_OUTER_X = 13.20
-PVSS1_RETURN_Y = 25.30
-PVSS1_BRANCH_VIA = (PVSS1_OUTER_X, PVSS1_RETURN_Y)
-
-# Lower return: keep the branch via clear of C102.1/VSYS and the +3V0 path.
+PVSS1_BRANCH_VIA = (11.30, 25.20)
 PVSS2_BRANCH_VIA = (7.90, 33.10)
 
 
@@ -128,6 +123,10 @@ def has_via(board, netname: str, p: tuple[float, float], tol: float = 0.01) -> b
     return False
 
 
+def near(a: float, b: float, tol: float = 0.001) -> bool:
+    return abs(a - b) <= tol
+
+
 def main():
     stage('start')
     ap = argparse.ArgumentParser()
@@ -176,12 +175,27 @@ def main():
         raise SystemExit('route1i missing accepted PVSS1 U2-side via')
     if not has_via(b, 'PVSS2_LOCAL', PVSS2_EXISTING_VIA):
         raise SystemExit('route1i missing accepted PVSS2 U2-side via')
-    stage('net and existing-via gates passed')
+    if not near(float(nt101.GetOrientationDegrees()), 0.0):
+        raise SystemExit(f'route1i NT101 source-orientation gate failed: {nt101.GetOrientationDegrees()}')
+    stage('net, via and NT101 orientation gates passed')
+
+    # Rotate only NT101 in place. KiCad 9 exposes SetOrientationDegrees on
+    # FOOTPRINT; pad numbers/nets remain unchanged while their physical sides
+    # swap, putting PVSS1_LOCAL toward C107 and GND toward the PMIC/plane side.
+    nt101.SetOrientationDegrees(180.0)
+    if not near(float(nt101.GetOrientationDegrees()), 180.0):
+        raise SystemExit('route1i NT101 rotation failed')
+    stage('NT101 rotated 180 degrees in place')
 
     c107_p2 = point(c107, '2')
     nt101_p1 = point(nt101, '1')
+    nt101_p2 = point(nt101, '2')
     c108_p2 = point(c108, '2')
     nt102_p1 = point(nt102, '1')
+
+    # Rotation must physically swap the two NetTie sides without moving center.
+    if not (near(nt101_p1[0], 10.938265) and near(nt101_p2[0], 9.938265)):
+        raise SystemExit(f'route1i NT101 rotated-pad geometry gate failed: p1={nt101_p1} p2={nt101_p2}')
 
     n1 = b.FindNet('PVSS1_LOCAL')
     n2 = b.FindNet('PVSS2_LOCAL')
@@ -191,24 +205,21 @@ def main():
     added = 0
     vias_added = 0
 
-    # PVSS1: route outside C107/+1V8 before returning to NT101.1.
-    upper_c107_out = (PVSS1_OUTER_X, c107_p2[1])
-    upper_nt_approach = (nt101_p1[0], PVSS1_RETURN_Y)
-    added += add_track(b, n1, c107_p2, upper_c107_out, PVSS_WIDTH, pcbnew.F_Cu)
-    added += add_track(b, n1, upper_c107_out, PVSS1_BRANCH_VIA, PVSS_WIDTH, pcbnew.F_Cu)
-    added += add_track(b, n1, PVSS1_BRANCH_VIA, upper_nt_approach, PVSS_WIDTH, pcbnew.F_Cu)
-    added += add_track(b, n1, upper_nt_approach, nt101_p1, PVSS_WIDTH, pcbnew.F_Cu)
+    # PVSS1: short Top-copper output-cap return into the now-facing NetTie pad;
+    # a second short Top segment reaches a clear branch via, then In2.Cu joins
+    # the already-accepted U2/C103 PVSS1 loop.
+    added += add_track(b, n1, c107_p2, nt101_p1, PVSS_WIDTH, pcbnew.F_Cu)
+    added += add_track(b, n1, nt101_p1, PVSS1_BRANCH_VIA, PVSS_WIDTH, pcbnew.F_Cu)
     vias_added += add_via(b, n1, PVSS1_BRANCH_VIA)
     added += add_track(b, n1, PVSS1_BRANCH_VIA, PVSS1_EXISTING_VIA, PVSS_WIDTH, pcbnew.In2_Cu)
 
-    # PVSS2: retain the clean C108.2->NT102.1 path and branch left/down away
-    # from C102 before crossing on In2.Cu to the accepted U2-side via.
+    # PVSS2 already has the favorable C108->local-pad ordering; retain it.
     added += add_track(b, n2, c108_p2, nt102_p1, PVSS_WIDTH, pcbnew.F_Cu)
     added += add_track(b, n2, nt102_p1, PVSS2_BRANCH_VIA, PVSS_WIDTH, pcbnew.F_Cu)
     vias_added += add_via(b, n2, PVSS2_BRANCH_VIA)
     added += add_track(b, n2, PVSS2_BRANCH_VIA, PVSS2_EXISTING_VIA, PVSS_WIDTH, pcbnew.In2_Cu)
 
-    if added != 8 or vias_added != 2:
+    if added != 6 or vias_added != 2:
         raise SystemExit(f'route1i internal scope gate failed: segments={added} vias={vias_added}')
 
     refill_all_zones(b)
