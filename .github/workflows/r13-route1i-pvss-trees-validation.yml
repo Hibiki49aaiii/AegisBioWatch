@@ -6,6 +6,7 @@ on:
     types: [opened, reopened, synchronize]
     paths:
       - '.github/workflows/r13-route1i-pvss-trees-validation.yml'
+      - 'tools/reproduce-route1h-accepted.sh'
       - 'tools/materialize-pcb-r13-route1i-pvss-trees.py'
       - 'tools/write-pcb-r13-route1i-report.py'
       - 'tools/audit-pcb-pin-nets.py'
@@ -13,6 +14,7 @@ on:
     branches: [agent/phase1-mainboard-schematic]
     paths:
       - '.github/workflows/r13-route1i-pvss-trees-validation.yml'
+      - 'tools/reproduce-route1h-accepted.sh'
       - 'tools/materialize-pcb-r13-route1i-pvss-trees.py'
       - 'tools/write-pcb-r13-route1i-report.py'
       - 'tools/audit-pcb-pin-nets.py'
@@ -20,7 +22,6 @@ on:
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
   validate:
@@ -34,43 +35,11 @@ jobs:
           sudo apt-get install -y software-properties-common
           sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends kicad kicad-footprints unzip
+          sudo apt-get install -y --no-install-recommends kicad kicad-footprints
           test "$(kicad-cli --version | head -n1)" = "9.0.9"
 
-      - name: Restore accepted route1h same-run baseline
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          curl -fL \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/9040996689/zip" \
-            -o /tmp/route1h.zip
-          rm -rf /tmp/route1h-artifact
-          mkdir -p /tmp/route1h-artifact hardware/main-board/pcb/route-r13-1h
-          unzip -q /tmp/route1h.zip -d /tmp/route1h-artifact
-          cp "$(find /tmp/route1h-artifact -name 'AegisBioWatch-MainBoard-Route1h-r13.kicad_pcb' -print -quit)" hardware/main-board/pcb/route-r13-1h/AegisBioWatch-MainBoard-Route1h-r13.kicad_pcb
-          cp "$(find /tmp/route1h-artifact -name 'AegisBioWatch-MainBoard-Route1h-r13.kicad_pro' -print -quit)" hardware/main-board/pcb/route-r13-1h/AegisBioWatch-MainBoard-Route1h-r13.kicad_pro
-          cp "$(find /tmp/route1h-artifact -name 'routing-seed-r13-1h.json' -print -quit)" hardware/main-board/pcb/route-r13-1h/routing-seed-r13-1h.json
-          cp "$(find /tmp/route1h-artifact -name 'route1h.json' -print -quit)" /tmp/route1h.json
-          cp "$(find /tmp/route1h-artifact -name 'route1h-audit.json' -print -quit)" /tmp/route1h-audit.json
-          cp "$(find /tmp/route1h-artifact -name 'route1h-summary.json' -print -quit)" /tmp/route1h-summary.json
-          python3 - <<'PY'
-          import hashlib,json
-          from pathlib import Path
-          pcb=Path('hardware/main-board/pcb/route-r13-1h/AegisBioWatch-MainBoard-Route1h-r13.kicad_pcb')
-          rep=json.load(open('hardware/main-board/pcb/route-r13-1h/routing-seed-r13-1h.json'))
-          drc=json.load(open('/tmp/route1h.json')); audit=json.load(open('/tmp/route1h-audit.json')); summary=json.load(open('/tmp/route1h-summary.json'))
-          h=hashlib.sha256(pcb.read_bytes()).hexdigest()
-          if h!='183cd620cc2a9e9fa74191a7400f4b24f4c902664ec6750189530c92743f2d8c': raise SystemExit('route1h same-run PCB SHA gate failed')
-          if rep.get('output_sha256')!=h: raise SystemExit('route1h report/PCB SHA gate failed')
-          if len(drc.get('violations',[]))!=0 or len(drc.get('unconnected_items',[]))!=176: raise SystemExit('route1h DRC gate failed')
-          if audit.get('result')!='PASS' or audit.get('audited_present_source_nodes')!=268: raise SystemExit('route1h audit gate failed')
-          if summary.get('rule_violations')!=0 or summary.get('unconnected_items')!=176: raise SystemExit('route1h summary gate failed')
-          print({'route1h_sha256':h,'violations':0,'unconnected':176,'audit':'PASS'})
-          PY
+      - name: Reproduce and validate accepted route1h baseline
+        run: bash tools/reproduce-route1h-accepted.sh
 
       - name: Materialize route1i PVSS trees
         run: |
