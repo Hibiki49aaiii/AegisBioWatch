@@ -27,7 +27,9 @@ OUT_PRO=OUT_DIR/'AegisBioWatch-MainBoard-Route1g-r13.kicad_pro'
 OUT_REPORT=OUT_DIR/'routing-seed-r13-1g.json'
 SW_WIDTH=0.20
 VSYS_WIDTH=0.30
-SW_ESCAPE_X=8.70
+SW1_ESCAPE_X=8.50
+SW2_ESCAPE_X=8.30
+SW2_BEND=(7.90,30.40)
 VSYS_ESCAPE_X=8.50
 
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
@@ -54,18 +56,15 @@ def main():
     b=pcbnew.LoadBoard(str(SRC_PCB)); fps={f.GetReference():f for f in b.GetFootprints()}
     u2,l101,l102,c103,c104=fps['U2'],fps['L101'],fps['L102'],fps['C103'],fps['C104']
 
-    # Resolve every footprint/pad-derived datum before mutating the board.
-    # KiCad 9 SWIG wrappers for unrelated board items can become stale after
-    # BOARD.Remove(), so no cached FOOTPRINT/PAD wrapper is reused afterwards.
+    # Resolve all pad-derived data before BOARD.Remove() to avoid stale SWIG wrappers.
     sw1_name=pads(u2,'3')[0].GetNetname(); sw2_name=pads(u2,'5')[0].GetNetname(); vsys_name=pads(u2,'4')[0].GetNetname()
     if {sw1_name,sw2_name,vsys_name}!={'PMIC_SW1','PMIC_SW2','VSYS'}: raise SystemExit('critical net gate failed')
     if pads(l101,'1')[0].GetNetname()!='PMIC_SW1' or pads(l102,'1')[0].GetNetname()!='PMIC_SW2': raise SystemExit('inductor SW pad gate failed')
     if pads(c103,'1')[0].GetNetname()!='VSYS' or pads(c104,'1')[0].GetNetname()!='VSYS': raise SystemExit('VSYS cap gate failed')
     u3=point(u2,'3'); u5=point(u2,'5'); u4=point(u2,'4')
     l1=point(l101,'1'); l2=point(l102,'1'); p103=point(c103,'1'); p104=point(c104,'1')
-    e1=(SW_ESCAPE_X,u3[1]); e2=(SW_ESCAPE_X,u5[1]); ev=(VSYS_ESCAPE_X,u4[1])
+    e1=(SW1_ESCAPE_X,u3[1]); e2=(SW2_ESCAPE_X,u5[1]); ev=(VSYS_ESCAPE_X,u4[1])
 
-    # Remove only F.Cu track segments on the three locally controlled nets.
     removed=[]
     for item in list(b.GetTracks()):
         if not isinstance(item,pcbnew.PCB_TRACK) or isinstance(item,pcbnew.PCB_VIA): continue
@@ -76,18 +75,17 @@ def main():
     if removed.count('PMIC_SW1')!=3 or removed.count('PMIC_SW2')!=4 or removed.count('VSYS')!=4:
         raise SystemExit(f'unexpected controlled-track counts removed: {removed}')
 
-    # Reacquire nets from the mutated board; do not reuse stale PAD-derived
-    # NETINFO_ITEM wrappers across Remove() calls.
     n_sw1=b.FindNet(sw1_name); n_sw2=b.FindNet(sw2_name); n_vsys=b.FindNet(vsys_name)
     if n_sw1 is None or n_sw2 is None or n_vsys is None: raise SystemExit('controlled net reacquire failed')
 
-    # Short pad-row escape, then diverge away from PVSS pins instead of forming
-    # vertical copper walls beside the QFN.
+    # SW1 exits farther left before turning toward L101 so its diagonal clears
+    # the adjacent VOUT1/PVSS1 pads. SW2 first moves left, then below the input
+    # capacitor row, and only then turns toward L102; this avoids crossing C103.
+    # These diverging paths intentionally leave a surface corridor near U2.2/U2.6.
     added=0
     added+=add_track(b,n_sw1,u3,e1,SW_WIDTH); added+=add_track(b,n_sw1,e1,l1,SW_WIDTH)
-    added+=add_track(b,n_sw2,u5,e2,SW_WIDTH); added+=add_track(b,n_sw2,e2,l2,SW_WIDTH)
-    # With SW2 now diverging down-left, VSYS can leave U2.4 above it and head
-    # directly toward the two input capacitors without the previous x=7.75 wall.
+    added+=add_track(b,n_sw2,u5,e2,SW_WIDTH); added+=add_track(b,n_sw2,e2,SW2_BEND,SW_WIDTH); added+=add_track(b,n_sw2,SW2_BEND,l2,SW_WIDTH)
+    # VSYS remains above the rerouted SW2 path and feeds the two local input caps.
     added+=add_track(b,n_vsys,u4,ev,VSYS_WIDTH); added+=add_track(b,n_vsys,ev,p103,VSYS_WIDTH); added+=add_track(b,n_vsys,p103,p104,VSYS_WIDTH)
 
     b.SynchronizeNetsAndNetClasses(True); b.BuildConnectivity()
@@ -105,10 +103,12 @@ def main():
       'vias_added':0,
       'sw_track_width_mm':SW_WIDTH,
       'vsys_track_width_mm':VSYS_WIDTH,
-      'sw_escape_x_mm':SW_ESCAPE_X,
+      'sw1_escape_x_mm':SW1_ESCAPE_X,
+      'sw2_escape_x_mm':SW2_ESCAPE_X,
+      'sw2_bend_mm':list(SW2_BEND),
       'vsys_escape_x_mm':VSYS_ESCAPE_X,
       'sw1_points_mm':[u3,e1,l1],
-      'sw2_points_mm':[u5,e2,l2],
+      'sw2_points_mm':[u5,e2,SW2_BEND,l2],
       'vsys_points_mm':[u4,ev,p103,p104],
       'logical_connectivity_added':False,
       'target':'open F.Cu approach corridors for PVSS1/PVSS2 local returns',
