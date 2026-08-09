@@ -4,13 +4,9 @@
 Source: executed-KiCad-clean route-1h (0 violations / 176 unconnected /
 268-node physical audit PASS).
 
-This increment only adds PVSS1_LOCAL/PVSS2_LOCAL copper:
-  * C107.2 -> NT101.1 -> branch via -> existing PVSS1 U2-side via
-  * C108.2 -> NT102.1 -> branch via -> existing PVSS2 U2-side via
-
-The NetTie GND-side pads remain intentionally deferred for route-1j, so this
-stage does not add GND stitching and does not alter the continuous In1.Cu GND
-reference except to refill clearance around the two new local-return vias.
+This increment only adds PVSS1_LOCAL/PVSS2_LOCAL copper. The upper return is
+doglegged around the accepted +1V8 route; the lower branch via is moved away
+from C102. NetTie GND-side pads remain deferred for route-1j.
 
 No component moves, no RF routing and no supplier-gated interfaces.
 Planning/evidence artifact only; not fabrication authority.
@@ -45,8 +41,17 @@ VIA_SIZE = 0.60
 VIA_DRILL = 0.30
 PVSS1_EXISTING_VIA = (8.25, 27.20)
 PVSS2_EXISTING_VIA = (8.25, 29.30)
-PVSS1_BRANCH_VIA = (9.65, 23.65)
-PVSS2_BRANCH_VIA = (8.65, 33.00)
+
+# Upper return: leave C107.2 to the right, descend outside the PMIC top edge,
+# then approach NT101.1 vertically so neither C107.1 nor the accepted +1V8
+# track is crossed. The via at the outer dogleg also feeds In2.Cu back to the
+# accepted U2-side PVSS1 via.
+PVSS1_OUTER_X = 13.20
+PVSS1_RETURN_Y = 25.30
+PVSS1_BRANCH_VIA = (PVSS1_OUTER_X, PVSS1_RETURN_Y)
+
+# Lower return: keep the branch via clear of C102.1/VSYS and the +3V0 path.
+PVSS2_BRANCH_VIA = (7.90, 33.10)
 
 
 def stage(name: str) -> None:
@@ -186,20 +191,24 @@ def main():
     added = 0
     vias_added = 0
 
-    # Upper BUCK return tree. The C107->NT101 segment remains on Top copper;
-    # the branch to the already-routed U2/C103 loop crosses on In2.Cu.
-    added += add_track(b, n1, c107_p2, nt101_p1, PVSS_WIDTH, pcbnew.F_Cu)
-    added += add_track(b, n1, nt101_p1, PVSS1_BRANCH_VIA, PVSS_WIDTH, pcbnew.F_Cu)
+    # PVSS1: route outside C107/+1V8 before returning to NT101.1.
+    upper_c107_out = (PVSS1_OUTER_X, c107_p2[1])
+    upper_nt_approach = (nt101_p1[0], PVSS1_RETURN_Y)
+    added += add_track(b, n1, c107_p2, upper_c107_out, PVSS_WIDTH, pcbnew.F_Cu)
+    added += add_track(b, n1, upper_c107_out, PVSS1_BRANCH_VIA, PVSS_WIDTH, pcbnew.F_Cu)
+    added += add_track(b, n1, PVSS1_BRANCH_VIA, upper_nt_approach, PVSS_WIDTH, pcbnew.F_Cu)
+    added += add_track(b, n1, upper_nt_approach, nt101_p1, PVSS_WIDTH, pcbnew.F_Cu)
     vias_added += add_via(b, n1, PVSS1_BRANCH_VIA)
     added += add_track(b, n1, PVSS1_BRANCH_VIA, PVSS1_EXISTING_VIA, PVSS_WIDTH, pcbnew.In2_Cu)
 
-    # Lower BUCK return tree follows the same pattern.
+    # PVSS2: retain the clean C108.2->NT102.1 path and branch left/down away
+    # from C102 before crossing on In2.Cu to the accepted U2-side via.
     added += add_track(b, n2, c108_p2, nt102_p1, PVSS_WIDTH, pcbnew.F_Cu)
     added += add_track(b, n2, nt102_p1, PVSS2_BRANCH_VIA, PVSS_WIDTH, pcbnew.F_Cu)
     vias_added += add_via(b, n2, PVSS2_BRANCH_VIA)
     added += add_track(b, n2, PVSS2_BRANCH_VIA, PVSS2_EXISTING_VIA, PVSS_WIDTH, pcbnew.In2_Cu)
 
-    if added != 6 or vias_added != 2:
+    if added != 8 or vias_added != 2:
         raise SystemExit(f'route1i internal scope gate failed: segments={added} vias={vias_added}')
 
     refill_all_zones(b)
