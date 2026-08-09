@@ -1,135 +1,141 @@
 # PCB placement implementation — Phase 1 r13
 
-## Scope
+## Status
 
-r13 converts the staged nPM1300 area from r11 into a deterministic reference-style placement implementation.
+r13 is the current nPM1300 placement implementation. It is generated from the **recovered r8-equivalent topology + r10 mechanical floorplan**, through an executed-KiCad-clean recovered r11 seed.
 
-The source remains the hash-verified r11 real-net placement seed. `U2` stays at the r11 PMIC-zone datum; the nPM1300 local passives are repositioned from the **actual U2 pad geometry and AegisBioWatch net names**, not from third-party absolute coordinates.
+The historical compressed r7/r11 payloads in Git are truncated and are not used as authority. No byte-identical recovery claim is made.
 
-This revision is still **not manufacturing authority** and must not be used for Gerber release.
+Current executed placement gate:
+
+- KiCad CLI: **9.0.9**
+- components: **79**
+- footprints: **76**; J3/J5/J6 intentionally absent
+- nets: **86**
+- physical pin/net audit: **268 / 268 PASS**
+- r13 placement rule violations: **0**
+- r13 placement unconnected/ratsnest: **186**
+
+`186` means the placement is still unrouted. It is not a complete PCB DRC pass and is not manufacturing authority.
 
 ## Authority
 
-Physical-layout authority for this block is Nordic Semiconductor documentation:
+Physical-layout authority for the PMIC block remains Nordic Semiconductor documentation, especially the current nPM1300 QEAA reference layout / hardware guidance. The reviewed QEAA reference-layout v1.2 includes the PVSS1/PVSS2-to-GND NetTie treatment used by this design.
 
-1. nPM1300 QEAA/QFN current reference-layout release (1.2 at r13 implementation time);
-2. nPM1300 Product Specification, configuration 1 reference circuitry and QFN32 pin assignment;
-3. Nordic nPM1300/nPM1304 Hardware Design Guidelines for component placement, switching-current loops and ground-plane integrity.
+The earlier `hlord2000/nPM1300-Stamp` remains a density/adjacency sanity check only. No third-party absolute coordinates are copied.
 
-The earlier `hlord2000/nPM1300-Stamp` review remains density/adjacency evidence only. r13 does **not** copy its component coordinates.
+## Recovered electrical source
 
-## Electrical configuration retained
+`tools/recover-r8-netlist-from-legacy.py` deterministically reconstructs PCB-stage topology from retained project evidence:
 
-No r8 electrical topology is changed by r13.
+- five retained legacy Eeschema sheets;
+- retained AegisBioWatch legacy symbol library;
+- retained r8 BOM;
+- documented r8 J8/J9 interface freeze;
+- documented net-name normalization.
 
-- BUCK1: `+1V8`, VSET1 = 47 kΩ
-- BUCK2: `+3V0`, VSET2 = 150 kΩ
-- L101/L102: 2.2 µH class
-- PVSS1/PVSS2: project-local switching return nets
-- NT101/NT102: explicit transition from local PVSS return to the continuous GND system
-- In1.Cu role: continuous GND; no split ground plane
+The recovery fails closed unless it reproduces the independently retained invariants:
 
-The current Nordic QEAA reference-layout 1.2 release explicitly includes GND net-ties to PVSS1/PVSS2. The exact final top-copper/via shape still requires board-level KiCad review and is not inferred from a third-party board.
+- 79 components;
+- 86 PCB nets;
+- 268 logical pin/net nodes;
+- critical U1/U2 pin mappings;
+- 12 r8 interface checks.
 
-## Implemented placement policy
+`tools/rebuild-pcb-r11-recovered.py` then constructs the unrouted real-net board inside the actual r10 41 × 34 mm Edge.Cuts and is accepted only after KiCad 9.0.9 reports **0 rule violations / 186 unconnected** plus a **268/268 physical-pad audit**.
 
-`tools/materialize-pcb-r13.py` first materializes r11 and refuses to continue unless the r11 PCB SHA-256 matches the recorded electrical-placement source.
+## nPM1300 placement method
 
-It then checks critical U2 pad/net assignments before moving any component.
+`tools/materialize-pcb-r13-recovered.py` binds itself to the exact recovered-r11 PCB SHA and executed validation evidence.
 
-### BUCK block
+U2 remains fixed. Only the 24 PMIC support references are repositioned:
 
-The BUCK-side coordinate frame is derived from U2 pins 2…6.
+- C101–C114
+- L101/L102
+- NT101/NT102
+- R101–R106
 
-- `C103` / `C104`: VSYS input capacitors placed against the PVDD/PVSS1/PVSS2 side.
-- `C114`: high-frequency application decoupling kept immediately at the PVDD/VSYS side.
-- `L101` / `L102`: placed radially from SW1/SW2 to minimize SW copper length.
-- `C107` / `C108`: output capacitors staged directly beyond their corresponding inductors, with their local-return orientation facing the PMIC return region.
-- `NT101` / `NT102`: placed adjacent to the corresponding local-return region so the local switching return can enter the continuous GND reference over a short transition.
+Non-PMIC seed references are not moved.
 
-This implements the Nordic current-loop rules: minimize the high-di/dt input loop, keep PVDD/PVSS/SW components close, and retain an intact second-layer ground reference.
+Placement uses:
 
-### Other nPM1300 local passives
+- actual AegisBioWatch U2 and inductor pad coordinates;
+- actual KiCad no-text footprint bounding geometry;
+- 0.10 mm planning collision gap;
+- functional attraction toward the relevant PMIC pins/nets;
+- bounded legalization when a preferred location is physically blocked.
 
-The following are placed from the relevant U2 package pins rather than arbitrary board coordinates:
+The high-current SW/PVDD/PVSS/VOUT group is placed before lower-current VSET/I2C/LS-LDO support circuitry. In the validated implementation only C104 and L102 required the bounded legalization expansion.
 
-- `C101`: VBUS / charging-input decoupling
-- `C102`: VSYS decoupling
-- `C105`: VBUSOUT decoupling
-- `C106`: VBAT decoupling
-- `C113`: VDDIO / +1V8 decoupling
-- `R101` / `R102`: VSET1/VSET2
-- `C109` / `C110`: DISP_SW output capacitance
-- `C111` / `C112`: BIO_SW output capacitance
-- `R105` / `R106`: optional LS/LDO input links
-- `R103` / `R104`: optional TWI pull-ups
+This is an implementation of reference-layout intent inside the AegisBioWatch envelope, not a copy of reference-board coordinates.
 
-## Reproduction
+## Ground and PVSS policy
 
-From repository root:
+- In1.Cu role remains one continuous GND reference; the GND plane is not split.
+- PVSS1_LOCAL and PVSS2_LOCAL are local switching-return nets.
+- NT101/NT102 are the explicit transition points from those local returns to the continuous GND system.
+- NetTie-to-GND vias must not be treated as complete until an actual keep-out-aware In1 GND plane/stitching implementation exists.
+
+## Routing status
+
+The first over-broad routing prototype is rejected: it attempted several power loops simultaneously with 0.50 mm straight/star tracks and produced KiCad geometry violations.
+
+The accepted first routing increment is **route-1b**, documented in `pcb-routing-r13-route1b.md`:
+
+- PMIC_SW1 and PMIC_SW2 only;
+- 0.20 mm QFN neck-down;
+- dogleg escape outside the 0.5 mm-pitch U2 pad row;
+- 7 segments;
+- 0 vias;
+- KiCad 9.0.9 rule violations = **0**;
+- unconnected = **184**;
+- physical pin/net audit = **268 / 268 PASS**.
+
+Continue routing incrementally, with executed KiCad DRC after every stage. Do not restore the rejected straight/star geometry merely to reduce ratsnest count.
+
+## Current reproduction path
 
 ```bash
-python3 tools/materialize-pcb-r13.py
+python3 tools/recover-r8-netlist-from-legacy.py
+python3 tools/rebuild-pcb-r11-recovered.py \
+  --netlist hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml
 ```
 
-Generated files:
-
-```text
-hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
-hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pro
-hardware/main-board/pcb/placement-r13/placement-implementation-r13.json
-```
-
-## KiCad validation requirement
-
-Run with **KiCad CLI 9.0.9**:
+After the r11 executed DRC/pad-audit evidence is available:
 
 ```bash
-cd hardware/main-board/pcb/placement-r13
-kicad-cli pcb drc --format json --severity-all \
-  -o drc-r13.json AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
+python3 tools/materialize-pcb-r13-recovered.py \
+  --drc-summary <r11-drc-summary.json> \
+  --pin-net-audit <r11-pin-net-audit.json>
 ```
 
-Report these separately:
+Route-1b is then generated from the exact validated r13 placement by:
 
-- rule violations;
-- unconnected items.
+```bash
+python3 tools/materialize-pcb-r13-route1b-recovered.py \
+  --placement-drc-json <r13-drc.json> \
+  --placement-pin-net-audit <r13-pin-net-audit.json>
+```
 
-r13 currently changes placement only, so the intended pre-routing topology baseline remains 186 unconnected items. This number is an expectation to be checked by KiCad, not a substitute for the check.
+The durable validation workflow is `.github/workflows/r13-route1b-sw-validation.yml`.
 
-The branch workflow `.github/workflows/phase1-r13-kicad.yml` reproduces r11, runs the r11 baseline DRC, materializes r13, runs the r13 DRC and preserves the generated board plus DRC evidence as a workflow artifact.
+## Next routing increments
 
-**Do not describe r13 as DRC-clean until that KiCad run reports rule violations = 0.**
-
-## Routing gate after placement validation
-
-After the r13 placement itself is KiCad-clean, routing begins in this order:
-
-1. short local PVSS/GND transition and GND stitching strategy;
-2. VSYS/PVDD input loop;
-3. SW1/L101 and SW2/L102;
-4. +1V8/+3V0 output paths and output-cap returns;
-5. VBAT and charging input;
-6. remaining PMIC low-speed/control nets.
-
-Power copper must be kept away from the nRF54L15 RF reserve. In1.Cu remains continuous GND.
+1. establish the keep-out-aware continuous In1 GND plane/stitching strategy;
+2. BUCK VOUT1 / +1V8 local output path;
+3. BUCK VOUT2 / +3V0 local output path;
+4. VSYS/PVDD input decoupling;
+5. PVSS1/PVSS2 local return trees to NT101/NT102;
+6. NetTie-to-GND vias into the actual continuous GND plane;
+7. VBAT / charger power;
+8. nRF internal DC/DC and crystals;
+9. revision-matched RF matching/feed after silicon revision and fab stack-up gates close;
+10. remaining buses/GPIO/debug.
 
 ## Unchanged release gates
 
-r13 does not close any supplier- or fabrication-specific unknown by assumption. The following remain gated, among others:
-
-- J3 watch-side magnetic-dock contact land pattern;
-- J5 AMOLED official FPC pin definition;
-- J6 touch physical/electrical interface;
-- protected battery-pack drawing and limits;
-- actual procured nPM1300 build code / applicable errata;
-- performance-critical capacitor effective capacitance and final MPNs;
-- fabricator stack-up and final RF impedance geometry;
-- nRF54L15 RF/crystal reference placement and antenna tuning;
-- Bio Board electrode disconnect/high-Z charging safety;
-- fully routed PCB with KiCad violations = 0 and unconnected = 0;
-- DFM and Rev.0 prototype bring-up.
+Still blocked before manufacturing include J3 watch contact land/mechanics, J5 official AMOLED FPC pinout, J6 touch physical/electrical definition, protected battery-pack construction, applicable nPM1300 build-code/errata, critical passive MPN/effective capacitance, final fabricator stack-up, nRF silicon-revision-matched reference design, final 50-ohm geometry and VNA tuning, Bio electrode charging isolation, complete intentional routing, KiCad **rule violations = 0 / unconnected = 0**, DFM and Rev.0 bring-up.
 
 ## Privacy boundary
 
-This hardware revision stores only engineering abstractions and contains no individual health history, private messages, medication names/doses, or identifiable health information.
+Repository material is restricted to engineering abstractions. It contains no individual health history, private messages, medication names/doses, or identifiable health information.
