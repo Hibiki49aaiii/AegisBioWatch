@@ -1,0 +1,66 @@
+{
+  "revision": "r13-route1h-pvss-input-loops",
+  "status": "ACCEPTED_EXECUTED_KICAD_CLEAN_INCREMENT",
+  "workflow": {
+    "name": "r13 route1h PVSS input loops validation",
+    "run_id": 31323982087,
+    "job_id": 93271287602,
+    "validated_head_sha": "c822839559ee43f7ff57d3487900cc0877493710",
+    "kicad_version": "9.0.9"
+  },
+  "validation": {
+    "rule_violations": 0,
+    "unconnected_items": 176,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "controlled_segments_removed": 11,
+    "replacement_segments_added": 20,
+    "vias_added": 4,
+    "moved_footprints": ["C103", "C104"]
+  },
+  "routing": {
+    "logical_connectivity_added": [
+      "U2.2<->C103.2",
+      "U2.6<->C104.2"
+    ],
+    "moved_footprints": {
+      "C103": {
+        "from_mm": [6.84638, 29.040584],
+        "to_mm": [6.35, 29.040584]
+      },
+      "C104": {
+        "from_mm": [5.094124, 28.977213],
+        "to_mm": [4.82, 28.977213]
+      }
+    },
+    "pvss1_cap_side_via_mm": [5.55, 27.55],
+    "pvss2_cap_side_via_mm": [3.75, 28.202213],
+    "vout2_sense_trunk_layer": "B.Cu",
+    "vout2_sense_points_mm": [
+      [9.62, 25.30],
+      [9.62, 31.00],
+      [4.80, 33.828194]
+    ],
+    "in1_gnd_plane_preserved_and_refilled": true,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  },
+  "deferred_same_net_nodes": [
+    "C107.2",
+    "NT101.1",
+    "C108.2",
+    "NT102.1"
+  ],
+  "evidence": {
+    "artifact_name": "r13-route1h-pvss-input-loops-evidence",
+    "artifact_id": 9040996689,
+    "artifact_digest": "sha256:42c7afab00e7fee3c98a90da450588286b4909aff416e3dd020da05255792424",
+    "routed_pcb_sha256": "183cd620cc2a9e9fa74191a7400f4b24f4c902664ec6750189530c92743f2d8c",
+    "route1h_summary_sha256": "8af50cf887940cf85fde2820f915444113220de313fca509aaa597c2b2659557",
+    "route1h_drc_sha256": "a4015e6d168b7d0fe5dd45bfff521a7d339f2d3fab4e00688fbf667029317beb",
+    "pin_net_audit_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "routing_report_sha256": "73bbe8646f3dcc938e2287b589018f2ebd3cc1c51a6f0663167b221b7f594ff1"
+  },
+  "release_status": "NOT_FOR_GERBER",
+  "note": "This is a DRC-clean incremental PCB baseline, not a completed PCB. 176 connections remain unrouted. Same-run Actions artifact evidence is authoritative because generated KiCad UUIDs can vary across deterministic reproductions."
+}
