@@ -67,12 +67,12 @@ def main():
     # High-current local output leg.
     segs=add_track(b,net,pl,pc,WIDTH_POWER,pcbnew.F_Cu)
 
-    # Kelvin/sense escape. The first candidate at (10.00, 25.20) was rejected
-    # by executed KiCad DRC because it left only 0.0292 mm to NT101.1. Moving
-    # 0.10 mm toward U2 preserves the route while restoring the 0.10 mm rule.
-    # The second via remains left of C108. The In2 segment passes below F.Cu
-    # component congestion and remains outside the retained RF keep-out.
-    via_top=(10.00,25.30)
+    # Kelvin/sense escape. Executed DRC proved there is no legal 0.10 mm
+    # vertical clearance window at x=10.00 between NT101.1 and U2.31. Move the
+    # via left toward same-net U2.32 instead: (9.50,25.30) lies outside both
+    # expanded foreign-net pad envelopes while keeping a short F.Cu escape.
+    # The second via remains left of C108; In2 carries the long sense segment.
+    via_top=(9.50,25.30)
     via_out=(4.80,33.828194)
     segs+=add_track(b,net,pu,via_top,WIDTH_SENSE,pcbnew.F_Cu)
     vias=add_via(b,net,via_top)
