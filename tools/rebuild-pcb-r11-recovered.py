@@ -3,11 +3,10 @@
 
 KiCad FOOTPRINT.GetBoundingBox() includes footprint fields/text by default.
 Those annotations are not component placement envelopes, so packing uses
-GetBoundingBox(False).  The BIO reserve is widened 1.5 mm to the right so the
-selected Hirose FH12-20S connector's real ~13.3 mm body/MP span can fit without
-changing the 41 x 34 mm board envelope or entering the MCU/RF reserve.
-
-KiCad courtyard/clearance DRC remains placement-rule authority after generation.
+GetBoundingBox(False).  The Main<->Bio FH12 connector is physically wide; its
+KiCad no-text bounding box already contains the library placement geometry, so
+only a small extra packing guard is added around J7.  KiCad courtyard and
+clearance DRC remains final placement-rule authority after generation.
 """
 from __future__ import annotations
 
@@ -37,6 +36,23 @@ def bbox_local_mm_no_text(fp):
     )
 
 
+original_scan_place = mod.scan_place
+
+
+def scan_place_physical(fp, zone, occupied, margin=0.25):
+    ref = fp.GetReference()
+    if ref == "J7":
+        margin = 0.10
+    return original_scan_place(fp, zone, occupied, margin)
+
+
 mod.bbox_local_mm = bbox_local_mm_no_text
-mod.ZONES["BIO"] = (100.25, 74.25, 114.25, 82.75)
+mod.scan_place = scan_place_physical
+mod.ZONES["BIO"] = (100.25, 74.25, 115.75, 82.75)
+
+j7 = mod.load_fp("Connector_FFC-FPC:Hirose_FH12-20S-0.5SH_1x20-1MP_P0.50mm_Horizontal")
+j7.SetReference("J7")
+print("J7 KiCad GetBoundingBox(False) mm =", bbox_local_mm_no_text(j7))
+print("BIO recovered reserve mm =", mod.ZONES["BIO"])
+
 mod.main()
