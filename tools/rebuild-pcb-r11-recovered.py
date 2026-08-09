@@ -15,7 +15,11 @@ Recovery-only corrections implemented here:
   *planning* minima: 0.10 mm clearance, 0.20 mm copper-edge clearance, and
   0.20 mm minimum through-hole drill. These are not fabrication rules;
 - retain r10 mechanical datum and antenna keep-out;
-- rotate the physically wide Main<->Bio FH12 connector J7 by 90 degrees.
+- rotate the physically wide Main<->Bio FH12 connector J7 by 90 degrees;
+- preserve the two r10 floorplan-status annotations, but move them from F.SilkS
+  to Cmts.User in the recovered real-net seed so planning prose cannot collide
+  with real component silkscreen/copper. The authoritative r10 source is not
+  modified.
 
 This creates an unrouted recovery seed only. r13 must still replace U2's local
 power cluster with Nordic-reference current-loop placement before routing.
@@ -94,6 +98,38 @@ def find_pad_group(fp, number: str):
 
 
 mod.find_pad = find_pad_group
+
+# The r10 floorplan contains two status labels on F.SilkS. They are useful design
+# notes but are not production silkscreen. When real footprints are introduced,
+# keep the text and move it to Cmts.User before the board is saved. BOARD.GetDrawings,
+# PCB_TEXT.GetShownText and BOARD_ITEM.SetLayer are KiCad APIs; fail closed unless
+# exactly the two expected annotations are found and moved.
+FLOORPLAN_STATUS_TEXT = {
+    "FLOORPLAN ONLY",
+    "PROVISIONAL MAIN PCB 41.0 x 34.0 / 0.8 mm / 4L",
+}
+_real_save_board = mod.pcbnew.SaveBoard
+
+
+def save_board_with_floorplan_notes_on_comments(path, board):
+    moved = []
+    for item in board.GetDrawings():
+        if not isinstance(item, pcbnew.PCB_TEXT):
+            continue
+        text = str(item.GetShownText(False, 0))
+        if text in FLOORPLAN_STATUS_TEXT and item.GetLayer() == pcbnew.F_SilkS:
+            item.SetLayer(pcbnew.Cmts_User)
+            moved.append(text)
+    if set(moved) != FLOORPLAN_STATUS_TEXT or len(moved) != len(FLOORPLAN_STATUS_TEXT):
+        raise SystemExit(
+            "recovered r11 floorplan-note migration mismatch: "
+            f"expected={sorted(FLOORPLAN_STATUS_TEXT)} moved={sorted(moved)}"
+        )
+    print("Moved r10 status notes F.SilkS -> Cmts.User:", sorted(moved))
+    return _real_save_board(path, board)
+
+
+mod.pcbnew.SaveBoard = save_board_with_floorplan_notes_on_comments
 
 
 def bbox_local_mm(fp):
