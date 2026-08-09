@@ -10,6 +10,7 @@ on:
       - '.github/workflows/r11-recovered-topology-validation.yml'
       - 'tools/recover-r8-netlist-from-legacy.py'
       - 'tools/rebuild-pcb-r11-from-r8-r10.py'
+      - 'tools/rebuild-pcb-r11-recovered.py'
       - 'hardware/main-board/kicad/capture/**'
       - 'hardware/main-board/kicad/generated/BOM-r8.csv'
       - 'hardware/main-board/pcb/AegisBioWatch-MainBoard-Floorplan-r10.kicad_*'
@@ -41,7 +42,7 @@ jobs:
 
       - name: Rebuild real-net r11 seed from recovered topology and r10 floorplan
         run: |
-          python3 tools/rebuild-pcb-r11-from-r8-r10.py \
+          python3 tools/rebuild-pcb-r11-recovered.py \
             --netlist hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml
 
       - name: KiCad 9.0.9 PCB DRC on rebuilt r11
@@ -53,13 +54,14 @@ jobs:
             hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb
           python3 - <<'PY'
           import json
+          from collections import Counter
           p='/tmp/drc-r11-rebuilt.json'
           d=json.load(open(p))
           v=d.get('violations',[]); u=d.get('unconnected_items',[])
           print(f'KiCad rebuilt r11: rule violations={len(v)}, unconnected={len(u)}')
+          print('violation_types=',dict(Counter(x.get('type','?') for x in v if isinstance(x,dict))))
           if v:
-              from collections import Counter
-              print('violation_types=',dict(Counter(x.get('type','?') for x in v)))
+              print(json.dumps(v[:30],indent=2))
               raise SystemExit('rebuilt r11 has KiCad rule violations')
           PY
 
@@ -84,12 +86,12 @@ jobs:
               ref=fp.GetReference()
               for pad in fp.Pads():
                   if pad.GetNetname(): actual[(ref,str(pad.GetNumber()))]=pad.GetNetname()
+          audited=[k for k in expected if k[0] not in {'J3','J5','J6'}]
           mismatches=[]
-          for k,v in expected.items():
-              if k[0] in {'J3','J5','J6'}: continue
-              if actual.get(k)!=v: mismatches.append({'ref':k[0],'pin':k[1],'expected':v,'actual':actual.get(k)})
+          for k in audited:
+              if actual.get(k)!=expected[k]: mismatches.append({'ref':k[0],'pin':k[1],'expected':expected[k],'actual':actual.get(k)})
           unexpected=[{'ref':r,'pin':p,'net':n} for (r,p),n in actual.items() if (r,p) not in expected]
-          report={'expected_nodes':len(expected),'audited_present_nodes':len(expected),'mismatches':mismatches,'unexpected_pad_nets':unexpected,'result':'PASS' if not mismatches and not unexpected else 'FAIL'}
+          report={'source_nodes':len(expected),'audited_present_nodes':len(audited),'mismatches':mismatches,'unexpected_pad_nets':unexpected,'result':'PASS' if not mismatches and not unexpected else 'FAIL'}
           Path('/tmp/r11-rebuilt-pin-net-audit.json').write_text(json.dumps(report,indent=2)+'\n')
           print(json.dumps(report,indent=2))
           if mismatches or unexpected: raise SystemExit('pin/net audit failed')
@@ -97,15 +99,19 @@ jobs:
 
       - name: Package executed evidence
         shell: bash
+        if: always()
         run: |
           mkdir -p /tmp/r11-recovered-evidence
-          cp docs/r8-topology-recovery-validation.json /tmp/r11-recovered-evidence/
-          cp hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml /tmp/r11-recovered-evidence/
-          cp hardware/main-board/pcb/placement-r11-rebuilt/placement-seed-manifest-r11-rebuilt.json /tmp/r11-recovered-evidence/
-          cp hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb /tmp/r11-recovered-evidence/
-          cp /tmp/drc-r11-rebuilt.json /tmp/r11-recovered-evidence/
-          cp /tmp/r11-rebuilt-pin-net-audit.json /tmp/r11-recovered-evidence/
-          sha256sum /tmp/r11-recovered-evidence/* | tee /tmp/r11-recovered-evidence/SHA256SUMS.txt
+          for f in \
+            docs/r8-topology-recovery-validation.json \
+            hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
+            hardware/main-board/pcb/placement-r11-rebuilt/placement-seed-manifest-r11-rebuilt.json \
+            hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb \
+            /tmp/drc-r11-rebuilt.json \
+            /tmp/r11-rebuilt-pin-net-audit.json; do
+              test -f "$f" && cp "$f" /tmp/r11-recovered-evidence/
+          done
+          sha256sum /tmp/r11-recovered-evidence/* | tee /tmp/r11-recovered-evidence/SHA256SUMS.txt || true
 
       - uses: actions/upload-artifact@v4
         if: always()
