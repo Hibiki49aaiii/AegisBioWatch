@@ -5,7 +5,7 @@
     "name": "r13 route1g PVSS corridor validation",
     "run_id": 31322247376,
     "job_id": 93266927047,
-    "head_sha": "b15f77804aa3631bf9afce198d10f895fd66f763",
+    "validated_head_sha": "b15f77804aa3631bf9afce198d10f895fd66f763",
     "kicad_version": "9.0.9"
   },
   "validation": {
