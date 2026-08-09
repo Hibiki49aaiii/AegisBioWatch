@@ -1,0 +1,61 @@
+name: payload history recovery
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan historical certified payloads
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, hashlib, json, subprocess
+
+          root=Path('.')
+          cases=[
+            ('r7','hardware/main-board/kicad/native-r7-payload/native-r7.tar.gz.b64','hardware/main-board/kicad/native-r7-payload/manifest.json'),
+            ('r11','hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64','hardware/main-board/pcb/placement-r11-payload/manifest.json'),
+          ]
+          def git(*a):
+            return subprocess.run(['git',*a],check=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+          def validate(raw, n, sha):
+            try: s=''.join(raw.decode('ascii').split()); b=base64.b64decode(s,validate=True)
+            except Exception as e: return False, str(e)
+            if len(b)!=n: return False,f'bytes={len(b)} expected={n}'
+            h=hashlib.sha256(b).hexdigest()
+            return (h==sha, f'sha={h}')
+          report={}
+          for name,path,mp in cases:
+            m=json.loads(Path(mp).read_text())
+            n=int(m['archive_bytes']); sha=m['archive_sha256']
+            commits=git('log','--all','--format=%H','--',path).stdout.decode().splitlines()
+            seen=[]; good=[]
+            for c in commits:
+              cp=git('show',f'{c}:{path}')
+              if cp.returncode: continue
+              ok,why=validate(cp.stdout,n,sha)
+              seen.append({'commit':c,'ok':ok,'reason':why,'blob_bytes':len(cp.stdout)})
+              if ok: good.append(c)
+            report[name]={'expected_archive_bytes':n,'expected_archive_sha256':sha,'candidates':seen,'certified_commits':good}
+          print(json.dumps(report,indent=2))
+          Path('/tmp/payload-history-report.json').write_text(json.dumps(report,indent=2))
+          PY
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: payload-history-report
+          path: /tmp/payload-history-report.json
