@@ -43,7 +43,8 @@ VIA_DRILL = 0.30
 C103_EXPECTED = (6.84638, 29.040584)
 C104_EXPECTED = (5.094124, 28.977213)
 C103_X = 6.35
-C104_X = 4.55
+# Keep C104 left of C103 but far enough right to clear R503 courtyard.
+C104_X = 4.82
 SW_ESCAPE_X = 7.72
 VSYS_ESCAPE_X = 7.35
 SW2_TURN_Y = 30.65
@@ -53,8 +54,10 @@ PVSS2_U2_VIA = (8.25, 29.30)
 PVSS1_CAP_VIA_X = 5.55
 PVSS2_CAP_VIA_X = 3.75
 PVSS1_IN2_BEND_X = 6.30
-PVSS2_IN2_BEND_1_X = 6.00
-PVSS2_IN2_BEND_2_X = 4.50
+PVSS2_IN2_BEND_X = 4.50
+# Route the B.Cu VOUT2 sense trunk down the right side before heading left so
+# it cannot intersect either local PVSS through-via.
+VOUT2_SENSE_BEND = (9.62, 31.00)
 
 
 def stage(name: str) -> None:
@@ -265,8 +268,9 @@ def main():
 
     sense_top = (9.62, 25.30)
     sense_out = (4.80, 33.828194)
-    added += add_track(b, n_3v0, sense_top, sense_out, 0.20, pcbnew.B_Cu)
-    stage('VOUT2 sense trunk moved to B.Cu')
+    added += add_track(b, n_3v0, sense_top, VOUT2_SENSE_BEND, 0.20, pcbnew.B_Cu)
+    added += add_track(b, n_3v0, VOUT2_SENSE_BEND, sense_out, 0.20, pcbnew.B_Cu)
+    stage('VOUT2 sense trunk moved to B.Cu with right-side dogleg')
 
     pvss1_cap_via = (PVSS1_CAP_VIA_X, c103_p2[1])
     pvss1_bend = (PVSS1_IN2_BEND_X, PVSS1_U2_VIA[1])
@@ -280,13 +284,11 @@ def main():
     stage('PVSS1 local loop added')
 
     pvss2_cap_via = (PVSS2_CAP_VIA_X, c104_p2[1])
-    pvss2_b1 = (PVSS2_IN2_BEND_1_X, PVSS2_U2_VIA[1])
-    pvss2_b2 = (PVSS2_IN2_BEND_2_X, PVSS2_U2_VIA[1])
+    pvss2_bend = (PVSS2_IN2_BEND_X, PVSS2_U2_VIA[1])
     added += add_track(b, n_pvss2, u2_p6, PVSS2_U2_VIA, PVSS_WIDTH, pcbnew.F_Cu)
     vias_added += add_via(b, n_pvss2, PVSS2_U2_VIA)
-    added += add_track(b, n_pvss2, PVSS2_U2_VIA, pvss2_b1, PVSS_WIDTH, pcbnew.In2_Cu)
-    added += add_track(b, n_pvss2, pvss2_b1, pvss2_b2, PVSS_WIDTH, pcbnew.In2_Cu)
-    added += add_track(b, n_pvss2, pvss2_b2, pvss2_cap_via, PVSS_WIDTH, pcbnew.In2_Cu)
+    added += add_track(b, n_pvss2, PVSS2_U2_VIA, pvss2_bend, PVSS_WIDTH, pcbnew.In2_Cu)
+    added += add_track(b, n_pvss2, pvss2_bend, pvss2_cap_via, PVSS_WIDTH, pcbnew.In2_Cu)
     vias_added += add_via(b, n_pvss2, pvss2_cap_via)
     added += add_track(b, n_pvss2, pvss2_cap_via, c104_p2, PVSS_WIDTH, pcbnew.F_Cu)
     stage('PVSS2 local loop added')
