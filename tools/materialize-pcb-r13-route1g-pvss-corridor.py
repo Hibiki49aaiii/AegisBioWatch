@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""r13 route-1g: refine SW/VSYS escapes to open top-copper PVSS corridors.
+"""r13 route-1g: refine SW/VSYS escapes for later top-copper PVSS routing.
 
 This stage does not add new logical connectivity. It replaces the accepted
-route-1b SW1/SW2 doglegs and route-1f VSYS dogleg with shorter, diverging
-routes. The objective is to make the Nordic-critical PVSS1/PVSS2 local returns
-routable on F.Cu without via-in-pad or cutting the continuous In1.Cu GND plane.
+route-1b SW1/SW2 doglegs and route-1f VSYS dogleg with a controlled geometry
+that removes the long SW1 vertical barrier while keeping SW2 and VSYS in
+separate, DRC-safe channels. SW2 approaches L102.1 from above so it does not
+cross the adjacent +3V0 pad.
 
 Source gate: route-1f must be executed-KiCad-clean at 0 violations / 178
 unconnected with the 268-node physical pad/net audit PASS.
@@ -27,10 +28,10 @@ OUT_PRO=OUT_DIR/'AegisBioWatch-MainBoard-Route1g-r13.kicad_pro'
 OUT_REPORT=OUT_DIR/'routing-seed-r13-1g.json'
 SW_WIDTH=0.20
 VSYS_WIDTH=0.30
-SW1_ESCAPE_X=8.50
+SW1_ESCAPE_X=8.45
 SW2_ESCAPE_X=8.30
-SW2_BEND=(7.90,30.40)
-VSYS_ESCAPE_X=8.50
+SW2_TURN_Y=30.65
+VSYS_ESCAPE_X=7.75
 
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def loadj(p): return json.loads(Path(p).read_text())
@@ -64,6 +65,8 @@ def main():
     u3=point(u2,'3'); u5=point(u2,'5'); u4=point(u2,'4')
     l1=point(l101,'1'); l2=point(l102,'1'); p103=point(c103,'1'); p104=point(c104,'1')
     e1=(SW1_ESCAPE_X,u3[1]); e2=(SW2_ESCAPE_X,u5[1]); ev=(VSYS_ESCAPE_X,u4[1])
+    sw2_turn=(SW2_ESCAPE_X,SW2_TURN_Y); sw2_pre_l=(l2[0],SW2_TURN_Y)
+    vsys_turn=(VSYS_ESCAPE_X,p103[1])
 
     removed=[]
     for item in list(b.GetTracks()):
@@ -78,15 +81,24 @@ def main():
     n_sw1=b.FindNet(sw1_name); n_sw2=b.FindNet(sw2_name); n_vsys=b.FindNet(vsys_name)
     if n_sw1 is None or n_sw2 is None or n_vsys is None: raise SystemExit('controlled net reacquire failed')
 
-    # SW1 exits farther left before turning toward L101 so its diagonal clears
-    # the adjacent VOUT1/PVSS1 pads. SW2 first moves left, then below the input
-    # capacitor row, and only then turns toward L102; this avoids crossing C103.
-    # These diverging paths intentionally leave a surface corridor near U2.2/U2.6.
+    # SW1 escapes left then diagonally to L101.1. Moving the turn left from the
+    # failed 8.50 mm point restores clearance to U2.2/PVSS1_LOCAL.
     added=0
     added+=add_track(b,n_sw1,u3,e1,SW_WIDTH); added+=add_track(b,n_sw1,e1,l1,SW_WIDTH)
-    added+=add_track(b,n_sw2,u5,e2,SW_WIDTH); added+=add_track(b,n_sw2,e2,SW2_BEND,SW_WIDTH); added+=add_track(b,n_sw2,SW2_BEND,l2,SW_WIDTH)
-    # VSYS remains above the rerouted SW2 path and feeds the two local input caps.
-    added+=add_track(b,n_vsys,u4,ev,VSYS_WIDTH); added+=add_track(b,n_vsys,ev,p103,VSYS_WIDTH); added+=add_track(b,n_vsys,p103,p104,VSYS_WIDTH)
+
+    # SW2 stays in its own channel, turns below the C103/C104 row, then reaches
+    # L102.1 vertically from above. This avoids both the VSYS spine and L102.2/+3V0.
+    added+=add_track(b,n_sw2,u5,e2,SW_WIDTH)
+    added+=add_track(b,n_sw2,e2,sw2_turn,SW_WIDTH)
+    added+=add_track(b,n_sw2,sw2_turn,sw2_pre_l,SW_WIDTH)
+    added+=add_track(b,n_sw2,sw2_pre_l,l2,SW_WIDTH)
+
+    # Preserve the already-validated route-1f VSYS dogleg rather than forcing a
+    # diagonal through the SW2 channel.
+    added+=add_track(b,n_vsys,u4,ev,VSYS_WIDTH)
+    added+=add_track(b,n_vsys,ev,vsys_turn,VSYS_WIDTH)
+    added+=add_track(b,n_vsys,vsys_turn,p103,VSYS_WIDTH)
+    added+=add_track(b,n_vsys,p103,p104,VSYS_WIDTH)
 
     b.SynchronizeNetsAndNetClasses(True); b.BuildConnectivity()
     if OUT_DIR.exists(): shutil.rmtree(OUT_DIR)
@@ -105,13 +117,13 @@ def main():
       'vsys_track_width_mm':VSYS_WIDTH,
       'sw1_escape_x_mm':SW1_ESCAPE_X,
       'sw2_escape_x_mm':SW2_ESCAPE_X,
-      'sw2_bend_mm':list(SW2_BEND),
+      'sw2_turn_y_mm':SW2_TURN_Y,
       'vsys_escape_x_mm':VSYS_ESCAPE_X,
       'sw1_points_mm':[u3,e1,l1],
-      'sw2_points_mm':[u5,e2,SW2_BEND,l2],
-      'vsys_points_mm':[u4,ev,p103,p104],
+      'sw2_points_mm':[u5,e2,sw2_turn,sw2_pre_l,l2],
+      'vsys_points_mm':[u4,ev,vsys_turn,p103,p104],
       'logical_connectivity_added':False,
-      'target':'open F.Cu approach corridors for PVSS1/PVSS2 local returns',
+      'target':'DRC-clean PMIC-local SW/VSYS geometry with SW1 barrier removed for PVSS follow-on routing',
       'in1_gnd_plane_preserved':True,
       'rf_routing_touched':False,
       'supplier_gated_interfaces_touched':False,
