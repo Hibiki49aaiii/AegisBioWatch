@@ -1,6 +1,25 @@
 name: r13 route1h PVSS input loops validation
 
 on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1h-pvss-input-loops-validation.yml'
+      - 'tools/audit-pcb-pin-nets.py'
+      - 'tools/recover-r8-netlist-from-legacy.py'
+      - 'tools/rebuild-pcb-r11-recovered.py'
+      - 'tools/materialize-pcb-r13-recovered.py'
+      - 'tools/materialize-pcb-r13-route1b-recovered.py'
+      - 'tools/materialize-pcb-r13-route1c-gnd-plane.py'
+      - 'tools/materialize-pcb-r13-route1d-vout1.py'
+      - 'tools/materialize-pcb-r13-route1e-vout2.py'
+      - 'tools/materialize-pcb-r13-route1f-vsys.py'
+      - 'tools/materialize-pcb-r13-route1g-pvss-corridor.py'
+      - 'tools/materialize-pcb-r13-route1h-pvss-input-loops.py'
+      - 'hardware/main-board/kicad/capture/**'
+      - 'hardware/main-board/kicad/generated/BOM-r8.csv'
+      - 'hardware/main-board/pcb/AegisBioWatch-MainBoard-Floorplan-r10.kicad_pcb'
   push:
     branches: [agent/phase1-mainboard-schematic]
     paths:
