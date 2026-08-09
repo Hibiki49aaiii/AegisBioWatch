@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+python3 tools/recover-r8-netlist-from-legacy.py
+python3 tools/rebuild-pcb-r11-recovered.py --netlist hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml
+kicad-cli pcb drc --format json --severity-all -o /tmp/r11.json hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb
+python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb --output /tmp/r11-audit.json
+python3 - <<'PY'
+import json
+from pathlib import Path
+d=json.load(open('/tmp/r11.json')); a=json.load(open('/tmp/r11-audit.json'))
+s={'rule_violations':len(d.get('violations',[])),'unconnected_items':len(d.get('unconnected_items',[]))}
+Path('/tmp/r11-summary.json').write_text(json.dumps(s))
+if s!={'rule_violations':0,'unconnected_items':186}: raise SystemExit('r11 gate failed')
+if a.get('result')!='PASS' or a.get('audited_present_source_nodes')!=268: raise SystemExit('r11 audit gate failed')
+PY
+
+python3 tools/materialize-pcb-r13-recovered.py --drc-summary /tmp/r11-summary.json --pin-net-audit /tmp/r11-audit.json
+kicad-cli pcb drc --format json --severity-all -o /tmp/r13.json hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
+python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb --output /tmp/r13-audit.json
+python3 - <<'PY'
+import json
+d=json.load(open('/tmp/r13.json')); a=json.load(open('/tmp/r13-audit.json'))
+if len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=186: raise SystemExit('r13 gate failed')
+if a.get('result')!='PASS' or a.get('audited_present_source_nodes')!=268: raise SystemExit('r13 audit gate failed')
+PY
+
+python3 tools/materialize-pcb-r13-route1b-recovered.py --placement-drc-json /tmp/r13.json --placement-pin-net-audit /tmp/r13-audit.json
+kicad-cli pcb drc --format json --severity-all -o /tmp/route1b.json hardware/main-board/pcb/route-r13-1b/AegisBioWatch-MainBoard-Route1b-r13.kicad_pcb
+python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/route-r13-1b/AegisBioWatch-MainBoard-Route1b-r13.kicad_pcb --output /tmp/route1b-audit.json
+python3 - <<'PY'
+import json
+d=json.load(open('/tmp/route1b.json')); a=json.load(open('/tmp/route1b-audit.json'))
+if len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=184 or a.get('result')!='PASS': raise SystemExit('route1b gate failed')
+PY
+
+python3 tools/materialize-pcb-r13-route1c-gnd-plane.py --route1b-drc-json /tmp/route1b.json --route1b-pin-net-audit /tmp/route1b-audit.json
+kicad-cli pcb drc --format json --severity-all -o /tmp/route1c.json hardware/main-board/pcb/route-r13-1c/AegisBioWatch-MainBoard-Route1c-r13.kicad_pcb
+python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/route-r13-1c/AegisBioWatch-MainBoard-Route1c-r13.kicad_pcb --output /tmp/route1c-audit.json
+python3 - <<'PY'
+import json
+d=json.load(open('/tmp/route1c.json')); a=json.load(open('/tmp/route1c-audit.json'))
+if len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=184 or a.get('result')!='PASS': raise SystemExit('route1c gate failed')
+PY
+
+python3 tools/materialize-pcb-r13-route1d-vout1.py --route1c-drc-json /tmp/route1c.json --route1c-pin-net-audit /tmp/route1c-audit.json
+kicad-cli pcb drc --format json --severity-all -o /tmp/route1d.json hardware/main-board/pcb/route-r13-1d/AegisBioWatch-MainBoard-Route1d-r13.kicad_pcb
+python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/route-r13-1d/AegisBioWatch-MainBoard-Route1d-r13.kicad_pcb --output /tmp/route1d-audit.json
+python3 - <<'PY'
+import json
+d=json.load(open('/tmp/route1d.json')); a=json.load(open('/tmp/route1d-audit.json'))
+if len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=182 or a.get('result')!='PASS': raise SystemExit('route1d gate failed')
+PY
+
+python3 tools/materialize-pcb-r13-route1e-vout2.py --route1d-drc-json /tmp/route1d.json --route1d-pin-net-audit /tmp/route1d-audit.json
+kicad-cli pcb drc --format json --severity-all -o /tmp/route1e.json hardware/main-board/pcb/route-r13-1e/AegisBioWatch-MainBoard-Route1e-r13.kicad_pcb
+python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/route-r13-1e/AegisBioWatch-MainBoard-Route1e-r13.kicad_pcb --output /tmp/route1e-audit.json
+python3 - <<'PY'
+import json
+d=json.load(open('/tmp/route1e.json')); a=json.load(open('/tmp/route1e-audit.json'))
+if len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=180 or a.get('result')!='PASS': raise SystemExit('route1e gate failed')
+PY
+
+python3 tools/materialize-pcb-r13-route1f-vsys.py --route1e-drc-json /tmp/route1e.json --route1e-pin-net-audit /tmp/route1e-audit.json
+kicad-cli pcb drc --format json --severity-all -o /tmp/route1f.json hardware/main-board/pcb/route-r13-1f/AegisBioWatch-MainBoard-Route1f-r13.kicad_pcb
+python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/route-r13-1f/AegisBioWatch-MainBoard-Route1f-r13.kicad_pcb --output /tmp/route1f-audit.json
+python3 - <<'PY'
+import json
+d=json.load(open('/tmp/route1f.json')); a=json.load(open('/tmp/route1f-audit.json'))
+if len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=178 or a.get('result')!='PASS': raise SystemExit('route1f gate failed')
+PY
+
+python3 tools/materialize-pcb-r13-route1g-pvss-corridor.py --route1f-drc-json /tmp/route1f.json --route1f-pin-net-audit /tmp/route1f-audit.json
+kicad-cli pcb drc --format json --severity-all -o /tmp/route1g.json hardware/main-board/pcb/route-r13-1g/AegisBioWatch-MainBoard-Route1g-r13.kicad_pcb
+python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/route-r13-1g/AegisBioWatch-MainBoard-Route1g-r13.kicad_pcb --output /tmp/route1g-audit.json
+python3 - <<'PY'
+import json
+d=json.load(open('/tmp/route1g.json')); a=json.load(open('/tmp/route1g-audit.json')); r=json.load(open('hardware/main-board/pcb/route-r13-1g/routing-seed-r13-1g.json'))
+if len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=178 or a.get('result')!='PASS': raise SystemExit('route1g gate failed')
+if r.get('removed_track_segments')!=11 or r.get('added_track_segments')!=10 or r.get('vias_added')!=0: raise SystemExit('route1g scope gate failed')
+PY
+
+python3 tools/materialize-pcb-r13-route1h-pvss-input-loops.py --route1g-drc-json /tmp/route1g.json --route1g-pin-net-audit /tmp/route1g-audit.json
+kicad-cli pcb drc --format json --severity-all -o /tmp/route1h.json hardware/main-board/pcb/route-r13-1h/AegisBioWatch-MainBoard-Route1h-r13.kicad_pcb
+python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/route-r13-1h/AegisBioWatch-MainBoard-Route1h-r13.kicad_pcb --output /tmp/route1h-audit.json
+python3 - <<'PY'
+import json
+from pathlib import Path
+d=json.load(open('/tmp/route1h.json')); a=json.load(open('/tmp/route1h-audit.json')); r=json.load(open('hardware/main-board/pcb/route-r13-1h/routing-seed-r13-1h.json'))
+out={
+  'rule_violations':len(d.get('violations',[])),
+  'unconnected_items':len(d.get('unconnected_items',[])),
+  'pin_net_audit':a.get('result'),
+  'audited_nodes':a.get('audited_present_source_nodes'),
+  'removed_segments':r.get('track_segments_removed'),
+  'added_segments':r.get('track_segments_added'),
+  'vias_added':r.get('vias_added'),
+  'moved_footprints':sorted(r.get('moved_footprints',{})),
+}
+print(json.dumps(out,indent=2)); Path('/tmp/route1h-summary.json').write_text(json.dumps(out,indent=2))
+if out['rule_violations']!=0 or out['unconnected_items']!=176: raise SystemExit('route1h DRC/ratsnest gate failed')
+if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1h audit gate failed')
+if out['removed_segments']!=11 or out['added_segments']!=20 or out['vias_added']!=4: raise SystemExit('route1h scope gate failed')
+if out['moved_footprints']!=['C103','C104']: raise SystemExit('route1h placement scope gate failed')
+PY
