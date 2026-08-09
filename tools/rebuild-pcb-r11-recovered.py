@@ -1,17 +1,37 @@
 #!/usr/bin/env python3
 """Recover an unrouted r11 seed in the actual r10 board datum.
 
-The historical r11 payload is truncated. This wrapper keeps r8-equivalent nets,
-r10 Edge.Cuts/RF keep-out, 76 frozen footprints, and delegates final geometry
-validity to KiCad 9.0.9 PCB DRC. It does not recreate the lost r11 coordinates.
+The historical r11 payload is irrecoverably truncated. This wrapper keeps the
+recovered r8-equivalent electrical topology, the real r10 Edge.Cuts/RF keep-out,
+and the 76 frozen footprints, then delegates validation to KiCad 9.0.9.
+
+Recovery-only corrections implemented here:
+- use physical footprint geometry without Reference/Value annotation text;
+- hide Reference/Value fields on this automated placement seed (documentation
+  fields remain present and can be restored/repositioned after placement);
+- assign an XML pin net to every physical pad that shares that pad number (for
+  example every exposed-pad/thermal-via pad numbered 33 on the nPM1300 QFN);
+- write a sibling KiCad project carrying the historically documented r11
+  *planning* minima: 0.10 mm clearance, 0.20 mm copper-edge clearance, and
+  0.20 mm minimum through-hole drill. These are not fabrication rules;
+- retain r10 mechanical datum and antenna keep-out;
+- rotate the physically wide Main<->Bio FH12 connector J7 by 90 degrees.
+
+This creates an unrouted recovery seed only. r13 must still replace U2's local
+power cluster with Nordic-reference current-loop placement before routing.
 """
 from __future__ import annotations
+
 import importlib.util
+import json
 from pathlib import Path
+
 import pcbnew  # type: ignore
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / "tools/rebuild-pcb-r11-from-r8-r10.py"
+PROJECT_TEMPLATE = ROOT / "hardware/main-board/kicad/capture/AegisBioWatch-MainBoard-Rev0.kicad_pro"
+
 spec = importlib.util.spec_from_file_location("aegis_r11_builder", TARGET)
 if spec is None or spec.loader is None:
     raise SystemExit(f"unable to load {TARGET}")
@@ -25,15 +45,55 @@ mod.FIXED_ANCHORS["U1"] = (28.75, 13.75)
 mod.FIXED_ANCHORS["U2"] = (11.25, 28.50)
 GLOBAL_OCCUPIED: list[tuple[float, float, float, float]] = []
 
-# r10 intentionally has only the PCB floorplan file. The old generic builder
-# expected a sibling .kicad_pro; skip only that absent optional copy.
+# r10 intentionally has only the PCB floorplan file. The generic builder expects
+# a sibling project file; skip that absent copy and write a recovered-r11 project
+# with explicit planning rules after the board is generated.
 _real_copy2 = mod.shutil.copy2
+
+
 def _copy2_optional(src, dst, *args, **kwargs):
     if Path(src) == mod.R10_PRO and not Path(src).exists():
-        print(f"r10 project file absent by design; PCB-only recovery continues: {src}")
+        print(f"r10 project file absent by design; recovered r11 project will be generated: {src}")
         return str(dst)
     return _real_copy2(src, dst, *args, **kwargs)
+
+
 mod.shutil.copy2 = _copy2_optional
+
+# Footprint fields are metadata, not part of the placement envelope. Keep their
+# strings but hide the two mandatory display fields for the automated seed so
+# they cannot create artificial silk-to-copper or silk-to-edge DRC errors.
+_original_load_fp = mod.load_fp
+
+
+def load_fp_for_seed(identifier: str):
+    fp = _original_load_fp(identifier)
+    fp.Reference().SetVisible(False)
+    fp.Value().SetVisible(False)
+    return fp
+
+
+mod.load_fp = load_fp_for_seed
+
+# Some KiCad footprints intentionally contain multiple physical pads with one
+# logical pin number. nPM1300 pad 33 (exposed pad plus thermal-via pads) is the
+# critical case. The source XML has one logical node; all physical duplicates
+# must receive the same net while the source-node audit count remains one.
+class _PadGroup:
+    def __init__(self, pads):
+        self._pads = pads
+
+    def SetNet(self, net):
+        for pad in self._pads:
+            pad.SetNet(net)
+
+
+def find_pad_group(fp, number: str):
+    pads = [pad for pad in fp.Pads() if str(pad.GetNumber()) == str(number)]
+    return _PadGroup(pads) if pads else None
+
+
+mod.find_pad = find_pad_group
 
 
 def bbox_local_mm(fp):
@@ -50,7 +110,10 @@ def set_angle(fp, deg: float):
 
 
 def intersects(a, b, gap=0.0):
-    return not (a[2] + gap <= b[0] or b[2] + gap <= a[0] or a[3] + gap <= b[1] or b[3] + gap <= a[1])
+    return not (
+        a[2] + gap <= b[0] or b[2] + gap <= a[0]
+        or a[3] + gap <= b[1] or b[3] + gap <= a[1]
+    )
 
 
 def inside(a, b):
@@ -63,9 +126,11 @@ def candidate(fp, x, y, margin):
 
 
 def valid(rect):
-    return (inside(rect, BOARD_INTERIOR)
-            and not intersects(rect, RF_ANTENNA_BLOCK)
-            and not any(intersects(rect, o, 0.10) for o in GLOBAL_OCCUPIED))
+    return (
+        inside(rect, BOARD_INTERIOR)
+        and not intersects(rect, RF_ANTENNA_BLOCK)
+        and not any(intersects(rect, other, 0.10) for other in GLOBAL_OCCUPIED)
+    )
 
 
 def commit(fp, x, y, margin):
@@ -76,11 +141,13 @@ def commit(fp, x, y, margin):
 
 
 _original_anchor = mod.place_anchor
+
+
 def place_anchor(fp, x, y, margin=0.35):
     rect = _original_anchor(fp, x, y, margin)
     if not inside(rect, BOARD_INTERIOR) or intersects(rect, RF_ANTENNA_BLOCK):
         raise SystemExit(f"fixed anchor {fp.GetReference()} violates r10 geometry: {rect}")
-    if any(intersects(rect, o, 0.10) for o in GLOBAL_OCCUPIED):
+    if any(intersects(rect, other, 0.10) for other in GLOBAL_OCCUPIED):
         raise SystemExit(f"fixed anchor {fp.GetReference()} overlaps prior placement: {rect}")
     GLOBAL_OCCUPIED.append(rect)
     return rect
@@ -112,6 +179,83 @@ def scan_place(fp, _zone, _occupied, margin=0.25):
             y += step
     return None
 
+
+def write_recovered_project():
+    project = json.loads(PROJECT_TEMPLATE.read_text(encoding="utf-8"))
+    project["meta"] = {
+        "filename": mod.OUT_PRO.name,
+        "version": max(1, int(project.get("meta", {}).get("version", 1))),
+    }
+    project["board"] = {
+        "3dviewports": [],
+        "design_settings": {
+            "defaults": {
+                "zones": {"45_degree_only": False, "min_clearance": 0.10}
+            },
+            "diff_pair_dimensions": [],
+            "drc_exclusions": [],
+            "meta": {"version": 2},
+            "rules": {
+                "allow_blind_buried_vias": False,
+                "allow_microvias": False,
+                "max_error": 0.005,
+                "min_clearance": 0.10,
+                "min_connection": 0.0,
+                "min_copper_edge_clearance": 0.20,
+                "min_hole_clearance": 0.0,
+                "min_hole_to_hole": 0.20,
+                "min_microvia_diameter": 0.20,
+                "min_microvia_drill": 0.10,
+                "min_resolved_spokes": 2,
+                "min_silk_clearance": 0.0,
+                "min_text_height": 0.0,
+                "min_text_thickness": 0.0,
+                "min_through_hole_diameter": 0.20,
+                "min_track_width": 0.10,
+                "min_via_annular_width": 0.05,
+                "min_via_diameter": 0.30,
+                "solder_mask_to_copper_clearance": 0.0,
+                "use_height_for_length_calcs": True,
+            },
+            "track_widths": [],
+            "via_dimensions": [],
+            "zones_allow_external_fillets": False,
+        },
+        "layer_presets": [],
+        "viewports": [],
+    }
+    project["net_settings"] = {
+        "classes": [
+            {
+                "bus_width": 12,
+                "clearance": 0.10,
+                "diff_pair_gap": 0.25,
+                "diff_pair_via_gap": 0.25,
+                "diff_pair_width": 0.20,
+                "line_style": 0,
+                "microvia_diameter": 0.30,
+                "microvia_drill": 0.10,
+                "name": "Default",
+                "pcb_color": "rgba(0, 0, 0, 0.000)",
+                "schematic_color": "rgba(0, 0, 0, 0.000)",
+                "track_width": 0.20,
+                "via_diameter": 0.60,
+                "via_drill": 0.30,
+                "wire_width": 6,
+            }
+        ],
+        "meta": {"version": 3},
+        "net_colors": None,
+        "netclass_assignments": {},
+        "netclass_patterns": [],
+    }
+    mod.OUT_PRO.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+    print(
+        "Recovered r11 planning project written:", mod.OUT_PRO,
+        "clearance=0.10mm copper-edge=0.20mm min-through-hole=0.20mm"
+    )
+
+
 mod.bbox_local_mm = bbox_local_mm
 mod.place_anchor = place_anchor
 mod.scan_place = scan_place
@@ -124,4 +268,6 @@ print("r10 Edge.Cuts mm =", EDGE)
 print("r10 packing interior mm =", BOARD_INTERIOR)
 print("r10 RF antenna block mm =", RF_ANTENNA_BLOCK)
 print("J7 KiCad GetBoundingBox(False) 0deg mm =", bbox_local_mm(j7))
+
 mod.main()
+write_recovered_project()
