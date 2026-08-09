@@ -67,12 +67,12 @@ def main():
     # High-current local output leg.
     segs=add_track(b,net,pl,pc,WIDTH_POWER,pcbnew.F_Cu)
 
-    # Kelvin/sense escape. Executed DRC proved there is no legal 0.10 mm
-    # vertical clearance window at x=10.00 between NT101.1 and U2.31. Move the
-    # via left toward same-net U2.32 instead: (9.50,25.30) lies outside both
-    # expanded foreign-net pad envelopes while keeping a short F.Cu escape.
-    # The second via remains left of C108; In2 carries the long sense segment.
-    via_top=(9.50,25.30)
+    # Kelvin/sense escape. Three executed DRC probes bounded the legal gap:
+    # x=10.00 conflicts alternately with NT101.1/U2.31; x=9.50 clears those but
+    # approaches the existing +1V8 track. At (9.62,25.30), conservative copper
+    # edge gaps are about 0.126 mm to NT101.1, 0.143 mm to U2.31 and 0.170 mm
+    # to the +1V8 track, all above the 0.10 mm planning rule.
+    via_top=(9.62,25.30)
     via_out=(4.80,33.828194)
     segs+=add_track(b,net,pu,via_top,WIDTH_SENSE,pcbnew.F_Cu)
     vias=add_via(b,net,via_top)
