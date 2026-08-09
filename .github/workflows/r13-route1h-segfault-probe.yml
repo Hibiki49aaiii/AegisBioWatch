@@ -1,12 +1,6 @@
 name: r13 route1h segfault probe
 
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, reopened, synchronize]
-    paths:
-      - '.github/workflows/r13-route1h-segfault-probe.yml'
-      - 'tools/materialize-pcb-r13-route1h-pvss-input-loops.py'
   workflow_dispatch:
 
 permissions:
