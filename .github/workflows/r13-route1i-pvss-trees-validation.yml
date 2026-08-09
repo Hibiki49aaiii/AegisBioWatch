@@ -66,11 +66,14 @@ jobs:
             'added_segments':r.get('track_segments_added'),
             'vias_added':r.get('vias_added'),
             'component_moves':r.get('component_moves'),
+            'component_rotations':r.get('component_rotations'),
           }
           print(json.dumps(out,indent=2)); Path('/tmp/route1i-summary.json').write_text(json.dumps(out,indent=2))
           if out['rule_violations']!=0 or out['unconnected_items']!=172: raise SystemExit('route1i DRC/ratsnest gate failed')
           if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1i audit gate failed')
-          if out['added_segments']!=8 or out['vias_added']!=2 or out['component_moves']!=[]: raise SystemExit('route1i scope gate failed')
+          if out['added_segments']!=6 or out['vias_added']!=2 or out['component_moves']!=[]: raise SystemExit('route1i routing scope gate failed')
+          rot=out['component_rotations'] or {}
+          if sorted(rot)!=['NT101'] or rot['NT101'].get('from_deg')!=0.0 or rot['NT101'].get('to_deg')!=180.0: raise SystemExit('route1i rotation scope gate failed')
           PY
 
       - name: Package route1i evidence
