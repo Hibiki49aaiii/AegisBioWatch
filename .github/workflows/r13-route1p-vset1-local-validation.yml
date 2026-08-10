@@ -7,6 +7,8 @@ on:
     paths:
       - '.github/workflows/r13-route1p-vset1-local-validation.yml'
       - 'tools/reproduce-route1o-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1h-pvss-input-loops.py'
+      - 'tools/postprocess-pcb-r13-route1h-pvss1-via.py'
       - 'tools/materialize-pcb-r13-route1p-vset1-local.py'
       - 'tools/write-pcb-r13-route1p-report.py'
       - 'tools/audit-pcb-pin-nets.py'
@@ -15,6 +17,8 @@ on:
     paths:
       - '.github/workflows/r13-route1p-vset1-local-validation.yml'
       - 'tools/reproduce-route1o-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1h-pvss-input-loops.py'
+      - 'tools/postprocess-pcb-r13-route1h-pvss1-via.py'
       - 'tools/materialize-pcb-r13-route1p-vset1-local.py'
       - 'tools/write-pcb-r13-route1p-report.py'
       - 'tools/audit-pcb-pin-nets.py'
