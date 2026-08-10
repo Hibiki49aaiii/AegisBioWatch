@@ -39,7 +39,7 @@ def main() -> None:
         'connections': {
             'NT101.2/GND': {
                 'pad_mm': [9.938265, 24.624113],
-                'gnd_via_mm': [10.40, 25.20],
+                'gnd_via_mm': [10.35, 25.05],
                 'target_reference': 'continuous In1.Cu GND zone'
             },
             'NT102.2/GND': {
@@ -47,6 +47,10 @@ def main() -> None:
                 'gnd_via_mm': [10.35, 32.05],
                 'target_reference': 'continuous In1.Cu GND zone'
             }
+        },
+        'rejected_geometry': {
+            'NT101_GND_VIA_mm': [10.40, 25.20],
+            'reason': '0.0935 mm clearance to PVSS1_LOCAL In2.Cu trunk; required 0.1000 mm'
         },
         'logical_connectivity_added': [
             'NT101.2/GND -> continuous GND reference',
