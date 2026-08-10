@@ -1,0 +1,53 @@
+{
+  "revision": "r13-route1p-vset1-local-strap",
+  "status": "ACCEPTED_EXECUTED_KICAD_DRC",
+  "source_baseline": "r13-route1o-vbusout-sense-local-decoupling",
+  "workflow": {
+    "name": "r13 route1p VSET1 local validation",
+    "run_id": 31355802297,
+    "job_id": 93355133196,
+    "kicad_version": "9.0.9"
+  },
+  "validation": {
+    "rule_violations": 0,
+    "unconnected_items": 160,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268
+  },
+  "scope": {
+    "connection": "U2.17/PMIC_VSET1 <-> R101.1/PMIC_VSET1",
+    "gnd_connection": "R101.2/GND -> continuous In1.Cu GND reference",
+    "track_segments_added": 2,
+    "vias_added": 1,
+    "vset_track_width_mm": 0.20,
+    "gnd_track_width_mm": 0.30,
+    "via_size_mm": 0.60,
+    "via_drill_mm": 0.30,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "geometry": {
+    "U2.17_mm": [13.8875, 30.25],
+    "R101.1_mm": [13.964027, 32.210297],
+    "R101.2_mm": [14.604027, 32.210297],
+    "R101_value": "47k 1%",
+    "gnd_via_mm": [15.70, 32.40]
+  },
+  "route1n_chg5v_status": "REJECTED_AND_DEFERRED",
+  "accepted_vbusout_vbat_vsys_pvss_geometry_modified": false,
+  "same_run_pcb_sha256": "603e32dbff69e28dd11f2dd4c351d4eb702c5a3bac5ade592139bc45d94323a8",
+  "evidence_artifact": {
+    "id": 9050583093,
+    "name": "r13-route1p-vset1-local-evidence",
+    "digest": "sha256:6b80e4fb9cf31d1db3d894eb0ad023d2a848de6399d07201cb212d51ee3313da"
+  },
+  "reproduction_stability": {
+    "route1h_swig_safe_refill_fix": true,
+    "route1h_fix_changes_electrical_geometry": false,
+    "route1h_validation_run_id": 31355802280,
+    "route1h_validation_result": "0 violations / 176 unconnected / 268/268 PASS"
+  },
+  "current_accepted_baseline": "r13-route1p-vset1-local-strap",
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}
