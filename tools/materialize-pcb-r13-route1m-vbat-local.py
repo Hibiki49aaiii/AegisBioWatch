@@ -8,6 +8,10 @@ This increment is intentionally limited to the local VBAT decoupler C106:
 - U2.19/VBAT -> C106.1/VBAT on F.Cu
 - C106.2/GND -> one short F.Cu stub + through-via into continuous In1.Cu GND
 
+C106 is rotated 90 degrees in the accepted PCB, so pad 1/VBAT is the lower
+physical pad and pad 2/GND is the upper physical pad. Geometry is gated from
+the executed route-1l board, not the earlier placement memo.
+
 Battery connector, charger input, protection, RF and supplier-gated interfaces
 remain deferred. Planning/evidence artifact only; not fabrication authority.
 """
@@ -40,7 +44,7 @@ VBAT_WIDTH = 0.40
 GND_WIDTH = 0.40
 VIA_SIZE = 0.60
 VIA_DRILL = 0.30
-GND_VIA = (16.35, 30.49)
+GND_VIA = (16.20, 28.94)
 
 
 def stage(name: str) -> None:
@@ -147,8 +151,8 @@ def main():
     c106_gnd = point(c106, '2')
     expected = {
         'U2.19': ((13.8875, 29.25), u2_vbat),
-        'C106.1': ((15.522674, 28.939978), c106_vbat),
-        'C106.2': ((15.522674, 30.489978), c106_gnd),
+        'C106.1': ((15.522674, 30.489978), c106_vbat),
+        'C106.2': ((15.522674, 28.939978), c106_gnd),
     }
     for name, (want, got) in expected.items():
         if abs(want[0]-got[0]) > 0.001 or abs(want[1]-got[1]) > 0.001:
