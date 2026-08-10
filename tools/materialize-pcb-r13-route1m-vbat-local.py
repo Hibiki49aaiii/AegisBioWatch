@@ -5,12 +5,15 @@ Source: executed-KiCad-clean route-1l (0 violations / 166 unconnected /
 268-node physical audit PASS).
 
 This increment is intentionally limited to the local VBAT decoupler C106:
-- U2.19/VBAT -> C106.1/VBAT on F.Cu
+- U2.19/VBAT -> short horizontal escape -> C106.1/VBAT on F.Cu
 - C106.2/GND -> one short F.Cu stub + through-via into continuous In1.Cu GND
 
 C106 is rotated 90 degrees in the accepted PCB, so pad 1/VBAT is the lower
-physical pad and pad 2/GND is the upper physical pad. Geometry is gated from
-the executed route-1l board, not the earlier placement memo.
+physical pad and pad 2/GND is the upper physical pad. The first corrected-pad
+attempt used a direct diagonal U2.19->C106.1 track and was rejected because it
+crossed adjacent U2.18/BAT_NTC. Its GND via at (16.20,28.94) also intersected
+the accepted route-1l B.Cu VSYS trunk. This revision only changes those two
+geometric details; no violation is waived.
 
 Battery connector, charger input, protection, RF and supplier-gated interfaces
 remain deferred. Planning/evidence artifact only; not fabrication authority.
@@ -44,7 +47,8 @@ VBAT_WIDTH = 0.40
 GND_WIDTH = 0.40
 VIA_SIZE = 0.60
 VIA_DRILL = 0.30
-GND_VIA = (16.20, 28.94)
+VBAT_ESCAPE = (14.65, 29.25)
+GND_VIA = (16.65, 28.94)
 
 
 def stage(name: str) -> None:
@@ -165,10 +169,11 @@ def main():
 
     added = 0
     vias = 0
-    added += add_track(board, vbat, u2_vbat, c106_vbat, VBAT_WIDTH)
+    added += add_track(board, vbat, u2_vbat, VBAT_ESCAPE, VBAT_WIDTH)
+    added += add_track(board, vbat, VBAT_ESCAPE, c106_vbat, VBAT_WIDTH)
     added += add_track(board, gnd, c106_gnd, GND_VIA, GND_WIDTH)
     vias += add_via(board, gnd, GND_VIA)
-    if added != 2 or vias != 1:
+    if added != 3 or vias != 1:
         raise SystemExit(f'route1m internal scope gate failed: segments={added} vias={vias}')
 
     refill_all_zones(board)
