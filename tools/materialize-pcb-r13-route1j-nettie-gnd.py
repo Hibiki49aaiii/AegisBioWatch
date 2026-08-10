@@ -39,7 +39,9 @@ REPORT_HELPER = ROOT / 'tools/write-pcb-r13-route1j-report.py'
 GND_WIDTH = 0.30
 VIA_SIZE = 0.60
 VIA_DRILL = 0.30
-NT101_GND_VIA = (10.40, 25.20)
+# Keep the upper GND via above/left of the route-1i PVSS1 In2 trunk. The
+# rejected (10.40,25.20) point had only 0.0935 mm clearance to that trunk.
+NT101_GND_VIA = (10.35, 25.05)
 NT102_GND_VIA = (10.35, 32.05)
 
 
