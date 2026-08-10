@@ -37,8 +37,12 @@ REPORT_HELPER = ROOT / 'tools/write-pcb-r13-route1q-report.py'
 
 VSET_WIDTH = 0.20
 GND_WIDTH = 0.30
-VSET_BEND1 = (13.30, 31.35)
-VSET_BEND2 = (13.30, 32.80)
+# First executed geometry at x=13.30 mm produced 0.0848 mm clearance to
+# C113.2/GND (0.1000 mm required). Shift the vertical dogleg +0.05 mm only;
+# this leaves comfortable clearance to R101 while preserving all accepted
+# route-1p geometry.
+VSET_BEND1 = (13.35, 31.35)
+VSET_BEND2 = (13.35, 32.80)
 GND_VIA = (15.40, 33.15)
 VIA_SIZE = 0.60
 VIA_DRILL = 0.30
