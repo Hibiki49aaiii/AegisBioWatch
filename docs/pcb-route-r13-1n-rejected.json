@@ -1,0 +1,49 @@
+{
+  "revision": "r13-route1n-chg5v-local-decoupling",
+  "status": "REJECTED_EXECUTED_KICAD_GEOMETRY",
+  "source_baseline": "r13-route1m-vbat-local-decoupling",
+  "workflow": {
+    "name": "r13 route1n CHG_5V local validation",
+    "run_id": 31347592666,
+    "kicad_version": "9.0.9"
+  },
+  "candidate_result": {
+    "unconnected_items": 162,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "accepted": false
+  },
+  "candidate_scope": {
+    "component_moves": [],
+    "component_rotations": {
+      "C101": {
+        "from_deg": 90.0,
+        "to_deg": 270.0,
+        "center_mm": [17.141428, 28.799501]
+      }
+    },
+    "proposed_connection": "U2.21/CHG_5V -> C101.1/CHG_5V",
+    "proposed_gnd_connection": "C101.2/GND -> continuous In1.Cu GND"
+  },
+  "executed_drc_failures": [
+    {
+      "type": "tracks_crossing",
+      "reason": "CHG_5V direct F.Cu route crosses the accepted route1k VSYS F.Cu barrier at x=14.60 mm"
+    },
+    {
+      "type": "clearance",
+      "actual_clearance_mm": 0.0669,
+      "required_clearance_mm": 0.1,
+      "reason": "CHG_5V direct F.Cu route is too close to the accepted route1l VSYS via at (15.50,27.57)"
+    }
+  ],
+  "decision": "Do not force a thin CHG_5V trace, via-in-pad escape, or waive the accepted VSYS geometry. Revisit CHG_5V later as a coordinated PMIC-side routing refinement.",
+  "evidence_artifact": {
+    "id": 9047898162,
+    "name": "r13-route1n-chg5v-local-evidence",
+    "digest": "sha256:4b66d2abbc312dcf3ea16734a815d46a3a367d20074387731054e4e6f72fde1c"
+  },
+  "current_accepted_baseline_remains": "r13-route1m-vbat-local-decoupling",
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}
