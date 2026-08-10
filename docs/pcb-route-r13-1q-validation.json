@@ -1,0 +1,46 @@
+{
+  "revision": "r13-route1q-vset2-local-strap",
+  "status": "ACCEPTED_EXECUTED_KICAD",
+  "workflow_run_id": 31362589595,
+  "workflow_job_id": 93374283824,
+  "head_sha": "d59ebe5c6b2155af65214670e8a5cc61c1da2c8e",
+  "kicad_version": "9.0.9",
+  "rule_violations": 0,
+  "unconnected_items": 158,
+  "pin_net_audit": "PASS",
+  "audited_present_source_nodes": 268,
+  "track_segments_added": 4,
+  "vias_added": 1,
+  "component_moves": [],
+  "component_rotations": [],
+  "same_run_pcb_sha256": "2d802d65e64edce5c0c31554f5bcdc1d231edef13b33f3906ebb88a1b8552665",
+  "evidence_artifact": {
+    "id": 9052935356,
+    "name": "r13-route1q-vset2-local-evidence",
+    "digest": "sha256:e921234e5db0f7e14b1bf4a3a70175113ebac6027b5e85cb47e07c1db04df5f2"
+  },
+  "accepted_geometry": {
+    "u2_16_pmic_vset2_mm": [13.1875, 30.95],
+    "bend1_mm": [13.35, 31.35],
+    "bend2_mm": [13.35, 32.8],
+    "r102_1_pmic_vset2_mm": [13.818252, 33.153649],
+    "r102_value": "150k 1%",
+    "r102_2_gnd_mm": [14.458252, 33.153649],
+    "gnd_via_mm": [15.4, 33.15],
+    "vset_track_width_mm": 0.2,
+    "gnd_track_width_mm": 0.3,
+    "via_size_mm": 0.6,
+    "via_drill_mm": 0.3
+  },
+  "rejected_geometry": {
+    "bend_x_mm": 13.3,
+    "clearance_to_c113_2_mm": 0.0848,
+    "required_clearance_mm": 0.1,
+    "correction": "shift VSET2 vertical dogleg +0.05 mm to x=13.35 mm"
+  },
+  "accepted_previous_geometry_modified": false,
+  "chg_5v_status": "REJECTED_AND_DEFERRED",
+  "rf_routing_touched": false,
+  "supplier_gated_interfaces_touched": false,
+  "release_status": "NOT_FOR_GERBER"
+}
