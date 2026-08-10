@@ -3,9 +3,14 @@
 
 Starts from the executed-KiCad-clean route-1g baseline. C103/C104 are shifted
 left, the low-current VOUT2 sense trunk is moved In2.Cu -> B.Cu, and the two
-local PVSS input returns cross on In2.Cu. The KiCad-mutating process execs a
-fresh, pcbnew-free report writer after SaveBoard to avoid KiCad 9 SWIG teardown
-heap corruption observed during JSON encoding.
+local PVSS input returns cross on In2.Cu.
+
+The primary mutating process deliberately does not enumerate/fill zones after
+track removal/addition. KiCad 9.0.9 SWIG can corrupt that board-owned wrapper
+state after repeated Remove/Add operations. Instead this process saves the
+board, then execs a pcbnew-free report helper; that helper launches the focused
+PVSS1-via postprocessor in a fresh pcbnew process, where zones are refilled and
+the final board is saved. Electrical geometry and accepted scope are unchanged.
 
 Planning/evidence artifact only; not fabrication authority.
 """
@@ -114,14 +119,6 @@ def add_via(board, net, p):
     v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
     board.Add(v)
     return 1
-
-
-def refill_all_zones(board):
-    zs = pcbnew.ZONES()
-    for z in board.Zones():
-        zs.append(z)
-    if len(zs) and not pcbnew.ZONE_FILLER(board).Fill(zs):
-        raise SystemExit('zone refill failed')
 
 
 def near(a: float, b: float, tol: float = 0.00001) -> bool:
@@ -296,9 +293,10 @@ def main():
     if added != 20 or vias_added != 4:
         raise SystemExit(f'route1h internal scope gate failed: added={added} vias={vias_added}')
 
-    stage('refill zones begin')
-    refill_all_zones(b)
-    stage('refill zones done')
+    # Do not call board.Zones()/ZONE_FILLER in this heavily-mutated SWIG process.
+    # The report helper launches the existing focused postprocessor in a fresh
+    # pcbnew process; that postprocessor performs the final zone refill and save.
+    stage('defer zone refill to fresh postprocess')
     stage('synchronize nets begin')
     b.SynchronizeNetsAndNetClasses(True)
     stage('synchronize nets done')
@@ -318,7 +316,7 @@ def main():
 
     if not REPORT_HELPER.is_file():
         raise SystemExit('route1h report helper missing')
-    stage('exec SWIG-free report helper')
+    stage('exec fresh finalizer/report helper')
     os.execv(sys.executable, [sys.executable, str(REPORT_HELPER)])
 
 
