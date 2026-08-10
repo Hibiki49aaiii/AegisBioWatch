@@ -62,8 +62,9 @@ jobs:
           print(json.dumps(out,indent=2)); Path('/tmp/route1k-summary.json').write_text(json.dumps(out,indent=2))
           if out['rule_violations']!=0 or out['unconnected_items']!=168: raise SystemExit('route1k DRC/ratsnest gate failed')
           if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1k audit gate failed')
-          if out['added_segments']!=3 or out['vias_added']!=3: raise SystemExit('route1k routing scope gate failed')
-          if out['component_moves']!=[] or out['component_rotations']!=[]: raise SystemExit('route1k placement scope gate failed')
+          if out['added_segments']!=4 or out['vias_added']!=1: raise SystemExit('route1k routing scope gate failed')
+          moves=out['component_moves'] or []
+          if len(moves)!=1 or moves[0].get('ref')!='C114' or out['component_rotations']!=[]: raise SystemExit('route1k placement scope gate failed')
           PY
       - name: Package route1k evidence
         if: always()
