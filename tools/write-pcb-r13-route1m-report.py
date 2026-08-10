@@ -16,11 +16,14 @@ def main():
     if src.get('output_sha256')!=srcsha: raise SystemExit('route1l report/PCB SHA mismatch in route1m helper')
     out={
       'revision':'r13-route1m-vbat-local-decoupling','source_route1l_sha256':srcsha,'output_sha256':sha(OUT_PCB),
-      'track_segments_added':2,'vias_added':1,'vbat_track_width_mm':0.40,'gnd_track_width_mm':0.40,'via_size_mm':0.60,'via_drill_mm':0.30,
+      'track_segments_added':3,'vias_added':1,'vbat_track_width_mm':0.40,'gnd_track_width_mm':0.40,'via_size_mm':0.60,'via_drill_mm':0.30,
       'c106':{'value':'2.2uF X7R 16V','center_mm':[15.522674,29.714978],'orientation_deg':90.0,
         'vbat_pad_mm':[15.522674,30.489978],'gnd_pad_mm':[15.522674,28.939978],
-        'u2_19_vbat_mm':[13.8875,29.25],'gnd_via_mm':[16.20,28.94],'gnd_reference':'continuous In1.Cu GND zone'},
-      'corrected_geometry':{'reason':'accepted route1l PCB shows C106 pad orientation opposite the earlier memo; physical pad/net audit remains authoritative'},
+        'u2_19_vbat_mm':[13.8875,29.25],'vbat_escape_mm':[14.65,29.25],
+        'gnd_via_mm':[16.65,28.94],'gnd_reference':'continuous In1.Cu GND zone'},
+      'rejected_geometry':{'strategy':'direct U2.19->C106.1 diagonal plus GND via (16.20,28.94)',
+        'reason':'VBAT track shorted adjacent U2.18/BAT_NTC and GND via intersected accepted route1l B.Cu VSYS trunk; no waiver used'},
+      'corrected_geometry':{'reason':'accepted route1l PCB shows C106 pad orientation opposite the earlier memo; executed PCB geometry is authoritative'},
       'logical_connectivity_added':['U2.19/VBAT <-> C106.1/VBAT','C106.2/GND -> continuous GND reference'],
       'battery_connector_deferred':True,'charger_input_deferred':True,'component_moves':[],'component_rotations':[],
       'accepted_vsys_pvss_geometry_modified':False,'in1_gnd_plane_preserved_and_refilled':True,'rf_routing_touched':False,'supplier_gated_interfaces_touched':False,
