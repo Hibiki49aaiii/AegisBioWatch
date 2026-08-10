@@ -13,12 +13,18 @@ def main():
     if src.get('output_sha256')!=srcsha: raise SystemExit('route1j report/PCB SHA mismatch in route1k helper')
     out={
       'revision':'r13-route1k-c114-vsys-hf-decoupling','source_route1j_sha256':srcsha,'output_sha256':sha(OUT_PCB),
-      'track_segments_added':3,'vias_added':3,'vsys_track_width_mm':0.30,'gnd_track_width_mm':0.30,'via_size_mm':0.60,'via_drill_mm':0.30,
-      'c114':{'value':'100nF HF / APP','vsys_pad_mm':[6.892232,27.030566],'gnd_pad_mm':[6.892232,26.390566],
-        'vsys_cap_via_mm':[6.15,27.05],'vsys_spine_via_mm':[7.35,29.40],'vsys_crossing_layer':'B.Cu','gnd_via_mm':[6.60,25.90],'gnd_reference':'continuous In1.Cu GND zone'},
-      'rejected_top_only_geometry':{'gnd_via_mm':[7.35,26.39],'reason':'executed KiCad found SW1 short/clearance conflicts; no waiver used'},
-      'logical_connectivity_added':['C114.1/VSYS -> accepted VSYS spine','C114.2/GND -> continuous GND reference'],
-      'c102_bulk_vsys_deferred':True,'vbat_charger_deferred':True,'component_moves':[],'component_rotations':[],
+      'track_segments_added':4,'vias_added':1,'vsys_track_width_mm':0.30,'gnd_track_width_mm':0.30,'via_size_mm':0.60,'via_drill_mm':0.30,
+      'c114':{'value':'100nF HF / APP','from_center_mm':[6.892232,26.710566],'to_center_mm':[15.05,27.25],'orientation_deg':90.0,
+        'vsys_pad_after_move_mm':[15.05,27.57],'gnd_pad_after_move_mm':[15.05,26.93],
+        'u2_20_vsys_mm':[13.8875,28.75],'vsys_escape_x_mm':14.65,'gnd_via_mm':[15.05,26.45],'gnd_reference':'continuous In1.Cu GND zone'},
+      'rejected_geometries':[
+        {'strategy':'old-location top-only','reason':'SW1 short/clearance conflicts'},
+        {'strategy':'old-location B.Cu crossing','reason':'R502/PVSS1/PVSS2/SW2 conflicts'}
+      ],
+      'logical_connectivity_added':['U2.20/VSYS <-> C114.1/VSYS','C114.2/GND -> continuous GND reference'],
+      'c102_bulk_vsys_deferred':True,'vbat_charger_deferred':True,
+      'component_moves':[{'ref':'C114','from_mm':[6.892232,26.710566],'to_mm':[15.05,27.25]}],
+      'component_rotations':[],
       'accepted_pvss_geometry_modified':False,'in1_gnd_plane_preserved_and_refilled':True,'rf_routing_touched':False,'supplier_gated_interfaces_touched':False,
       'validation_status':'PENDING_EXECUTED_KICAD_DRC','release_status':'NOT_FOR_GERBER','report_process':'fresh_python_without_pcbnew'}
     OUT_REPORT.write_text(json.dumps(out,indent=2)+'\n'); print(json.dumps(out,indent=2))
