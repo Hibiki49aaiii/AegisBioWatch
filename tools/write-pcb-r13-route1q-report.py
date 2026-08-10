@@ -39,8 +39,8 @@ def main() -> None:
         'connections': {
             'PMIC_VSET2': {
                 'u2_16_mm': [13.1875, 30.95],
-                'bend1_mm': [13.30, 31.35],
-                'bend2_mm': [13.30, 32.80],
+                'bend1_mm': [13.35, 31.35],
+                'bend2_mm': [13.35, 32.80],
                 'r102_1_mm': [13.818252, 33.153649],
                 'r102_value': '150k 1%'
             },
@@ -49,6 +49,12 @@ def main() -> None:
                 'gnd_via_mm': [15.40, 33.15],
                 'target_reference': 'continuous In1.Cu GND zone'
             }
+        },
+        'rejected_geometry': {
+            'bend_x_mm': 13.30,
+            'clearance_to_C113_2_mm': 0.0848,
+            'required_clearance_mm': 0.1000,
+            'correction': 'shift VSET2 vertical dogleg +0.05 mm to x=13.35 mm'
         },
         'logical_connectivity_added': [
             'U2.16/PMIC_VSET2 <-> R102.1/PMIC_VSET2',
