@@ -5,13 +5,17 @@ Source: executed-KiCad-clean route-1m (0 violations / 164 unconnected /
 268-node physical audit PASS).
 
 route-1n CHG_5V was rejected because the accepted VSYS barrier blocks a safe
-local escape. route-1o therefore advances an independent local node instead:
-- U2.22/VBUSOUT_SENSE -> left-side dogleg -> C105.1 on F.Cu
-- C105.2/GND -> short F.Cu stub -> through-via -> continuous In1.Cu GND
+local escape. The first route-1o Top-only dogleg was also rejected because its
+vertical segment bridged/shorted adjacent U2.23/U2.24 pads.
 
-No component moves or rotations. The route stays left of the accepted route1k
-VSYS barrier and away from the C114 GND via. RF and supplier-gated interfaces
-remain untouched. Planning/evidence artifact only; not fabrication authority.
+The revised sense route uses a short F.Cu escape from U2.22 to a small through
+via, crosses the local obstacle field on B.Cu, then returns to F.Cu beside
+C105.1. VBUSOUT_SENSE is a local sense/decoupling node, so the two sense vias
+use the planning-rule minimum 0.20 mm drill without reducing any high-current
+power trace. C105.2/GND uses a conventional 0.60/0.30 mm plane via.
+
+No component moves or rotations. RF and supplier-gated interfaces remain
+untouched. Planning/evidence artifact only; not fabrication authority.
 """
 from __future__ import annotations
 
@@ -38,11 +42,14 @@ OUT_PCB = OUT_DIR / 'AegisBioWatch-MainBoard-Route1o-r13.kicad_pcb'
 OUT_PRO = OUT_DIR / 'AegisBioWatch-MainBoard-Route1o-r13.kicad_pro'
 REPORT_HELPER = ROOT / 'tools/write-pcb-r13-route1o-report.py'
 
-SENSE_WIDTH = 0.30
+SENSE_WIDTH = 0.25
 GND_WIDTH = 0.30
-VIA_SIZE = 0.60
-VIA_DRILL = 0.30
-ESCAPE_X = 14.10
+SENSE_VIA_SIZE = 0.45
+SENSE_VIA_DRILL = 0.20
+GND_VIA_SIZE = 0.60
+GND_VIA_DRILL = 0.30
+SENSE_ENTRY_VIA = (14.05, 27.75)
+SENSE_EXIT_VIA = (15.00, 25.05)
 GND_VIA = (17.70, 25.38)
 
 
@@ -80,9 +87,9 @@ def point(fp, number: str):
     )
 
 
-def add_track(board, net, a, b, width):
+def add_track(board, net, a, b, width, layer):
     t = pcbnew.PCB_TRACK(board)
-    t.SetLayer(pcbnew.F_Cu)
+    t.SetLayer(layer)
     t.SetNet(net)
     t.SetWidth(iu(width))
     t.SetStart(pcbnew.VECTOR2I(iu(a[0]), iu(a[1])))
@@ -91,12 +98,12 @@ def add_track(board, net, a, b, width):
     return 1
 
 
-def add_via(board, net, p):
+def add_via(board, net, p, size, drill):
     v = pcbnew.PCB_VIA(board)
     v.SetNet(net)
     v.SetPosition(pcbnew.VECTOR2I(iu(p[0]), iu(p[1])))
-    v.SetWidth(iu(VIA_SIZE))
-    v.SetDrill(iu(VIA_DRILL))
+    v.SetWidth(iu(size))
+    v.SetDrill(iu(drill))
     v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
     board.Add(v)
     return 1
@@ -164,14 +171,17 @@ def main():
 
     added = 0
     vias = 0
-    p1 = (ESCAPE_X, u2_sense[1])
-    p2 = (ESCAPE_X, c105_sense[1])
-    added += add_track(board, sense, u2_sense, p1, SENSE_WIDTH)
-    added += add_track(board, sense, p1, p2, SENSE_WIDTH)
-    added += add_track(board, sense, p2, c105_sense, SENSE_WIDTH)
-    added += add_track(board, gnd, c105_gnd, GND_VIA, GND_WIDTH)
-    vias += add_via(board, gnd, GND_VIA)
-    if added != 4 or vias != 1:
+    added += add_track(board, sense, u2_sense, SENSE_ENTRY_VIA, SENSE_WIDTH, pcbnew.F_Cu)
+    vias += add_via(board, sense, SENSE_ENTRY_VIA, SENSE_VIA_SIZE, SENSE_VIA_DRILL)
+    bcu_corner = (SENSE_ENTRY_VIA[0], SENSE_EXIT_VIA[1])
+    added += add_track(board, sense, SENSE_ENTRY_VIA, bcu_corner, SENSE_WIDTH, pcbnew.B_Cu)
+    added += add_track(board, sense, bcu_corner, SENSE_EXIT_VIA, SENSE_WIDTH, pcbnew.B_Cu)
+    vias += add_via(board, sense, SENSE_EXIT_VIA, SENSE_VIA_SIZE, SENSE_VIA_DRILL)
+    added += add_track(board, sense, SENSE_EXIT_VIA, c105_sense, SENSE_WIDTH, pcbnew.F_Cu)
+
+    added += add_track(board, gnd, c105_gnd, GND_VIA, GND_WIDTH, pcbnew.F_Cu)
+    vias += add_via(board, gnd, GND_VIA, GND_VIA_SIZE, GND_VIA_DRILL)
+    if added != 5 or vias != 3:
         raise SystemExit(f'route1o internal scope gate failed: segments={added} vias={vias}')
 
     refill_all_zones(board)
