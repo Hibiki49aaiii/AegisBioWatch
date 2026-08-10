@@ -6,8 +6,10 @@ Source: executed-KiCad-clean route-1j (0 violations / 170 unconnected /
 
 Two fixed-position routing attempts from the old C114 location were rejected by
 executed DRC because that location is trapped between SW1/PVSS/R502 copper.
-This revision moves only C114 into the free corridor beside U2.20/VSYS and
-connects it directly to U2.20 plus a short GND-plane via.
+C114 is moved beside U2.20/VSYS and connected directly to U2.20 plus a short
+GND-plane via. The first relocated point at x=15.05 mm was electrically clean
+but overlapped R404 courtyard by 0.025 mm, so the final candidate is shifted
+0.15 mm left without changing the electrical topology.
 
 C102 bulk VSYS, VBAT/charger, RF and supplier-gated interfaces remain deferred.
 """
@@ -20,7 +22,7 @@ ROOT=Path(__file__).resolve().parents[1]
 SRC_DIR=ROOT/'hardware/main-board/pcb/route-r13-1j'; SRC_PCB=SRC_DIR/'AegisBioWatch-MainBoard-Route1j-r13.kicad_pcb'; SRC_PRO=SRC_DIR/'AegisBioWatch-MainBoard-Route1j-r13.kicad_pro'; SRC_REPORT=SRC_DIR/'routing-seed-r13-1j.json'
 OUT_DIR=ROOT/'hardware/main-board/pcb/route-r13-1k'; OUT_PCB=OUT_DIR/'AegisBioWatch-MainBoard-Route1k-r13.kicad_pcb'; OUT_PRO=OUT_DIR/'AegisBioWatch-MainBoard-Route1k-r13.kicad_pro'; REPORT_HELPER=ROOT/'tools/write-pcb-r13-route1k-report.py'
 VSYS_WIDTH=0.30; GND_WIDTH=0.30; VIA_SIZE=0.60; VIA_DRILL=0.30
-C114_NEW=(15.05,27.25); VSYS_ESCAPE_X=14.65; C114_GND_VIA=(15.05,26.45)
+C114_NEW=(14.90,27.25); VSYS_ESCAPE_X=14.60; C114_GND_VIA=(14.90,26.45)
 
 def stage(n): print(f'[route1k] {n}',flush=True)
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
@@ -55,7 +57,7 @@ def main():
     if max(abs(u20[0]-13.8875),abs(u20[1]-28.75))>.001: raise SystemExit(f'route1k U2.20 geometry gate failed {u20}')
     c.SetPosition(pcbnew.VECTOR2I(iu(C114_NEW[0]),iu(C114_NEW[1]))); c.SetOrientationDegrees(90.0)
     p1=point(c,'1'); p2=point(c,'2')
-    expected1=(15.05,27.57); expected2=(15.05,26.93)
+    expected1=(14.90,27.57); expected2=(14.90,26.93)
     if max(abs(p1[0]-expected1[0]),abs(p1[1]-expected1[1]),abs(p2[0]-expected2[0]),abs(p2[1]-expected2[1]))>.001: raise SystemExit(f'route1k moved C114 geometry failed {p1} {p2}')
     vsys=b.FindNet('VSYS'); gnd=b.FindNet('GND'); added=vias=0
     a1=(VSYS_ESCAPE_X,u20[1]); a2=(VSYS_ESCAPE_X,p1[1])
