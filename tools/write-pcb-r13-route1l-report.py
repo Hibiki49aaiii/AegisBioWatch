@@ -30,7 +30,7 @@ def main() -> None:
         'revision': 'r13-route1l-c102-vsys-bulk-decoupling',
         'source_route1k_sha256': srcsha,
         'output_sha256': sha(OUT_PCB),
-        'track_segments_added': 5,
+        'track_segments_added': 6,
         'vias_added': 3,
         'vsys_track_width_mm': 0.40,
         'gnd_track_width_mm': 0.40,
@@ -42,19 +42,23 @@ def main() -> None:
             'vsys_pad_mm': [9.443578, 33.302172],
             'gnd_pad_mm': [10.993578, 33.302172],
             'vsys_entry_via_mm': [9.00, 34.00],
-            'vsys_dogleg_mm': [8.20, 32.80],
+            'vsys_doglegs_mm': [[11.00, 35.00], [16.20, 31.00]],
             'vsys_exit_via_mm': [15.50, 27.57],
             'vsys_crossing_layer': 'B.Cu',
             'vsys_rejoin_node': 'C114.1/VSYS',
             'gnd_via_mm': [11.40, 33.30],
             'gnd_reference': 'continuous In1.Cu GND zone'
         },
-        'rejected_geometry': {
-            'strategy': 'straight B.Cu entry-to-exit trunk',
-            'from_mm': [9.00, 34.00],
-            'to_mm': [15.50, 27.57],
-            'reason': 'shorted accepted route1j GND via at (10.35,32.05); no waiver used'
-        },
+        'rejected_geometries': [
+            {
+                'strategy': 'straight B.Cu entry-to-exit trunk',
+                'reason': 'shorted accepted route1j GND via at (10.35,32.05); no waiver used'
+            },
+            {
+                'strategy': 'left B.Cu dogleg via (8.20,32.80)',
+                'reason': 'shorted accepted PVSS2_LOCAL via at (7.90,33.10); no waiver used'
+            }
+        ],
         'logical_connectivity_added': [
             'C102.1/VSYS -> accepted C114/U2.20 VSYS island',
             'C102.2/GND -> continuous GND reference'
