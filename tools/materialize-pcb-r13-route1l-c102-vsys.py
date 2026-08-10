@@ -5,10 +5,11 @@ Source: executed-KiCad-clean route-1k (0 violations / 168 unconnected /
 268-node physical audit PASS).
 
 This increment keeps C102 in place. Its VSYS side enters B.Cu through a local
-via and uses one B.Cu dogleg to avoid the accepted route-1j NT102 GND via,
-then rejoins the accepted C114/U2.20 VSYS island through a second via. C102 GND
-uses one short F.Cu stub and one through-via into the continuous In1.Cu GND
-plane. The rejected straight B.Cu trunk is retained as negative evidence only.
+via, runs upward/right through two B.Cu doglegs that clear the accepted PVSS2
+and GND vias, then rejoins the accepted C114/U2.20 VSYS island through a second
+via. C102 GND uses one short F.Cu stub and one through-via into the continuous
+In1.Cu GND plane. Earlier straight/left-dogleg B.Cu paths remain rejected
+negative evidence; no waiver is used.
 
 VBAT/charger, RF and supplier-gated interfaces remain deferred.
 Planning/evidence artifact only; not fabrication authority.
@@ -43,7 +44,8 @@ GND_WIDTH = 0.40
 VIA_SIZE = 0.60
 VIA_DRILL = 0.30
 VSYS_ENTRY_VIA = (9.00, 34.00)
-VSYS_DOGLEG = (8.20, 32.80)
+VSYS_DOGLEG_A = (11.00, 35.00)
+VSYS_DOGLEG_B = (16.20, 31.00)
 VSYS_EXIT_VIA = (15.50, 27.57)
 GND_VIA = (11.40, 33.30)
 
@@ -168,15 +170,16 @@ def main():
     vias = 0
     added += add_track(board, vsys, c102_vsys, VSYS_ENTRY_VIA, VSYS_WIDTH, pcbnew.F_Cu)
     vias += add_via(board, vsys, VSYS_ENTRY_VIA)
-    added += add_track(board, vsys, VSYS_ENTRY_VIA, VSYS_DOGLEG, VSYS_WIDTH, pcbnew.B_Cu)
-    added += add_track(board, vsys, VSYS_DOGLEG, VSYS_EXIT_VIA, VSYS_WIDTH, pcbnew.B_Cu)
+    added += add_track(board, vsys, VSYS_ENTRY_VIA, VSYS_DOGLEG_A, VSYS_WIDTH, pcbnew.B_Cu)
+    added += add_track(board, vsys, VSYS_DOGLEG_A, VSYS_DOGLEG_B, VSYS_WIDTH, pcbnew.B_Cu)
+    added += add_track(board, vsys, VSYS_DOGLEG_B, VSYS_EXIT_VIA, VSYS_WIDTH, pcbnew.B_Cu)
     vias += add_via(board, vsys, VSYS_EXIT_VIA)
     added += add_track(board, vsys, VSYS_EXIT_VIA, c114_vsys, VSYS_WIDTH, pcbnew.F_Cu)
 
     added += add_track(board, gnd, c102_gnd, GND_VIA, GND_WIDTH, pcbnew.F_Cu)
     vias += add_via(board, gnd, GND_VIA)
 
-    if added != 5 or vias != 3:
+    if added != 6 or vias != 3:
         raise SystemExit(f'route1l internal scope gate failed: segments={added} vias={vias}')
 
     refill_all_zones(board)
