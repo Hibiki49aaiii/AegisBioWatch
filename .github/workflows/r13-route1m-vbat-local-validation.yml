@@ -59,7 +59,9 @@ jobs:
           if out['rule_violations']!=0 or out['unconnected_items']!=164: raise SystemExit('route1m DRC/ratsnest gate failed')
           if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1m audit gate failed')
           if out['added_segments']!=3 or out['vias_added']!=1: raise SystemExit('route1m routing scope gate failed')
-          if out['component_moves']!=[] or out['component_rotations']!=[]: raise SystemExit('route1m placement scope gate failed')
+          if out['component_moves']!=[]: raise SystemExit('route1m component-move gate failed')
+          rot=out['component_rotations'] or {}
+          if sorted(rot)!=['C106'] or rot['C106'].get('from_deg')!=90.0 or rot['C106'].get('to_deg')!=270.0: raise SystemExit('route1m rotation scope gate failed')
           PY
       - name: Package route1m evidence
         if: always()
