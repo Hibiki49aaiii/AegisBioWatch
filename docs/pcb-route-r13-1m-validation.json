@@ -1,0 +1,71 @@
+{
+  "revision": "r13-route1m-vbat-local-decoupling",
+  "status": "ACCEPTED_EXECUTED_KICAD_BASELINE",
+  "source_baseline": "r13-route1l-c102-vsys-bulk-decoupling",
+  "workflow": {
+    "name": "r13 route1m VBAT local validation",
+    "run_id": 31347040861,
+    "kicad_version": "9.0.9"
+  },
+  "result": {
+    "rule_violations": 0,
+    "unconnected_items": 164,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268
+  },
+  "scope": {
+    "track_segments_added": 3,
+    "vias_added": 1,
+    "vbat_track_width_mm": 0.4,
+    "gnd_track_width_mm": 0.4,
+    "via_size_mm": 0.6,
+    "via_drill_mm": 0.3,
+    "component_moves": [],
+    "component_rotations": {
+      "C106": {
+        "from_deg": 90.0,
+        "to_deg": 270.0,
+        "center_mm": [15.522674, 29.714978]
+      }
+    },
+    "accepted_vsys_pvss_geometry_modified": false,
+    "in1_gnd_plane_preserved_and_refilled": true,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  },
+  "c106": {
+    "value": "2.2uF X7R 16V",
+    "center_mm": [15.522674, 29.714978],
+    "vbat_pad_after_rotation_mm": [15.522674, 28.939978],
+    "gnd_pad_after_rotation_mm": [15.522674, 30.489978],
+    "u2_19_vbat_mm": [13.8875, 29.25],
+    "vbat_escape_mm": [14.65, 29.25],
+    "gnd_via_mm": [16.85, 30.49],
+    "gnd_reference": "continuous In1.Cu GND zone"
+  },
+  "rejected_geometries": [
+    {
+      "strategy": "direct U2.19->C106.1 diagonal with source C106 orientation 90 deg",
+      "reason": "crossed adjacent U2.18/BAT_NTC"
+    },
+    {
+      "strategy": "source orientation 90 deg with GND via (16.20,28.94)",
+      "reason": "intersected accepted route1l B.Cu VSYS trunk"
+    },
+    {
+      "strategy": "source orientation 90 deg with GND via (16.65,28.94)",
+      "reason": "short/clearance to C101.1/CHG_5V"
+    }
+  ],
+  "same_run_pcb_sha256": "11adc599324e790df2a834718b3d00f271ae8171b9de58f59a76725026163ed9",
+  "evidence_artifact": {
+    "id": 9047673443,
+    "name": "r13-route1m-vbat-local-evidence",
+    "digest": "sha256:b90cef8bb762ba9cd1a77c2178111a8a566f1f517314e16f6e04602985652fd7",
+    "size_bytes": 73836
+  },
+  "battery_connector_deferred": true,
+  "charger_input_deferred": true,
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}
