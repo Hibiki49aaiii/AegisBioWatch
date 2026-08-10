@@ -1,0 +1,64 @@
+{
+  "revision": "r13-route1l-c102-vsys-bulk-decoupling",
+  "status": "ACCEPTED_EXECUTED_KICAD_BASELINE",
+  "source_baseline": "r13-route1k-c114-vsys-hf-decoupling",
+  "workflow": {
+    "name": "r13 route1l C102 VSYS validation",
+    "run_id": 31345766899,
+    "kicad_version": "9.0.9"
+  },
+  "result": {
+    "rule_violations": 0,
+    "unconnected_items": 166,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268
+  },
+  "scope": {
+    "track_segments_added": 6,
+    "vias_added": 3,
+    "vsys_track_width_mm": 0.4,
+    "gnd_track_width_mm": 0.4,
+    "via_size_mm": 0.6,
+    "via_drill_mm": 0.3,
+    "component_moves": [],
+    "component_rotations": [],
+    "accepted_pvss_geometry_modified": false,
+    "accepted_c114_geometry_modified": false,
+    "in1_gnd_plane_preserved_and_refilled": true,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  },
+  "c102": {
+    "value": "10uF 10V X7R 0603",
+    "center_mm": [10.218578, 33.302172],
+    "vsys_pad_mm": [9.443578, 33.302172],
+    "gnd_pad_mm": [10.993578, 33.302172],
+    "vsys_entry_via_mm": [9.0, 34.0],
+    "vsys_doglegs_mm": [[11.0, 35.0], [16.2, 31.0]],
+    "vsys_exit_via_mm": [15.5, 27.57],
+    "vsys_crossing_layer": "B.Cu",
+    "vsys_rejoin_node": "C114.1/VSYS",
+    "gnd_via_mm": [11.4, 33.3],
+    "gnd_reference": "continuous In1.Cu GND zone"
+  },
+  "rejected_geometries": [
+    {
+      "strategy": "straight B.Cu entry-to-exit trunk",
+      "reason": "shorted accepted route1j GND via at (10.35,32.05); no waiver used"
+    },
+    {
+      "strategy": "left B.Cu dogleg via (8.20,32.80)",
+      "reason": "shorted accepted PVSS2_LOCAL via at (7.90,33.10); no waiver used"
+    }
+  ],
+  "same_run_pcb_sha256": "f206afceb7b45db1c633bd491c850f94cce5d835f2562cc819a742e447939f44",
+  "evidence_artifact": {
+    "id": 9047284640,
+    "name": "r13-route1l-c102-vsys-evidence",
+    "digest": "sha256:8e70ddc1c811d43ed80f10d9b74a20f1c89561b9162a2768d4a6b28d83c620fb",
+    "size_bytes": 73750
+  },
+  "vbat_charger_deferred": true,
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}
