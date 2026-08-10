@@ -4,16 +4,15 @@
 Source: executed-KiCad-clean route-1l (0 violations / 166 unconnected /
 268-node physical audit PASS).
 
-This increment is intentionally limited to the local VBAT decoupler C106:
-- U2.19/VBAT -> short horizontal escape -> C106.1/VBAT on F.Cu
-- C106.2/GND -> one short F.Cu stub + through-via into continuous In1.Cu GND
+This increment is intentionally limited to the local VBAT decoupler C106.
+The accepted route-1l board places C106 at 90 degrees, with VBAT facing away
+from U2.19. Two fixed-orientation routing attempts were rejected by executed
+DRC. This revision rotates C106 in place from 90 to 270 degrees, preserving its
+center/courtyard while putting C106.1/VBAT toward U2.19 and C106.2/GND toward
+an open GND-via corridor.
 
-C106 is rotated 90 degrees in the accepted PCB, so pad 1/VBAT is the lower
-physical pad and pad 2/GND is the upper physical pad. The first corrected-pad
-attempt used a direct diagonal U2.19->C106.1 track and was rejected because it
-crossed adjacent U2.18/BAT_NTC. Its GND via at (16.20,28.94) also intersected
-the accepted route-1l B.Cu VSYS trunk. This revision only changes those two
-geometric details; no violation is waived.
+- U2.19/VBAT -> short horizontal escape -> C106.1/VBAT on F.Cu
+- C106.2/GND -> short F.Cu stub -> through-via -> continuous In1.Cu GND
 
 Battery connector, charger input, protection, RF and supplier-gated interfaces
 remain deferred. Planning/evidence artifact only; not fabrication authority.
@@ -48,7 +47,7 @@ GND_WIDTH = 0.40
 VIA_SIZE = 0.60
 VIA_DRILL = 0.30
 VBAT_ESCAPE = (14.65, 29.25)
-GND_VIA = (16.65, 28.94)
+GND_VIA = (16.85, 30.49)
 
 
 def stage(name: str) -> None:
@@ -151,16 +150,36 @@ def main():
         raise SystemExit(f'route1m net gate failed: {gates}')
 
     u2_vbat = point(u2, '19')
+    source_vbat = point(c106, '1')
+    source_gnd = point(c106, '2')
+    if abs(float(c106.GetOrientationDegrees()) - 90.0) > 0.001:
+        raise SystemExit(f'route1m source C106 orientation gate failed: {c106.GetOrientationDegrees()}')
+    source_expected = {
+        'U2.19': ((13.8875, 29.25), u2_vbat),
+        'C106.1': ((15.522674, 30.489978), source_vbat),
+        'C106.2': ((15.522674, 28.939978), source_gnd),
+    }
+    for name, (want, got) in source_expected.items():
+        if abs(want[0]-got[0]) > 0.001 or abs(want[1]-got[1]) > 0.001:
+            raise SystemExit(f'route1m source {name} geometry gate failed: {got}')
+
+    # Rotate only C106, in place, so VBAT faces U2.19 and GND opens downward.
+    center_before = (mm(c106.GetPosition().x), mm(c106.GetPosition().y))
+    c106.SetOrientationDegrees(270.0)
+    center_after = (mm(c106.GetPosition().x), mm(c106.GetPosition().y))
+    if abs(center_before[0]-center_after[0]) > 0.001 or abs(center_before[1]-center_after[1]) > 0.001:
+        raise SystemExit(f'route1m C106 center moved during rotation: {center_before} -> {center_after}')
+
     c106_vbat = point(c106, '1')
     c106_gnd = point(c106, '2')
-    expected = {
-        'U2.19': ((13.8875, 29.25), u2_vbat),
-        'C106.1': ((15.522674, 30.489978), c106_vbat),
-        'C106.2': ((15.522674, 28.939978), c106_gnd),
+    rotated_expected = {
+        'C106.1': ((15.522674, 28.939978), c106_vbat),
+        'C106.2': ((15.522674, 30.489978), c106_gnd),
     }
-    for name, (want, got) in expected.items():
+    for name, (want, got) in rotated_expected.items():
         if abs(want[0]-got[0]) > 0.001 or abs(want[1]-got[1]) > 0.001:
-            raise SystemExit(f'route1m {name} geometry gate failed: {got}')
+            raise SystemExit(f'route1m rotated {name} geometry gate failed: {got}')
+    stage('C106 rotated 90 to 270 degrees in place')
 
     vbat = board.FindNet('VBAT')
     gnd = board.FindNet('GND')
