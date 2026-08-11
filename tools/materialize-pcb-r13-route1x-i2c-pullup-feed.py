@@ -2,10 +2,12 @@
 """r13 route-1x: connect the R103/R104 +1V8 pull-up branch to C113.1/+1V8.
 
 Source: executed-KiCad-clean route-1w (0 violations / 152 unconnected /
-268-node physical audit PASS). The first x=11.60 candidate was rejected because
-it shorted the accepted C102.2/GND track/via. This revision uses x=10.25,
-inside the measured standard-rule corridor between C102.1/VSYS and C102.2/GND.
-No I2C signal pad, via, or placement is modified.
+268-node physical audit PASS). Two earlier candidates were rejected by executed
+DRC: x=11.60 shorted C102.2/GND track/via, and a y=32.399818 crossing at x=10.25
+shorted the accepted route-1j GND via (10.35,32.05). This revision keeps the
+measured C102 pad-gap x=10.25 corridor, then crosses at y=32.59: above the via
+and below C102 copper with standard clearance. No I2C signal pad, via, or
+placement is modified.
 """
 from __future__ import annotations
 import argparse,faulthandler,hashlib,json,os,shutil,sys
@@ -23,7 +25,8 @@ OUT_PRO=OUT_DIR/'AegisBioWatch-MainBoard-Route1x-r13.kicad_pro'
 REPORT_HELPER=ROOT/'tools/write-pcb-r13-route1x-report.py'
 TRACK_WIDTH=0.20
 BEND1=(10.25,34.223282)
-BEND2=(10.25,32.399818)
+BEND2=(10.25,32.59)
+BEND3=(12.245188,32.59)
 
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def loadj(p): return json.loads(Path(p).read_text())
@@ -58,14 +61,15 @@ def main():
     if abs(p103[0]-12.214871)>0.001 or abs(p103[1]-34.223282)>0.001: raise SystemExit(f'route1x R103.1 geometry gate failed: {p103}')
     if abs(target[0]-12.245188)>0.001 or abs(target[1]-32.399818)>0.001: raise SystemExit(f'route1x C113.1 geometry gate failed: {target}')
     c102_1=point(c102,'1'); c102_2=point(c102,'2')
-    if abs(c102_1[0]-9.443578)>0.001 or abs(c102_2[0]-10.993578)>0.001: raise SystemExit(f'route1x C102 geometry gate failed: {c102_1} {c102_2}')
+    if abs(c102_1[0]-9.443578)>0.001 or abs(c102_2[0]-10.993578)>0.001 or abs(c102_1[1]-33.302172)>0.001: raise SystemExit(f'route1x C102 geometry gate failed: {c102_1} {c102_2}')
     net=board.FindNet('+1V8')
     if net is None: raise SystemExit('route1x +1V8 net reacquire failed')
     added=0
     added+=add_track(board,net,p103,BEND1)
     added+=add_track(board,net,BEND1,BEND2)
-    added+=add_track(board,net,BEND2,target)
-    if added!=3: raise SystemExit('route1x scope gate failed')
+    added+=add_track(board,net,BEND2,BEND3)
+    added+=add_track(board,net,BEND3,target)
+    if added!=4: raise SystemExit('route1x scope gate failed')
     refill(board); board.SynchronizeNetsAndNetClasses(True); board.BuildConnectivity()
     if OUT_DIR.exists(): shutil.rmtree(OUT_DIR)
     OUT_DIR.mkdir(parents=True)
