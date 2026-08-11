@@ -30,18 +30,29 @@ def main() -> None:
         'revision': 'r13-route1r-ldo1in-local-closure',
         'source_route1q_sha256': srcsha,
         'output_sha256': sha(OUT_PCB),
-        'track_segments_added': 4,
+        'track_segments_added': 5,
         'vias_added': 0,
         'track_width_mm': 0.20,
         'connections': {
             'LDO1_IN': {
                 'u2_28_mm': [11.6875, 26.05],
-                'bend1_mm': [11.6875, 25.30],
-                'bend2_mm': [13.55, 25.30],
-                'bend3_mm': [13.55, 24.750105],
+                'bend1_mm': [11.6875, 25.70],
+                'bend2_mm': [12.00, 25.40],
+                'bend3_mm': [13.55, 25.40],
+                'bend4_mm': [13.55, 24.750105],
                 'r105_2_mm': [13.10307, 24.750105],
                 'r105_value': '0R DNP/OPTION'
             }
+        },
+        'rejected_geometry': {
+            'route': 'U2.28 -> (11.6875,25.30) -> (13.55,25.30) -> (13.55,24.750105) -> R105.2',
+            'executed_run_id': 31468964539,
+            'violations': 2,
+            'unconnected_items': 157,
+            'actual_clearance_mm': 0.0002,
+            'required_clearance_mm': 0.1000,
+            'conflict': 'accepted PVSS1_LOCAL via at (11.30,25.20)',
+            'correction': 'terminate straight U2.28 escape at y=25.70, then shift right before descending to y=25.40'
         },
         'logical_connectivity_added': [
             'U2.28/LDO1_IN <-> R105.2/LDO1_IN'
