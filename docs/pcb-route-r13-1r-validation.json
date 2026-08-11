@@ -1,0 +1,56 @@
+{
+  "revision": "r13-route1r-ldo1in-local-closure",
+  "status": "ACCEPTED_EXECUTED_KICAD_EVIDENCE",
+  "accepted_run": {
+    "workflow": "r13 route1r LDO1_IN local validation",
+    "run_id": 31469286000,
+    "head_sha": "9b872b19d40c00800251650f1b5125f626f20315",
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 157,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268,
+    "track_segments_added": 5,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": [],
+    "source_route1q_sha256": "300c2c47ae1c18cfda259335962a34cdd4dca254a27ceaf2bcd4177a9c7d95b5",
+    "same_run_route1r_pcb_sha256": "ded47eb49c3a2cfaea4b86236654e240e7f858249a88c418d5e5888de450710c",
+    "artifact": {
+      "name": "r13-route1r-ldo1in-local-evidence",
+      "id": 9092737223,
+      "digest": "sha256:21d79c78a94e296b549d301c0d128b223233ac695fd5766b883c36dcf3beb64e"
+    }
+  },
+  "accepted_geometry": {
+    "net": "LDO1_IN",
+    "track_width_mm": 0.2,
+    "points_mm": [
+      [11.6875, 26.05],
+      [11.6875, 25.70],
+      [12.00, 25.40],
+      [13.55, 25.40],
+      [13.55, 24.750105],
+      [13.10307, 24.750105]
+    ],
+    "logical_connection": "U2.28/LDO1_IN <-> R105.2/LDO1_IN",
+    "r105_value": "0R DNP/OPTION"
+  },
+  "rejected_geometry": {
+    "run_id": 31468964539,
+    "artifact_id": 9092615849,
+    "artifact_digest": "sha256:0ed43f28e62c20e48cf7f4ecf4620ff6418e2a676656a460d977cbfbe582a6a0",
+    "rule_violations": 2,
+    "unconnected_items": 157,
+    "actual_clearance_mm": 0.0002,
+    "required_clearance_mm": 0.1,
+    "conflict": "LDO1_IN first escape versus accepted PVSS1_LOCAL via at (11.30,25.20)",
+    "disposition": "REJECTED_NO_WAIVER"
+  },
+  "constraints": {
+    "route1n_chg5v": "REJECTED_AND_DEFERRED",
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "release_status": "NOT_FOR_GERBER"
+  }
+}
