@@ -1,0 +1,42 @@
+{
+  "status": "ACCEPTED",
+  "revision": "route-1x",
+  "scope": "R103/R104 +1V8 pull-up branch feed into accepted C113.1/+1V8 node",
+  "workflow_run_id": 31476784580,
+  "artifact_id": 9095611760,
+  "artifact_name": "r13-route1x-i2c-pullup-feed-evidence",
+  "artifact_digest": "sha256:8c2a2df7c1a18c493e462563e66c1682f4b4b687dc24e5768b262c92c79fe20e",
+  "kicad_version": "9.0.9",
+  "rule_violations": 0,
+  "unconnected_items": 151,
+  "pin_net_audit": "PASS",
+  "audited_nodes": 268,
+  "source_route1w_sha256_same_run": "654b4c5879abf56c853240aef15c64fe119c300dd2adcdd16ab5d1360b6d9947",
+  "route1x_pcb_sha256_same_run": "4f25b08a75b5f2c691b041102d5cfb356bc71ed889252c03c836acece0649cef",
+  "accepted_geometry": {
+    "start_r103_1_mm": [12.214871, 34.223282],
+    "bend1_mm": [10.25, 34.223282],
+    "bend2_mm": [10.25, 32.59],
+    "bend3_mm": [12.245188, 32.59],
+    "target_c113_1_mm": [12.245188, 32.399818],
+    "track_width_mm": 0.20,
+    "segments": 4,
+    "vias": 0
+  },
+  "rejected_candidates": [
+    {"workflow_run_id": 31475815215, "reason": "short to C102.2/GND track/via at x=11.60"},
+    {"workflow_run_id": 31476339486, "reason": "short to route-1j GND via (10.35,32.05) at y=32.399818"}
+  ],
+  "measured_clearance_basis": {
+    "crossing_y_mm": 32.59,
+    "estimated_clearance_to_c102_copper_mm": 0.137172,
+    "estimated_clearance_to_route1j_gnd_via_mm": 0.14,
+    "required_clearance_mm": 0.10
+  },
+  "i2c_signal_pads_touched": false,
+  "component_moves": [],
+  "component_rotations": [],
+  "ldo2_in_status": "DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD",
+  "chg_5v_status": "REJECTED_AND_DEFERRED",
+  "release_status": "NOT_FOR_GERBER"
+}
