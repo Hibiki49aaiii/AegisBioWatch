@@ -2,9 +2,10 @@
 """r13 route-1x: connect the R103/R104 +1V8 pull-up branch to C113.1/+1V8.
 
 Source: executed-KiCad-clean route-1w (0 violations / 152 unconnected /
-268-node physical audit PASS). The path escapes left from R103.1, drops clear
-of R103.2/SDA, then joins the accepted C113.1 +1V8 node. No I2C signal pad,
-via, or placement is modified.
+268-node physical audit PASS). The first x=11.60 candidate was rejected because
+it shorted the accepted C102.2/GND track/via. This revision uses x=10.25,
+inside the measured standard-rule corridor between C102.1/VSYS and C102.2/GND.
+No I2C signal pad, via, or placement is modified.
 """
 from __future__ import annotations
 import argparse,faulthandler,hashlib,json,os,shutil,sys
@@ -21,8 +22,8 @@ OUT_PCB=OUT_DIR/'AegisBioWatch-MainBoard-Route1x-r13.kicad_pcb'
 OUT_PRO=OUT_DIR/'AegisBioWatch-MainBoard-Route1x-r13.kicad_pro'
 REPORT_HELPER=ROOT/'tools/write-pcb-r13-route1x-report.py'
 TRACK_WIDTH=0.20
-BEND1=(11.60,34.223282)
-BEND2=(11.60,32.399818)
+BEND1=(10.25,34.223282)
+BEND2=(10.25,32.399818)
 
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def loadj(p): return json.loads(Path(p).read_text())
@@ -48,14 +49,16 @@ def main():
     if len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=152: raise SystemExit('route1w DRC gate failed')
     if a.get('result')!='PASS' or a.get('audited_present_source_nodes')!=268: raise SystemExit('route1w pin/net gate failed')
     board=pcbnew.LoadBoard(str(SRC_PCB)); fps={f.GetReference():f for f in board.GetFootprints()}
-    r103=fps.get('R103'); c113=fps.get('C113')
-    if r103 is None or c113 is None: raise SystemExit('route1x missing R103/C113')
-    gates={'R103.1':pads(r103,'1')[0].GetNetname(),'R103.2':pads(r103,'2')[0].GetNetname(),'C113.1':pads(c113,'1')[0].GetNetname(),'C113.2':pads(c113,'2')[0].GetNetname()}
-    expected={'R103.1':'+1V8','R103.2':'SYS_I2C_SDA','C113.1':'+1V8','C113.2':'GND'}
+    r103=fps.get('R103'); c113=fps.get('C113'); c102=fps.get('C102')
+    if r103 is None or c113 is None or c102 is None: raise SystemExit('route1x missing R103/C113/C102')
+    gates={'R103.1':pads(r103,'1')[0].GetNetname(),'R103.2':pads(r103,'2')[0].GetNetname(),'C113.1':pads(c113,'1')[0].GetNetname(),'C113.2':pads(c113,'2')[0].GetNetname(),'C102.1':pads(c102,'1')[0].GetNetname(),'C102.2':pads(c102,'2')[0].GetNetname()}
+    expected={'R103.1':'+1V8','R103.2':'SYS_I2C_SDA','C113.1':'+1V8','C113.2':'GND','C102.1':'VSYS','C102.2':'GND'}
     if gates!=expected: raise SystemExit(f'route1x net gate failed: {gates}')
     p103=point(r103,'1'); target=point(c113,'1')
     if abs(p103[0]-12.214871)>0.001 or abs(p103[1]-34.223282)>0.001: raise SystemExit(f'route1x R103.1 geometry gate failed: {p103}')
     if abs(target[0]-12.245188)>0.001 or abs(target[1]-32.399818)>0.001: raise SystemExit(f'route1x C113.1 geometry gate failed: {target}')
+    c102_1=point(c102,'1'); c102_2=point(c102,'2')
+    if abs(c102_1[0]-9.443578)>0.001 or abs(c102_2[0]-10.993578)>0.001: raise SystemExit(f'route1x C102 geometry gate failed: {c102_1} {c102_2}')
     net=board.FindNet('+1V8')
     if net is None: raise SystemExit('route1x +1V8 net reacquire failed')
     added=0
