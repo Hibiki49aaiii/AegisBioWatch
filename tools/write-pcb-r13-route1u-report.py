@@ -38,17 +38,23 @@ def main() -> None:
         'connections': {
             'C113.2/GND': {
                 'pad_mm': [12.885188, 32.399818],
-                'gnd_via_mm': [12.70, 33.10],
+                'gnd_via_mm': [12.84, 32.79],
                 'target_reference': 'continuous In1.Cu GND zone',
                 'c113_value': '100nF X5R'
             }
         },
-        'rejected_geometry': {
-            'gnd_via_mm': [12.55, 33.05],
-            'clearance_to_R103_2_SYS_I2C_SDA_mm': 0.0668,
-            'required_clearance_mm': 0.1000,
-            'correction': 'move GND via to (12.70,33.10)'
-        },
+        'rejected_geometries': [
+            {
+                'gnd_via_mm': [12.55, 33.05],
+                'failure': 'clearance to R103.2/SYS_I2C_SDA',
+                'actual_clearance_mm': 0.0668,
+                'required_clearance_mm': 0.1000
+            },
+            {
+                'gnd_via_mm': [12.70, 33.10],
+                'failure': 'short to accepted B.Cu VSYS trunk from (11,35) to (16.2,31)'
+            }
+        ],
         'logical_connectivity_added': [
             'C113.2/GND -> continuous In1.Cu GND reference'
         ],
