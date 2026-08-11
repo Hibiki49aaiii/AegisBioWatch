@@ -1,0 +1,65 @@
+{
+  "revision": "r13-route1u-c113-gnd-closure",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "workflow": {
+    "name": "r13 route1u C113 GND validation",
+    "run_id": 31471520648,
+    "job_id": 93715683698,
+    "head_sha": "65c117fdca776f13c2be0b4d642fa19a10a73a04",
+    "kicad_version": "9.0.9",
+    "conclusion": "success"
+  },
+  "executed_results": {
+    "rule_violations": 0,
+    "unconnected_items": 154,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "track_segments_added": 1,
+    "vias_added": 1,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "same_run_source_route1t_sha256": "a015aa829ddfc057372a3f50ca087336350bfd583b890420ddf7f8c059708c04",
+  "same_run_pcb_sha256": "f7f640b58526c0bb1eb57159a472df11d92f72843e8286480f64f226575639ba",
+  "artifact": {
+    "name": "r13-route1u-c113-gnd-evidence",
+    "id": 9093593596,
+    "digest": "sha256:1335170e9f8db0710f729766a4762bea1773ea26ebd861e9405619db90b5d03a"
+  },
+  "accepted_geometry": {
+    "c113_2_gnd_mm": [12.885188, 32.399818],
+    "gnd_via_mm": [12.84, 32.79],
+    "track_width_mm": 0.30,
+    "via_size_mm": 0.60,
+    "via_drill_mm": 0.30,
+    "target_reference": "continuous In1.Cu GND zone"
+  },
+  "rejected_geometries": [
+    {
+      "gnd_via_mm": [12.55, 33.05],
+      "run_id": 31470890037,
+      "artifact_id": 9093332999,
+      "failure": "clearance to R103.2/SYS_I2C_SDA",
+      "actual_clearance_mm": 0.0668,
+      "required_clearance_mm": 0.1000
+    },
+    {
+      "gnd_via_mm": [12.70, 33.10],
+      "run_id": 31471200933,
+      "artifact_id": 9093451408,
+      "failure": "short to accepted B.Cu VSYS trunk from (11,35) to (16.2,31)"
+    }
+  ],
+  "scope": {
+    "logical_connectivity_added": [
+      "C113.2/GND -> continuous In1.Cu GND reference"
+    ],
+    "c113_1_1v8": "UNCHANGED_PENDING_SEPARATE_VALIDATION",
+    "ldo2_in": "DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD",
+    "chg_5v": "REJECTED_AND_DEFERRED",
+    "accepted_route1t_geometry_modified": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  }
+}
