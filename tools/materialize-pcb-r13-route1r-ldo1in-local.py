@@ -6,8 +6,11 @@ Source: executed-KiCad-clean route-1q (0 violations / 158 unconnected /
 
 Only the LDO1_IN side of optional R105 is routed in this increment. R105.1/VSYS
 is deliberately left unchanged until this local escape is proven clean. The
-three-segment dogleg exits U2.28 outward before approaching R105.2 from the
-right, avoiding adjacent U2.27 and R105.1 pads.
+five-segment dogleg exits U2.28 outward, shifts right before the accepted
+PVSS1 via at (11.30,25.20), then approaches R105.2 from the right.
+
+The first executed candidate using y=25.30 directly above the PVSS1 via was
+rejected by KiCad with two 0.0002 mm actual-clearance violations.
 
 Planning/evidence artifact only; not fabrication authority.
 """
@@ -37,9 +40,10 @@ OUT_PRO = OUT_DIR / 'AegisBioWatch-MainBoard-Route1r-r13.kicad_pro'
 REPORT_HELPER = ROOT / 'tools/write-pcb-r13-route1r-report.py'
 
 TRACK_WIDTH = 0.20
-BEND1 = (11.6875, 25.30)
-BEND2 = (13.55, 25.30)
-BEND3 = (13.55, 24.750105)
+BEND1 = (11.6875, 25.70)
+BEND2 = (12.00, 25.40)
+BEND3 = (13.55, 25.40)
+BEND4 = (13.55, 24.750105)
 
 
 def stage(name: str) -> None:
@@ -156,8 +160,9 @@ def main():
     added += add_track(board, ldo1, u2_ldo1, BEND1, TRACK_WIDTH)
     added += add_track(board, ldo1, BEND1, BEND2, TRACK_WIDTH)
     added += add_track(board, ldo1, BEND2, BEND3, TRACK_WIDTH)
-    added += add_track(board, ldo1, BEND3, r105_ldo1, TRACK_WIDTH)
-    if added != 4:
+    added += add_track(board, ldo1, BEND3, BEND4, TRACK_WIDTH)
+    added += add_track(board, ldo1, BEND4, r105_ldo1, TRACK_WIDTH)
+    if added != 5:
         raise SystemExit(f'route1r internal scope gate failed: segments={added}')
 
     refill_all_zones(board)
