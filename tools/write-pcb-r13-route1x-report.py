@@ -15,10 +15,13 @@ def main():
     if src.get('output_sha256')!=srcsha: raise SystemExit('route1w report/PCB SHA mismatch in route1x report helper')
     out={
       'revision':'r13-route1x-i2c-pullup-feed','source_route1w_sha256':srcsha,'output_sha256':sha(OUT_PCB),
-      'track_segments_added':3,'vias_added':0,'track_width_mm':0.20,
-      'connections':{'+1V8_pullup_feed':{'start_r103_1_mm':[12.214871,34.223282],'bend1_mm':[10.25,34.223282],'bend2_mm':[10.25,32.399818],'target_c113_1_mm':[12.245188,32.399818]}},
-      'rejected_geometry':{'bend_x_mm':11.60,'workflow_run_id':31475815215,'rule_violations':2,'reason':'short to accepted C102.2/GND F.Cu track and GND via (11.40,33.30)','correction':'use measured C102 pad-gap corridor at x=10.25'},
-      'measured_corridor':{'c102_1_vsys_pad_center_x_mm':9.443578,'c102_2_gnd_pad_center_x_mm':10.993578,'c102_pad_width_mm':0.90,'track_width_mm':0.20,'bend_x_mm':10.25,'estimated_min_copper_clearance_mm':0.1936},
+      'track_segments_added':4,'vias_added':0,'track_width_mm':0.20,
+      'connections':{'+1V8_pullup_feed':{'start_r103_1_mm':[12.214871,34.223282],'bend1_mm':[10.25,34.223282],'bend2_mm':[10.25,32.59],'bend3_mm':[12.245188,32.59],'target_c113_1_mm':[12.245188,32.399818]}},
+      'rejected_geometry':[
+        {'workflow_run_id':31475815215,'geometry':'x=11.60 vertical to y=32.399818','rule_violations':2,'reason':'short to accepted C102.2/GND F.Cu track and GND via (11.40,33.30)'},
+        {'workflow_run_id':31476339486,'geometry':'x=10.25 vertical to y=32.399818 then horizontal','rule_violations':2,'reason':'short to accepted route-1j GND via (10.35,32.05)'}
+      ],
+      'measured_corridor':{'c102_center_y_mm':33.302172,'c102_pad_height_mm':0.95,'c102_bottom_copper_y_mm':32.827172,'route1j_gnd_via_center_mm':[10.35,32.05],'route1j_gnd_via_diameter_mm':0.60,'track_width_mm':0.20,'crossing_y_mm':32.59,'estimated_clearance_to_c102_copper_mm':0.137172,'estimated_clearance_to_gnd_via_mm':0.14},
       'logical_connectivity_added':['R103/R104 local +1V8 pull-up branch -> accepted C113.1/+1V8 node'],
       'i2c_signal_pads_touched':False,'component_moves':[],'component_rotations':[],
       'accepted_route1w_geometry_modified':False,'ldo2_in_status':'DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD',
