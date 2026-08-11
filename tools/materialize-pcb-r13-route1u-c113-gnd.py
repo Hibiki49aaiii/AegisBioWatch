@@ -6,8 +6,7 @@ Source: executed-KiCad-clean route-1t (0 violations / 155 unconnected /
 
 This increment only connects the GND side of C113 (100 nF X5R) with one short
 F.Cu segment and one standard through via. C113.1/+1V8 remains unchanged.
-The first via at (12.55,33.05) was rejected after executed DRC measured only
-0.0668 mm clearance to R103.2/SYS_I2C_SDA; the via is moved to (12.70,33.10).
+Rejected candidates are retained in the report; no waiver is used.
 """
 from __future__ import annotations
 
@@ -35,7 +34,7 @@ OUT_PRO = OUT_DIR / 'AegisBioWatch-MainBoard-Route1u-r13.kicad_pro'
 REPORT_HELPER = ROOT / 'tools/write-pcb-r13-route1u-report.py'
 
 TRACK_WIDTH = 0.30
-GND_VIA = (12.70, 33.10)
+GND_VIA = (12.84, 32.79)
 VIA_SIZE = 0.60
 VIA_DRILL = 0.30
 
