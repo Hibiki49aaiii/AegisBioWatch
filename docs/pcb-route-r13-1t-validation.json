@@ -1,0 +1,50 @@
+{
+  "revision": "r13-route1t-r106-vsys-closure",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "workflow": {
+    "name": "r13 route1t R106 VSYS validation",
+    "run_id": 31470459175,
+    "job_id": 93712421119,
+    "head_sha": "9490a11ac6a69aae3e1748e31e35a896ea986c68",
+    "kicad_version": "9.0.9",
+    "conclusion": "success"
+  },
+  "executed_results": {
+    "rule_violations": 0,
+    "unconnected_items": 155,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "track_segments_added": 4,
+    "vias_added": 1,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "same_run_pcb_sha256": "e2207465b183828c7967caf18a7fb3d8f52faad217a4b3952ea2370cc6d0fbc9",
+  "same_run_source_route1s_sha256": "49c4fbeb8770e7505838bf9e2219f2377d48ba5a4193666e74129dd1f2466b2b",
+  "artifact": {
+    "name": "r13-route1t-r106-vsys-evidence",
+    "id": 9093160813,
+    "digest": "sha256:c5e9b4570bc47fc00f8f91d134e6cb0e558b5c304f88b4db789a704c2485b4d7"
+  },
+  "geometry": {
+    "r106_1_vsys_mm": [5.270826, 25.865834],
+    "new_vsys_via_mm": [4.65, 25.865834],
+    "b_cu_bend1_mm": [4.65, 23.0],
+    "b_cu_bend2_mm": [11.9, 23.0],
+    "accepted_route1s_vsys_via_mm": [11.9, 24.7],
+    "track_width_mm": 0.3,
+    "via_size_mm": 0.6,
+    "via_drill_mm": 0.3
+  },
+  "scope": {
+    "logical_connectivity_added": [
+      "R106.1/VSYS -> accepted route1s VSYS network at existing via (11.90,24.70)"
+    ],
+    "ldo2_in": "DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD",
+    "chg_5v": "REJECTED_AND_DEFERRED",
+    "accepted_route1s_geometry_modified": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  }
+}
