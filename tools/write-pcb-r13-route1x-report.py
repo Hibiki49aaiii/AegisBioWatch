@@ -14,15 +14,15 @@ def main():
     src=json.loads(SRC_REPORT.read_text()); srcsha=sha(SRC_PCB)
     if src.get('output_sha256')!=srcsha: raise SystemExit('route1w report/PCB SHA mismatch in route1x report helper')
     out={
-      'revision':'r13-route1x-i2c-pullup-feed','source_route1w_sha256':srcsha,'output_sha256':sha(OUT_PCB),
-      'track_segments_added':4,'vias_added':0,'track_width_mm':0.20,
-      'connections':{'+1V8_pullup_feed':{'start_r103_1_mm':[12.214871,34.223282],'bend1_mm':[10.25,34.223282],'bend2_mm':[10.25,32.59],'bend3_mm':[12.245188,32.59],'target_c113_1_mm':[12.245188,32.399818]}},
+      'revision':'r13-route1x-i2c-pullup-feed-in2-bridge','source_route1w_sha256':srcsha,'output_sha256':sha(OUT_PCB),
+      'track_segments_added':1,'vias_added':2,'track_width_mm':0.20,'via_size_mm':0.60,'via_drill_mm':0.30,
+      'connections':{'+1V8_pullup_feed':{'branch_via_mm':[12.684473,34.267766],'trunk_via_mm':[11.45,31.685729],'routing_layer':'In2.Cu','branch_via_location':'midpoint of accepted route-1w R103.1-R104.1 +1V8 segment','trunk_via_location':'on accepted route-1v U2.12-C113.1 +1V8 segment'}},
       'rejected_geometry':[
-        {'workflow_run_id':31475815215,'geometry':'x=11.60 vertical to y=32.399818','rule_violations':2,'reason':'short to accepted C102.2/GND F.Cu track and GND via (11.40,33.30)'},
-        {'workflow_run_id':31476339486,'geometry':'x=10.25 vertical to y=32.399818 then horizontal','rule_violations':2,'reason':'short to accepted route-1j GND via (10.35,32.05)'}
+        {'workflow_run_id':31475815215,'geometry':'F.Cu x=11.60 corridor','rule_violations':2,'reason':'short to accepted C102.2/GND track/via area'},
+        {'workflow_run_id':31476339486,'geometry':'F.Cu x=10.25 corridor','rule_violations':2,'reason':'short to accepted route-1j GND via (10.35,32.05)'}
       ],
-      'measured_corridor':{'c102_center_y_mm':33.302172,'c102_pad_height_mm':0.95,'c102_bottom_copper_y_mm':32.827172,'route1j_gnd_via_center_mm':[10.35,32.05],'route1j_gnd_via_diameter_mm':0.60,'track_width_mm':0.20,'crossing_y_mm':32.59,'estimated_clearance_to_c102_copper_mm':0.137172,'estimated_clearance_to_gnd_via_mm':0.14},
-      'logical_connectivity_added':['R103/R104 local +1V8 pull-up branch -> accepted C113.1/+1V8 node'],
+      'design_rationale':'F.Cu local corridors are blocked by accepted GND vias; use two standard through vias and an otherwise-unused local In2.Cu corridor instead of forcing substandard clearance.',
+      'logical_connectivity_added':['R103/R104 local +1V8 pull-up branch -> accepted route-1v +1V8 trunk'],
       'i2c_signal_pads_touched':False,'component_moves':[],'component_rotations':[],
       'accepted_route1w_geometry_modified':False,'ldo2_in_status':'DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD',
       'route1n_chg5v_status':'REJECTED_AND_DEFERRED','rf_routing_touched':False,'supplier_gated_interfaces_touched':False,
