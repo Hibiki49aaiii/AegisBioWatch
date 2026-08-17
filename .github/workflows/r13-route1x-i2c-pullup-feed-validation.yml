@@ -58,7 +58,7 @@ jobs:
           print(json.dumps(out,indent=2)); Path('/tmp/route1x-summary.json').write_text(json.dumps(out,indent=2))
           if out['rule_violations']!=0 or out['unconnected_items']!=151: raise SystemExit('route1x DRC/ratsnest gate failed')
           if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1x audit gate failed')
-          if out['added_segments']!=4 or out['vias_added']!=0: raise SystemExit('route1x routing scope gate failed')
+          if out['added_segments']!=1 or out['vias_added']!=2: raise SystemExit('route1x routing scope gate failed')
           if out['component_moves']!=[] or out['component_rotations']!=[]: raise SystemExit('route1x placement scope gate failed')
           PY
       - name: Package route1x evidence
