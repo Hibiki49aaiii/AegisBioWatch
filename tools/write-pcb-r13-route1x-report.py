@@ -16,12 +16,14 @@ def main():
     out={
       'revision':'r13-route1x-i2c-pullup-feed-in2-bridge','source_route1w_sha256':srcsha,'output_sha256':sha(OUT_PCB),
       'track_segments_added':1,'vias_added':2,'track_width_mm':0.20,'via_size_mm':0.60,'via_drill_mm':0.30,
-      'connections':{'+1V8_pullup_feed':{'branch_via_mm':[12.684473,34.267766],'trunk_via_mm':[11.45,31.685729],'routing_layer':'In2.Cu','branch_via_location':'midpoint of accepted route-1w R103.1-R104.1 +1V8 segment','trunk_via_location':'on accepted route-1v U2.12-C113.1 +1V8 segment'}},
+      'connections':{'+1V8_pullup_feed':{'branch_via_mm':[12.966234,34.294456],'trunk_via_mm':[11.60,31.820431],'routing_layer':'In2.Cu','branch_via_location':'on accepted route-1w R103.1-R104.1 +1V8 segment','trunk_via_location':'on accepted route-1v U2.12-C113.1 +1V8 segment'}},
       'rejected_geometry':[
         {'workflow_run_id':31475815215,'geometry':'F.Cu x=11.60 corridor','rule_violations':2,'reason':'short to accepted C102.2/GND track/via area'},
-        {'workflow_run_id':31476339486,'geometry':'F.Cu x=10.25 corridor','rule_violations':2,'reason':'short to accepted route-1j GND via (10.35,32.05)'}
+        {'workflow_run_id':31476339486,'geometry':'F.Cu x=10.25 corridor','rule_violations':2,'reason':'short to accepted route-1j GND via (10.35,32.05)'},
+        {'workflow_run_id':32042985975,'geometry':'In2.Cu bridge via (12.684473,34.267766) to via (11.45,31.685729)','rule_violations':2,'reason':'branch via shorted B.Cu VSYS spine; trunk via clearance to U2.13/SDA only 0.0725 mm vs 0.1000 mm required'}
       ],
-      'design_rationale':'F.Cu local corridors are blocked by accepted GND vias; use two standard through vias and an otherwise-unused local In2.Cu corridor instead of forcing substandard clearance.',
+      'measured_correction':{'branch_via_shifted_along_same_net_track_to_mm':[12.966234,34.294456],'trunk_via_shifted_along_same_net_track_to_mm':[11.60,31.820431],'first_in2_candidate_trunk_clearance_to_U2_13_mm':0.0725,'required_clearance_mm':0.1000},
+      'design_rationale':'F.Cu local corridors are blocked by accepted GND vias. Keep the otherwise-unused local In2.Cu bridge and move its standard through vias along existing +1V8 tracks to executed-DRC-informed clearance positions.',
       'logical_connectivity_added':['R103/R104 local +1V8 pull-up branch -> accepted route-1v +1V8 trunk'],
       'i2c_signal_pads_touched':False,'component_moves':[],'component_rotations':[],
       'accepted_route1w_geometry_modified':False,'ldo2_in_status':'DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD',
