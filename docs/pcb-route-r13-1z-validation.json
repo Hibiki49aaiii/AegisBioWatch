@@ -1,0 +1,32 @@
+{
+  "status": "ACCEPTED",
+  "revision": "route-1z",
+  "scope": "C101.2/GND local closure to accepted GND via (16.85,30.49)",
+  "workflow_run_id": 32043897581,
+  "artifact_id": 9292462033,
+  "artifact_name": "r13-route1z-c101-gnd-evidence",
+  "artifact_digest": "sha256:cb690f60ea38bc6f1152e43353c97784a68ea832f250a8910d3bd5449cb8a0ec",
+  "kicad_version": "9.0.9",
+  "rule_violations": 0,
+  "unconnected_items": 149,
+  "pin_net_audit": "PASS",
+  "audited_nodes": 268,
+  "source_route1y_sha256_same_run": "a54fd4c34d53b2d3f098a8f73c64fa0e71e479794d0bc187e5a9f99e319d5a01",
+  "route1z_pcb_sha256_same_run": "d8ad8677c862a683407d805fae05eb868f532fe480f26e612caa85fa81f59acd",
+  "accepted_geometry": {
+    "c101_2_gnd_mm": [17.141428, 28.024501],
+    "bend1_mm": [17.95, 28.024501],
+    "bend2_mm": [17.95, 30.49],
+    "target_existing_gnd_via_mm": [16.85, 30.49],
+    "track_width_mm": 0.30,
+    "segments": 3,
+    "vias_added": 0
+  },
+  "design_rationale": "C101.1/CHG_5V at (17.141428,29.574501) lies directly between C101.2/GND and the target GND via, so the accepted route escapes right of the CHG_5V pad before returning to the existing GND via.",
+  "chg_5v_status": "UNCHANGED_REJECTED_AND_DEFERRED",
+  "i2c_scl_status": "DEFERRED_STANDARD_RULE_CORRIDOR_NOT_DEMONSTRATED",
+  "ldo2_in_status": "DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD",
+  "component_moves": [],
+  "component_rotations": [],
+  "release_status": "NOT_FOR_GERBER"
+}
