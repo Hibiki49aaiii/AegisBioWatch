@@ -1,0 +1,58 @@
+{
+  "revision": "r13-route1ak-q501-gnd-local",
+  "status": "ACCEPTED_EXECUTED_KICAD",
+  "source_baseline": "route-1aj",
+  "geometry": {
+    "connection": "Q501.2/GND -> continuous In1.Cu GND",
+    "pad_mm": [18.6175, 19.525],
+    "gnd_via_mm": [17.65, 19.525],
+    "track_width_mm": 0.30,
+    "via_size_mm": 0.60,
+    "via_drill_mm": 0.30,
+    "segments_added": 1,
+    "vias_added": 1,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "component_gate": {
+    "reference": "Q501",
+    "value": "2N7002-CLASS",
+    "pin_1_net": "CHG_SENSE_GATE",
+    "pin_2_net": "GND",
+    "pin_3_net": "CHG_PRESENT_N"
+  },
+  "scope": {
+    "Q501_1_CHG_SENSE_GATE": "untouched_pending_separate_validation",
+    "Q501_3_CHG_PRESENT_N": "untouched_pending_separate_validation",
+    "SYS_I2C_SCL": "deferred_geometry_gated",
+    "LDO2_IN": "deferred_geometry_constrained_no_via_in_pad",
+    "CHG_5V": "rejected_and_deferred",
+    "RF": "untouched",
+    "supplier_gated_interfaces": "untouched",
+    "release_status": "NOT_FOR_GERBER"
+  },
+  "validation": {
+    "workflow_run_id": 32162687233,
+    "job_id": 95794993531,
+    "workflow_head_sha": "f5eeb1ed721ef95699008356e3e651da6a1b800b",
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 138,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268,
+    "same_run_source_route1aj_sha256": "87979eb6e898aceb9769eafcc7cefb643ef571d4f3f0253256bad560beca9eb1",
+    "historical_accepted_route1aj_artifact_sha256": "58e08f2c89b68efb41dc90c068a357dc00a483feb430fe220dd4c890c564aa63",
+    "same_run_route1ak_pcb_sha256": "254c5861aef41cb0b083779183dbb089e4ce807b1015df2d033a3e64ba265601",
+    "route1ak_pro_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "route1ak_drc_json_sha256": "64136812d5236e19714857da635d0ee3351a4e9d017d411f2ae3b0bc85db57f6",
+    "route1ak_pin_net_audit_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "route1ak_summary_sha256": "2606b17e9687368cd20a1ccc61eebc52a6488e392977cc2e7bf529203ff00f10",
+    "route1ak_routing_seed_sha256": "18f5afa65b93c4214f17ca5d56c1997a0adb8ae37e9a82231951957dd8f3e4bc",
+    "artifact_id": 9334817169,
+    "artifact_name": "r13-route1ak-q501-gnd-evidence",
+    "artifact_digest": "sha256:ef58c44265b6c79f1c7ce7517c862b71dc9b2c0de0f686f7303351bcbc54d4c4",
+    "source_hash_note": "The same-run regenerated route-1aj byte SHA is recorded separately from the prior accepted route-1aj artifact SHA. Acceptance is based on the executed same-run KiCad DRC/pin-net gates, exact routing scope, and recorded geometry; byte identity of the regenerated source baseline is not itself the electrical acceptance criterion.",
+    "artifact_resolution_note": "Artifact 9334817169 is the current non-expired artifact returned for workflow run 32162687233 and was downloaded and internally hash-checked for this acceptance. Obsolete artifact metadata observed earlier for artifact 9334525298 was not used after that artifact became unavailable."
+  },
+  "acceptance": "Accepted only from workflow run 32162687233 under KiCad 9.0.9: 0 violations / 138 unconnected / 268 of 268 physical pin-net nodes PASS, with one 0.30 mm F.Cu segment and one 0.60/0.30 mm GND via, Q501 value/net identity intact, and no placement changes."
+}
