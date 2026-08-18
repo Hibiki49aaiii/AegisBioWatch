@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/r13-route1ac-c6-gnd-validation.yml'
       - 'tools/reproduce-route1ab-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1z-c101-gnd.py'
       - 'tools/materialize-pcb-r13-route1ac-c6-gnd.py'
       - 'tools/write-pcb-r13-route1ac-report.py'
       - 'tools/audit-pcb-pin-nets.py'
@@ -15,6 +16,7 @@ on:
     paths:
       - '.github/workflows/r13-route1ac-c6-gnd-validation.yml'
       - 'tools/reproduce-route1ab-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1z-c101-gnd.py'
       - 'tools/materialize-pcb-r13-route1ac-c6-gnd.py'
       - 'tools/write-pcb-r13-route1ac-report.py'
       - 'tools/audit-pcb-pin-nets.py'
