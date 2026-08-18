@@ -1,0 +1,82 @@
+name: r13 route1ai C302 GND validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1ai-c302-gnd-validation.yml'
+      - 'tools/reproduce-route1ah-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1ai-c302-gnd.py'
+      - 'tools/write-pcb-r13-route1ai-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+    paths:
+      - '.github/workflows/r13-route1ai-c302-gnd-validation.yml'
+      - 'tools/reproduce-route1ah-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1ai-c302-gnd.py'
+      - 'tools/write-pcb-r13-route1ai-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+      - name: Reproduce and validate accepted route1ah baseline
+        run: bash tools/reproduce-route1ah-accepted.sh
+      - name: Materialize route1ai C302 GND closure
+        run: |
+          python3 -X faulthandler tools/materialize-pcb-r13-route1ai-c302-gnd.py \
+            --route1ah-drc-json /tmp/route1ah.json \
+            --route1ah-pin-net-audit /tmp/route1ah-audit.json
+      - name: KiCad route1ai DRC and audit
+        run: |
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1ai.json hardware/main-board/pcb/route-r13-1ai/AegisBioWatch-MainBoard-Route1ai-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py \
+            --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
+            --pcb hardware/main-board/pcb/route-r13-1ai/AegisBioWatch-MainBoard-Route1ai-r13.kicad_pcb \
+            --output /tmp/route1ai-audit.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1ai.json')); a=json.load(open('/tmp/route1ai-audit.json')); r=json.load(open('hardware/main-board/pcb/route-r13-1ai/routing-seed-r13-1ai.json'))
+          out={'rule_violations':len(d.get('violations',[])),'unconnected_items':len(d.get('unconnected_items',[])),'pin_net_audit':a.get('result'),'audited_nodes':a.get('audited_present_source_nodes'),'added_segments':r.get('track_segments_added'),'vias_added':r.get('vias_added'),'component_moves':r.get('component_moves'),'component_rotations':r.get('component_rotations')}
+          print(json.dumps(out,indent=2)); Path('/tmp/route1ai-summary.json').write_text(json.dumps(out,indent=2))
+          if out['rule_violations']!=0 or out['unconnected_items']!=140: raise SystemExit('route1ai DRC/ratsnest gate failed')
+          if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1ai audit gate failed')
+          if out['added_segments']!=1 or out['vias_added']!=1: raise SystemExit('route1ai routing scope gate failed')
+          if out['component_moves']!=[] or out['component_rotations']!=[]: raise SystemExit('route1ai placement scope gate failed')
+          PY
+      - name: Package route1ai evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/e
+          for f in \
+            hardware/main-board/pcb/route-r13-1ai/AegisBioWatch-MainBoard-Route1ai-r13.kicad_pcb \
+            hardware/main-board/pcb/route-r13-1ai/AegisBioWatch-MainBoard-Route1ai-r13.kicad_pro \
+            hardware/main-board/pcb/route-r13-1ai/routing-seed-r13-1ai.json \
+            /tmp/route1ai.json /tmp/route1ai-summary.json /tmp/route1ai-audit.json; do
+            test -f "$f" && cp "$f" /tmp/e/
+          done
+          sha256sum /tmp/e/* > /tmp/e/SHA256SUMS.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1ai-c302-gnd-evidence
+          path: /tmp/e/**
+          if-no-files-found: warn
