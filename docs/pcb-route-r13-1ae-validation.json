@@ -1,0 +1,44 @@
+{
+  "revision": "r13-route1ae-c301-gnd-local",
+  "status": "ACCEPTED_EXECUTED_KICAD",
+  "source_baseline": "route-1ad",
+  "geometry": {
+    "connection": "C301.2/GND -> continuous In1.Cu GND",
+    "pad_mm": [14.395, 23.725],
+    "gnd_via_mm": [15.0, 23.725],
+    "track_width_mm": 0.30,
+    "via_size_mm": 0.60,
+    "via_drill_mm": 0.30,
+    "segments_added": 1,
+    "vias_added": 1,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "scope": {
+    "C301_1_1V8": "untouched_pending_separate_validation",
+    "NRF_DECA_RF": "untouched",
+    "SYS_I2C_SCL": "deferred_geometry_gated",
+    "LDO2_IN": "deferred_geometry_constrained_no_via_in_pad",
+    "CHG_5V": "rejected_and_deferred",
+    "RF": "untouched",
+    "supplier_gated_interfaces": "untouched",
+    "release_status": "NOT_FOR_GERBER"
+  },
+  "validation": {
+    "workflow_run_id": 32149467514,
+    "job_id": 95751405682,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 144,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268,
+    "same_run_source_route1ad_sha256": "edc54b7264bd51aa122566231dc17ca5251127a99bd2bc6f0bea1e0355eb23d0",
+    "historical_accepted_route1ad_artifact_sha256": "3ba8f5b050f04582de5b0f4417039c5d4c48e3eb2d21ee9584feb472e9ca12b2",
+    "same_run_route1ae_pcb_sha256": "e38594f4d93ffb58668429b9eb9ee5945dca6d4711804938d5302ac9f240ea67",
+    "artifact_id": 9329182881,
+    "artifact_name": "r13-route1ae-c301-gnd-evidence",
+    "artifact_digest": "sha256:ee9e3cb5cd572a6c6473c201557f76f942e4e5e738042c471cf2a127caa6572c",
+    "source_hash_note": "The same-run regenerated route-1ad byte SHA is recorded separately from the prior accepted route-1ad artifact SHA. Acceptance is based on executed same-run KiCad DRC/pin-net gates and recorded geometry, not byte-identical regeneration."
+  },
+  "acceptance": "Accepted only from workflow run 32149467514 under KiCad 9.0.9: 0 violations / 144 unconnected / 268 of 268 physical pin-net nodes PASS, with one 0.30 mm F.Cu segment and one 0.60/0.30 mm GND via and no placement changes."
+}
