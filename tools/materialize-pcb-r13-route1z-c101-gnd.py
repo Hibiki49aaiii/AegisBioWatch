@@ -8,6 +8,12 @@ C101 is rotated such that C101.1/CHG_5V lies directly between C101.2/GND and
 accepted GND via (16.85,30.49); therefore a direct segment is forbidden. This
 increment escapes right to x=17.95, drops below the CHG_5V pad, then returns to
 the existing GND via. CHG_5V geometry is not modified.
+
+KiCad may choose a different same-net ratsnest peer when a board is regenerated,
+so source validation intentionally does not require C101.2 to be paired with one
+specific GND via in the DRC JSON. Instead it independently proves that C101.2 is
+still reported unconnected and that the intended accepted GND via exists on the
+source PCB with the correct net and coordinates.
 """
 from __future__ import annotations
 import argparse, faulthandler, hashlib, json, os, shutil, sys
@@ -29,6 +35,7 @@ BEND1=(17.95,28.024501)
 BEND2=(17.95,30.49)
 GND_VIA=(16.85,30.49)
 
+
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def loadj(p): return json.loads(Path(p).read_text())
 def mm(v): return float(pcbnew.ToMM(v))
@@ -45,20 +52,26 @@ def refill(board):
     zs=pcbnew.ZONES()
     for z in board.Zones(): zs.append(z)
     if len(zs) and not pcbnew.ZONE_FILLER(board).Fill(zs): raise SystemExit('route1z zone refill failed')
-def has_route1y_expected_gap(d):
-    want_a=('Via [GND]',16.85,30.49)
-    want_b=('Pad 2 [GND] of C101',17.141428,28.024501)
+def has_unconnected_c101_gnd_pad(d):
+    want=('Pad 2 [GND] of C101',17.141428,28.024501)
     for u in d.get('unconnected_items',[]):
-        items=u.get('items',[])
-        if len(items)!=2: continue
-        vals=[]
-        for it in items:
+        for it in u.get('items',[]):
             p=it.get('pos',{})
-            vals.append((it.get('description',''),float(p.get('x',999)),float(p.get('y',999))))
-        ok_a=any(want_a[0] in q[0] and abs(q[1]-want_a[1])<0.001 and abs(q[2]-want_a[2])<0.001 for q in vals)
-        ok_b=any(want_b[0] in q[0] and abs(q[1]-want_b[1])<0.001 and abs(q[2]-want_b[2])<0.001 for q in vals)
-        if ok_a and ok_b: return True
+            desc=it.get('description','')
+            x=float(p.get('x',999)); y=float(p.get('y',999))
+            if want[0] in desc and abs(x-want[1])<0.001 and abs(y-want[2])<0.001:
+                return True
     return False
+def has_target_gnd_via(board):
+    for item in board.GetTracks():
+        if not isinstance(item, pcbnew.PCB_VIA):
+            continue
+        p=item.GetPosition()
+        x=mm(p.x); y=mm(p.y)
+        if abs(x-GND_VIA[0])<0.001 and abs(y-GND_VIA[1])<0.001 and item.GetNetname()=='GND':
+            return True
+    return False
+
 
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--route1y-drc-json',required=True); ap.add_argument('--route1y-pin-net-audit',required=True); args=ap.parse_args()
@@ -67,7 +80,7 @@ def main():
     d=loadj(args.route1y_drc_json); a=loadj(args.route1y_pin_net_audit)
     if len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=150: raise SystemExit('route1y DRC gate failed')
     if a.get('result')!='PASS' or a.get('audited_present_source_nodes')!=268: raise SystemExit('route1y pin/net gate failed')
-    if not has_route1y_expected_gap(d): raise SystemExit('route1z source gap gate failed: C101.2/GND to accepted via not found')
+    if not has_unconnected_c101_gnd_pad(d): raise SystemExit('route1z source gap gate failed: C101.2/GND is not present in route1y unconnected evidence')
 
     board=pcbnew.LoadBoard(str(SRC_PCB)); fps={f.GetReference():f for f in board.GetFootprints()}
     c101=fps.get('C101')
@@ -77,6 +90,7 @@ def main():
     gnd_pad=point(c101,'2'); chg_pad=point(c101,'1')
     if abs(gnd_pad[0]-17.141428)>0.001 or abs(gnd_pad[1]-28.024501)>0.001: raise SystemExit(f'route1z C101.2 geometry gate failed: {gnd_pad}')
     if abs(chg_pad[0]-17.141428)>0.001 or abs(chg_pad[1]-29.574501)>0.001: raise SystemExit(f'route1z C101.1 geometry gate failed: {chg_pad}')
+    if not has_target_gnd_via(board): raise SystemExit('route1z source target gate failed: accepted GND via (16.85,30.49) not found on GND')
     net=board.FindNet('GND')
     if net is None: raise SystemExit('route1z GND net reacquire failed')
     added=0
