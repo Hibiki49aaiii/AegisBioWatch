@@ -1,0 +1,42 @@
+{
+  "revision": "r13-route1ad-c110-gnd-local",
+  "status": "ACCEPTED_EXECUTED_KICAD",
+  "source_baseline": "route-1ac",
+  "geometry": {
+    "connection": "C110.2/GND -> continuous In1.Cu GND",
+    "pad_mm": [15.020113, 20.427633],
+    "gnd_via_mm": [15.75, 20.43],
+    "track_width_mm": 0.30,
+    "via_size_mm": 0.60,
+    "via_drill_mm": 0.30,
+    "segments_added": 1,
+    "vias_added": 1,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "scope": {
+    "DISP_SW": "untouched_except_C110_ground_return",
+    "SYS_I2C_SCL": "deferred_geometry_gated",
+    "LDO2_IN": "deferred_geometry_constrained_no_via_in_pad",
+    "CHG_5V": "rejected_and_deferred",
+    "RF": "untouched",
+    "supplier_gated_interfaces": "untouched",
+    "release_status": "NOT_FOR_GERBER"
+  },
+  "validation": {
+    "workflow_run_id": 32148434154,
+    "job_id": 95747916520,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 145,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268,
+    "same_run_source_route1ac_sha256": "a30d88884b0b3cd5bf86f0f62b7f523d86607f25418cfec1e1d6ef1aaf8054c2",
+    "same_run_route1ad_pcb_sha256": "3ba8f5b050f04582de5b0f4417039c5d4c48e3eb2d21ee9584feb472e9ca12b2",
+    "artifact_id": 9328986399,
+    "artifact_name": "r13-route1ad-c110-gnd-evidence",
+    "artifact_digest": "sha256:da33e0d8a9bdaf1aa1da17e44ad17bc4e756c23e3013025d239866e89e99100b",
+    "source_hash_note": "Acceptance is based on same-run executed KiCad DRC/pin-net gates and recorded geometry; regenerated source PCB byte identity is not a release criterion."
+  },
+  "acceptance": "Accepted only from workflow run 32148434154 under KiCad 9.0.9: 0 violations / 145 unconnected / 268 of 268 physical pin-net nodes PASS, with one 0.30 mm F.Cu segment and one 0.60/0.30 mm GND via and no placement changes."
+}
