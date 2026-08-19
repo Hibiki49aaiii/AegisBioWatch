@@ -1,0 +1,63 @@
+{
+  "revision": "r13-route1al-c5-gnd-local",
+  "status": "ACCEPTED_EXECUTED_KICAD",
+  "source_baseline": "route-1ak",
+  "geometry": {
+    "connection": "C5.2/GND -> continuous In1.Cu GND",
+    "pad_mm": [
+      9.895,
+      22.225
+    ],
+    "gnd_via_mm": [
+      10.55,
+      22.225
+    ],
+    "track_width_mm": 0.3,
+    "via_size_mm": 0.6,
+    "via_drill_mm": 0.3,
+    "segments_added": 1,
+    "vias_added": 1,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "component_gate": {
+    "reference": "C5",
+    "value": "100nF",
+    "pin_1_net": "+1V8",
+    "pin_2_net": "GND"
+  },
+  "scope": {
+    "C5_1_+1V8": "untouched",
+    "SYS_I2C_SCL": "deferred_geometry_gated",
+    "LDO2_IN": "deferred_geometry_constrained_no_via_in_pad",
+    "CHG_5V": "rejected_and_deferred",
+    "RF": "untouched",
+    "supplier_gated_interfaces": "untouched",
+    "release_status": "NOT_FOR_GERBER"
+  },
+  "validation": {
+    "workflow_run_id": 32234005570,
+    "job_id": 96024685189,
+    "workflow_head_sha": "d06483ad4db5bb1d9dced4f2818b283b69b5678f",
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 137,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268,
+    "same_run_source_route1ak_sha256": "53f3749600b64e8e95acf18f98e63cf1e4ece2c3939bd6add48f061fcedf1699",
+    "historical_accepted_route1ak_artifact_sha256": "254c5861aef41cb0b083779183dbb089e4ce807b1015df2d033a3e64ba265601",
+    "same_run_route1al_pcb_sha256": "6d405a7c0aedd048bd81c8479d1d7cabe6c90514fff6fc95c6c6a2d93b016590",
+    "route1al_pro_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "route1al_drc_json_sha256": "3c2388b8c4dd29cd453dcb52685635ac1b69c66a42a82412cc6d8f76943fdd73",
+    "route1al_pin_net_audit_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "route1al_summary_sha256": "9f219ddcc92dec96e5e929c836d26562214505d2d643ccb7a3afe933f23839ce",
+    "route1al_routing_seed_sha256": "372d3f4e815fa83d3b0188f3f8c8ecf8fe93526b092c68c5ed4b5e17441d2df4",
+    "artifact_sha256s_manifest_sha256": "4ece9e1c06131b4881e7ddadf657f98cedc15ff4d78f7a49d0a2fb88b769096a",
+    "artifact_id": 9360022638,
+    "artifact_name": "r13-route1al-c5-gnd-evidence",
+    "artifact_digest": "sha256:ddf4c97f2b0ccba28ab4b489412ded6b000bf49f0af16dabd6415a4953e7e6a4",
+    "source_hash_note": "The same-run regenerated route-1ak byte SHA is recorded separately from the historical accepted route-1ak artifact PCB SHA. Acceptance is based on the executed same-run route-1ak electrical gates followed by route-1al KiCad DRC/pin-net gates, exact routing scope, C5 identity/net/geometry gates, and zero placement changes; byte identity of regenerated baselines is provenance, not itself the electrical acceptance criterion.",
+    "artifact_resolution_note": "Artifact 9360022638 is the successful, non-expired artifact returned for workflow run 32234005570 after job 96024685189 completed successfully. It was downloaded and its SHA256SUMS manifest was independently checked against the extracted files. Partial evidence from failed pre-materialization/install attempts is excluded from acceptance authority."
+  },
+  "acceptance": "Accepted only from workflow run 32234005570 successful job 96024685189 under KiCad 9.0.9: 0 violations / 137 unconnected / 268 of 268 physical pin-net nodes PASS, with one 0.30 mm F.Cu segment and one 0.60/0.30 mm GND via, C5 value/net/geometry identity intact, and no placement changes."
+}
