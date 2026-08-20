@@ -1,0 +1,103 @@
+name: r13 route1as C4 GND validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1as-c4-gnd-validation.yml'
+      - 'tools/reproduce-route1ar-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1as-c4-gnd.py'
+      - 'tools/write-pcb-r13-route1as-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+      - name: Reproduce and validate accepted route1ar baseline
+        run: bash tools/reproduce-route1ar-accepted.sh
+      - name: Materialize route1as C4 GND closure
+        run: |
+          python3 -X faulthandler tools/materialize-pcb-r13-route1as-c4-gnd.py \
+            --route1ar-drc-json /tmp/route1ar.json \
+            --route1ar-pin-net-audit /tmp/route1ar-audit.json
+      - name: KiCad route1as DRC and audit
+        run: |
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1as.json hardware/main-board/pcb/route-r13-1as/AegisBioWatch-MainBoard-Route1as-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py \
+            --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
+            --pcb hardware/main-board/pcb/route-r13-1as/AegisBioWatch-MainBoard-Route1as-r13.kicad_pcb \
+            --output /tmp/route1as-audit.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1as.json'))
+          a=json.load(open('/tmp/route1as-audit.json'))
+          r=json.load(open('hardware/main-board/pcb/route-r13-1as/routing-seed-r13-1as.json'))
+          c=r.get('connections',{}).get('C4.2/GND',{})
+          out={
+            'rule_violations':len(d.get('violations',[])),
+            'unconnected_items':len(d.get('unconnected_items',[])),
+            'pin_net_audit':a.get('result'),
+            'audited_nodes':a.get('audited_present_source_nodes'),
+            'added_segments':r.get('track_segments_added'),
+            'vias_added':r.get('vias_added'),
+            'component_moves':r.get('component_moves'),
+            'component_rotations':r.get('component_rotations'),
+            'c4_value':c.get('c4_value'),
+            'c4_1_net':c.get('c4_1_net'),
+            'c4_2_net':c.get('c4_2_net'),
+            'c4_2_pad_mm':c.get('pad_mm'),
+            'gnd_via_mm':c.get('gnd_via_mm'),
+            'accepted_route1ar_geometry_modified':r.get('accepted_route1ar_geometry_modified'),
+            'rf_routing_touched':r.get('rf_routing_touched'),
+            'supplier_gated_interfaces_touched':r.get('supplier_gated_interfaces_touched'),
+          }
+          print(json.dumps(out,indent=2))
+          Path('/tmp/route1as-summary.json').write_text(json.dumps(out,indent=2))
+          if out['rule_violations']!=0 or out['unconnected_items']!=130: raise SystemExit('route1as DRC/ratsnest gate failed')
+          if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1as audit gate failed')
+          if out['added_segments']!=1 or out['vias_added']!=1: raise SystemExit('route1as routing scope gate failed')
+          if out['component_moves']!=[] or out['component_rotations']!=[]: raise SystemExit('route1as placement scope gate failed')
+          if out['c4_value']!='100nF' or out['c4_1_net']!='+1V8' or out['c4_2_net']!='GND': raise SystemExit('route1as C4 identity/net gate failed')
+          if out['c4_2_pad_mm'] != [41.645,14.975] or out['gnd_via_mm'] != [42.25,14.975]: raise SystemExit('route1as C4 geometry gate failed')
+          if out['accepted_route1ar_geometry_modified'] is not False: raise SystemExit('route1as accepted route1ar geometry mutation gate failed')
+          if out['rf_routing_touched'] is not False or out['supplier_gated_interfaces_touched'] is not False: raise SystemExit('route1as frozen-interface scope gate failed')
+          PY
+      - name: Package route1as evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/e
+          for f in \
+            hardware/main-board/pcb/route-r13-1as/AegisBioWatch-MainBoard-Route1as-r13.kicad_pcb \
+            hardware/main-board/pcb/route-r13-1as/AegisBioWatch-MainBoard-Route1as-r13.kicad_pro \
+            hardware/main-board/pcb/route-r13-1as/routing-seed-r13-1as.json \
+            /tmp/route1as.json /tmp/route1as-summary.json /tmp/route1as-audit.json; do
+            test -f "$f" && cp "$f" /tmp/e/
+          done
+          sha256sum /tmp/e/* > /tmp/e/SHA256SUMS.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1as-c4-gnd-evidence
+          path: /tmp/e/**
+          if-no-files-found: warn
