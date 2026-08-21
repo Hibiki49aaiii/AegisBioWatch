@@ -85,7 +85,7 @@ jobs:
           expected={'j8_value':'TC2030_SWD_6','j8_1_net':'+1V8','j8_2_net':'SWDIO','j8_3_net':'NRF_RESET_N','j8_4_net':'SWDCLK','j8_5_net':'GND','j8_6_net':'SWO'}
           for key,value in expected.items():
               if out[key]!=value: raise SystemExit(f'route1at J8 identity/net gate failed: {key}={out[key]!r}')
-          if out['j8_5_pad_mm'] != [14.645,15.26] or out['gnd_via_mm'] != [15.25,15.26]: raise SystemExit('route1at J8 geometry gate failed')
+          if out['j8_5_pad_mm'] != [14.645,15.26] or out['gnd_via_mm'] != [14.645,16.0]: raise SystemExit('route1at J8 geometry gate failed')
           if out['accepted_route1as_geometry_modified'] is not False: raise SystemExit('route1at accepted route1as geometry mutation gate failed')
           if out['rf_routing_touched'] is not False or out['supplier_gated_interfaces_touched'] is not False: raise SystemExit('route1at frozen-interface scope gate failed')
           PY

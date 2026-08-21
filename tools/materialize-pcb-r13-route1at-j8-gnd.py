@@ -3,7 +3,7 @@
 
 Source: executed-KiCad-clean route-1as (0 violations / 130 unconnected /
 268-node physical audit PASS). This increment routes only J8.5/GND with one
-short rightward F.Cu segment and one standard through via. All J8 signal pads
+short downward F.Cu segment and one standard through via. All J8 signal pads
 and accepted route-1as geometry remain unchanged.
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ OUT_PCB=OUT_DIR/'AegisBioWatch-MainBoard-Route1at-r13.kicad_pcb'
 OUT_PRO=OUT_DIR/'AegisBioWatch-MainBoard-Route1at-r13.kicad_pro'
 REPORT_HELPER=ROOT/'tools/write-pcb-r13-route1at-report.py'
 TRACK_WIDTH=0.30
-GND_VIA=(15.25,15.26)
+GND_VIA=(14.645,16.00)
 VIA_SIZE=0.60
 VIA_DRILL=0.30
 

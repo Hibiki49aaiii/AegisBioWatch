@@ -30,7 +30,7 @@ def main():
       'connections':{
         'J8.5/GND':{
           'pad_mm':[14.645,15.26],
-          'gnd_via_mm':[15.25,15.26],
+          'gnd_via_mm':[14.645,16.00],
           'target_reference':'continuous In1.Cu GND zone',
           'j8_value':'TC2030_SWD_6',
           'j8_1_net':'+1V8',
@@ -42,13 +42,18 @@ def main():
         }
       },
       'preflight':{
-        'minimum_conservative_non_gnd_copper_gap_mm':0.55,
-        'limiting_object':'J8.6/SWO',
-        'track_length_mm':0.605,
+        'minimum_conservative_non_gnd_copper_gap_mm':0.7263,
+        'limiting_object':'J8.3/NRF_RESET_N and J8.6/SWO',
+        'track_length_mm':0.740,
+        'nearest_npth_center_mm':[15.915,15.641],
+        'via_to_nearest_npth_hole_edge_clearance_mm':0.6744,
+        'hole_to_hole_required_mm':0.1995,
+        'hole_to_hole_margin_mm':0.4749,
+        'via_copper_to_j8_keepout_gap_mm':0.440,
         'rf_region':'untouched',
         'supplier_gated_region':'untouched'
       },
-      'design_rationale':'Route J8.5/GND rightward into the continuous In1.Cu GND reference with one short 0.30 mm F.Cu segment and one standard 0.60/0.30 mm through via at (15.25,15.26). Conservative accepted-route1as copper screening gives approximately 0.55 mm minimum non-GND copper gap, limited by J8.6/SWO. All SWD signal pads remain untouched and the increment is outside frozen RF and supplier-gated regions. Executed KiCad DRC remains the acceptance authority.',
+      'design_rationale':'The initial rightward via at (15.25,15.26) was rejected by executed KiCad DRC because it was too close to the J8 NPTH at (15.915,15.641). Move only the route1at via to (14.645,16.00) and use one vertical 0.30 mm F.Cu segment from J8.5/GND. Conservative geometry gives approximately 0.6744 mm drill-edge clearance to the nearest NPTH versus the 0.1995 mm hole-to-hole requirement, while the via copper remains approximately 0.44 mm outside the J8 via keepout. All SWD signal pads remain untouched and the increment is outside frozen RF and supplier-gated regions. Executed KiCad DRC remains the acceptance authority.',
       'logical_connectivity_added':['J8.5/GND -> continuous In1.Cu GND reference'],
       'j8_signal_pads_status':'UNCHANGED',
       'component_moves':[],
