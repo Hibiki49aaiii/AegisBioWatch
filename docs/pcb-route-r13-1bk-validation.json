@@ -1,0 +1,180 @@
+{
+  "revision": "r13-route1bk-c305-c304-vsys-haptic-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 17,
+  "base_accepted_revision": "route-1bj",
+  "base_commit": "5e2cc80c83d63e10bf76c78eb7f7956ccc627e14",
+  "candidate_commit": "ed3c842504ffa5c0bf3d65a854299d8fbc1805e2",
+  "phase_a": {
+    "ordinary_run_id": 33253752823,
+    "ordinary_job_id": 99103802453,
+    "ordinary_artifact_id": 9715225538,
+    "ordinary_artifact_zip_sha256": "e7407646b496b8d531e0be98b2be5be5ad701d472541cdc0cb33d01cb704988a",
+    "expanded_run_id": 33254148238,
+    "expanded_job_id": 99104830838,
+    "expanded_artifact_id": 9715340474,
+    "expanded_artifact_zip_sha256": "405c4a42d2069a27f3fa2030ba19109c6af15d41a5d21c99d695146f49370737",
+    "low_current_run_id": 33255144664,
+    "low_current_job_id": 99107430649,
+    "low_current_artifact_id": 9715676488,
+    "low_current_artifact_zip_sha256": "83c8b1654ec65d2806da2993a650af208266a28663cc52fc8bdd0b831d29be71",
+    "selected_candidate": "C305.1/VSYS_HAPTIC to C304.1/VSYS_HAPTIC",
+    "selection_reason": "Only ordinary non-frozen candidate with a legal current-state route after low-current alternatives were exhausted; local DRV2605L supply-cap rail with documented 0.30 mm power-width sanity review."
+  },
+  "executed_authority": {
+    "workflow_name": "r13 route1bk C305-C304 VSYS_HAPTIC validation",
+    "workflow_run_id": 33256116462,
+    "validate_job_id": 99110000606,
+    "verify_artifact_job_id": 99110658526,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 113,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "mismatches": [],
+    "unexpected_pad_nets": [],
+    "artifact_verify": "PASS"
+  },
+  "probe": {
+    "board_modified": false,
+    "minimum_conservative_clearance_mm": 0.125,
+    "independent_gnd_via_gap_mm": 0.125,
+    "required_clearance_mm": 0.1,
+    "nearest_unrelated_copper": {
+      "kind": "via",
+      "net": "GND",
+      "position_mm": [12.75, 22.225],
+      "diameter_mm": 0.6
+    }
+  },
+  "routing_scope": {
+    "net": "VSYS_HAPTIC",
+    "from": {
+      "reference": "C305",
+      "pad": "1",
+      "value": "1uF",
+      "position_mm": [6.805, 22.335]
+    },
+    "to": {
+      "reference": "C304",
+      "pad": "1",
+      "value": "100nF",
+      "position_mm": [16.005, 23.725]
+    },
+    "path_family": "VHV",
+    "path_points_mm": [
+      [6.805, 22.335],
+      [6.805, 21.65],
+      [16.005, 21.65],
+      [16.005, 23.725]
+    ],
+    "track_width_mm": 0.3,
+    "segment_lengths_mm": [0.685, 9.2, 2.075],
+    "track_length_mm": 11.96,
+    "track_segments_added": 3,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "power_context": {
+    "U4": "DRV2605LDGSR",
+    "U4_pad10": {
+      "net": "VSYS_HAPTIC",
+      "position_mm": [23.005, 13.4],
+      "routing_touched": false
+    },
+    "R305": "0R / FB OPTION",
+    "R305_pad1": {
+      "net": "VSYS",
+      "position_mm": [30.295, 18.595]
+    },
+    "R305_pad2": {
+      "net": "VSYS_HAPTIC",
+      "position_mm": [31.315, 18.595],
+      "routing_touched": false
+    },
+    "F_Cu_thickness_mm": 0.018,
+    "approx_route_dc_resistance_ohm": 0.0382,
+    "resistance_note": "Sanity check only; not thermal/current-limit certification.",
+    "official_reference": "https://www.ti.com/document-viewer/DRV2605L/datasheet"
+  },
+  "preserved_pads": {
+    "C305.2": {
+      "net": "GND",
+      "position_mm": [7.765, 22.335],
+      "routing_touched": false
+    },
+    "C304.2": {
+      "net": "GND",
+      "position_mm": [16.645, 23.725],
+      "routing_touched": false
+    }
+  },
+  "preserved_geometry": {
+    "accepted_route1bj_geometry_modified": false,
+    "u4_vdd_routing_touched": false,
+    "r305_feed_routing_touched": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9715915878,
+    "artifact_name": "r13-route1bk-c305-c304-vsys-haptic-evidence",
+    "zip_sha256": "c8d4e565364159f555fc3c28260033b912946929d759d8df0f396bdac9c2c75e",
+    "pcb_sha256": "283217e6a0ff89355999c0bc2fa5330d5348811caaea97deff6c8b27295a9ed8",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "routing_seed_sha256": "53c78404f2a5819dacdb4a82da8cdd0c8b58ed024ad67e7bf7501872d0935b6d",
+    "drc_json_sha256": "32fe44c41654a490247a256433c15970b6e083f558e5c6a8bbe5e224ce34e613",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "summary_json_sha256": "be885e9a392282caa0867d5c81d6ab7e65c4300b2932dea874e6a4363ec3f002",
+    "probe_json_sha256": "c5c83fa7ad75446a1e3cdd8a22d2314cd4d41c7102f94da908c814d2ca21e125",
+    "dogleg_screen_json_sha256": "45182ea7aaa8596a9e93b9f13dbf035cad13af4a405b408969d79e8c1da00d50",
+    "downloaded_artifact_digest_verified_in_actions": true,
+    "sha256_manifest_verified_in_actions": true,
+    "independent_download_zip_sha256_verified": true,
+    "independent_sha256_manifest_verified": true,
+    "independent_json_gates_verified": true
+  },
+  "selection_rationale": {
+    "vsys_haptic": "Selected after ordinary, expanded, and targeted low-current screening. The candidate joins local haptic supply bypass-cap islands only.",
+    "dock_5v_raw": "Deferred because it is a primary dock/input power path requiring coordinated current/ESD/power routing.",
+    "nrf_reset_n": "Rejected because expanded route approached C11/RF_B in frozen RF context.",
+    "low_current": "CHG_SENSE_GATE and HAPTIC_TRIG targeted searches found zero legal paths under current topology.",
+    "r403_boundary": "Rejected because 0.099999 mm modeled result is below the 0.100 mm threshold."
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "accepted route-1bj reproduction",
+      "current-state 0.05 mm Manhattan screen",
+      "low-current alternative screening",
+      "exact C305/C304/U4/R305 identity, net and coordinate probe",
+      "0.125 mm conservative and independent GND-via clearance checks",
+      "executed KiCad 9.0.9 DRC",
+      "exact 113 unconnected count",
+      "268-node physical pin/net audit",
+      "exact three-segment zero-via scope",
+      "C305/C304 GND preservation",
+      "U4 VDD and R305 feed preservation",
+      "RF and supplier-gated preservation",
+      "downloaded Artifact digest/SHA256SUMS/JSON re-verification"
+    ]
+  },
+  "deferred_items_unchanged": [
+    "U1 adjacent-pad/high-density closures",
+    "J7 routing",
+    "C401.2/GND RF-adjacent",
+    "U2.30/LDO2_IN to R106.2",
+    "CHG_5V",
+    "U2.14/SYS_I2C_SCL to R104.2",
+    "RF routing/matching",
+    "NRF_DECD internal regulator/decoupling network",
+    "J3/J5/J6 supplier/mechanical interfaces",
+    "DOCK_5V_RAW coordinated power routing",
+    "U4 VDD and R305 VSYS_HAPTIC feed completion"
+  ]
+}
