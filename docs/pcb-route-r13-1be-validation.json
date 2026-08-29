@@ -1,0 +1,103 @@
+{
+  "revision": "r13-route1be-c4-c302-1v8-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 11,
+  "base_accepted_revision": "route-1bd",
+  "base_commit": "8fb9fe94b36f3a2f0ebdafbff2252b860913cde6",
+  "phase_a_probe": {
+    "commit": "1a4510a3d396818f6312b7db6a2b6581e5c52ed9",
+    "workflow_run_id": 33240365333,
+    "job_id": 99068549793,
+    "artifact_id": 9711188488,
+    "artifact_digest": "sha256:8473817094d4dcb0709a5556c344456420a494287c8b5fbdd84929cc8481bdc4",
+    "board_modified": false,
+    "measured_c302_1_mm": [40.305, 19.585],
+    "route_option_selected": "A_SINGLE_DIRECT_FCU_DIAGONAL"
+  },
+  "candidate_commit": "ffa1f448b94d41171286e22da2e07719d7576d2f",
+  "executed_authority": {
+    "workflow_name": "r13 route1be C4-C302 +1V8 validation",
+    "workflow_run_id": 33240581191,
+    "validate_job_id": 99069126543,
+    "verify_artifact_job_id": 99069387822,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 118,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "artifact_verify": "PASS"
+  },
+  "routing_scope": {
+    "net": "+1V8",
+    "from": {
+      "reference": "C4",
+      "pad": "1",
+      "value": "100nF",
+      "position_mm": [41.005, 14.975]
+    },
+    "to": {
+      "reference": "C302",
+      "pad": "1",
+      "value": "1uF",
+      "position_mm": [40.305, 19.585]
+    },
+    "track_width_mm": 0.3,
+    "track_length_mm": 4.662842,
+    "track_segments_added": 1,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "preserved_geometry": {
+    "C4.2_GND_pad_mm": [41.645, 14.975],
+    "C4_GND_via_mm": [42.25, 14.975],
+    "C302.2_GND_pad_mm": [41.265, 19.585],
+    "C302_GND_via_mm": [41.9, 19.585],
+    "c4_gnd_escape_status": "UNCHANGED",
+    "c302_gnd_escape_status": "UNCHANGED",
+    "accepted_route1bd_geometry_modified": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9711252209,
+    "artifact_name": "r13-route1be-c4-c302-1v8-evidence",
+    "zip_sha256": "6c5ced92fef8bd2060f14a2f944bba592e50fe48948aa87d93cdde682a11b029",
+    "pcb_sha256": "2fecba8eb68ad4997f7e5179d46b972cd1d8c1aebeea24b98a81f24659d07a90",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "routing_seed_sha256": "c466ae90c979d857a96964ef81e11126bb8236ed7446320181e83514a8aa6217",
+    "drc_json_sha256": "7d278e4db33b8f03f2ec0f8516d411c2e102d2733598d07f56c387a29b243469",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "summary_json_sha256": "5466f9f70827ba7bc0bb4e64ae5aa7bebed2fa657cc04a26452f70fd57dc6fec",
+    "probe_json_sha256": "5a44272946c49e55cdb6ebc46a5f6b623b06f1aae47cdbc696b846d120733b72",
+    "downloaded_artifact_digest_verified": true,
+    "sha256_manifest_verified": true
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "executed read-only geometry probe",
+      "executed KiCad 9.0.9 DRC",
+      "expected 118 unconnected count",
+      "268-node physical pin/net audit",
+      "exact one-segment zero-via routing scope",
+      "C4/C302 identity, net and coordinate gates",
+      "accepted C4/C302 GND escape preservation",
+      "RF and supplier-gated preservation",
+      "downloaded Artifact SHA256SUMS and JSON re-verification"
+    ]
+  },
+  "deferred_items_unchanged": [
+    "J7 routing",
+    "C401.2/GND RF-adjacent",
+    "U2.30/LDO2_IN to R106.2",
+    "CHG_5V",
+    "U2.14/SYS_I2C_SCL to R104.2",
+    "RF routing/matching",
+    "J3/J5/J6 supplier/mechanical interfaces"
+  ]
+}
