@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only targeted multi-bend screen for low-current route-1bk candidates."""
+"""Read-only optimized coarse multi-bend screen for low-current route-1bk candidates."""
 from __future__ import annotations
 
 import argparse
@@ -19,6 +19,7 @@ WIDTH = 0.30
 RULE = 0.10
 GRID = 0.25
 MARGIN = 3.0
+MAX_PATH_LENGTH = 20.0
 EPS = 1e-9
 
 TARGETS = [
@@ -62,6 +63,10 @@ def xy(v) -> tuple[float, float]:
 def bbox(item) -> tuple[float, float, float, float]:
     b = item.GetBoundingBox()
     return (mm(b.GetX()), mm(b.GetY()), mm(b.GetRight()), mm(b.GetBottom()))
+
+
+def rects_overlap(a, b) -> bool:
+    return not (a[2] < b[0] or b[2] < a[0] or a[3] < b[1] or b[3] < a[1])
 
 
 def orient(a, b, c) -> float:
@@ -171,7 +176,13 @@ def main() -> None:
 
     board=pcbnew.LoadBoard(str(SRC_PCB))
     fps={fp.GetReference():fp for fp in board.GetFootprints()}
-    expected_values={"R501":"100k","R502":"1M PD","Q501":"2N7002-CLASS","U4":"DRV2605LDGSR","R303":"100k PD"}
+    expected_values={
+        "R501":"100k",
+        "R502":"1M PD",
+        "Q501":"2N7002-CLASS",
+        "U4":"DRV2605LDGSR",
+        "R303":"100k PD",
+    }
     for ref,val in expected_values.items():
         if ref not in fps or fps[ref].GetValue()!=val:
             raise SystemExit(f"route1bk low-current identity gate failed: {ref}")
@@ -182,11 +193,12 @@ def main() -> None:
     for fp in board.GetFootprints():
         for p in fp.Pads():
             if p.IsOnLayer(pcbnew.F_Cu):
+                r=bbox(p)
                 pads.append({
                     "reference":fp.GetReference(),
                     "pad":str(p.GetNumber()),
                     "net":p.GetNetname(),
-                    "bbox":bbox(p),
+                    "bbox":r,
                 })
     for item in board.GetTracks():
         net=item.GetNetname() if hasattr(item,"GetNetname") else ""
@@ -196,46 +208,67 @@ def main() -> None:
                 "net":net,
                 "pos":xy(item.GetPosition()),
                 "radius":max(r[2]-r[0],r[3]-r[1])/2.0,
+                "bbox":r,
             })
         elif item.GetLayer()==pcbnew.F_Cu:
+            start=xy(item.GetStart())
+            end=xy(item.GetEnd())
+            width=mm(item.GetWidth())
+            h=width/2.0
+            r=(min(start[0],end[0])-h,min(start[1],end[1])-h,max(start[0],end[0])+h,max(start[1],end[1])+h)
             tracks.append({
                 "net":net,
-                "start":xy(item.GetStart()),
-                "end":xy(item.GetEnd()),
-                "width":mm(item.GetWidth()),
+                "start":start,
+                "end":end,
+                "width":width,
+                "bbox":r,
             })
 
-    def evaluate(net,points):
-        segs=list(zip(points,points[1:]))
-        best=float("inf")
-        nearest=None
-        half=WIDTH/2.0
-        def consider(clearance,item):
-            nonlocal best,nearest
-            if clearance < best:
-                best=clearance
-                nearest=item
-        for p in pads:
-            if p["net"]==net:
-                continue
-            clearance=min(segment_rect_distance(a,b,p["bbox"])-half for a,b in segs)
-            consider(clearance,{"kind":"pad","reference":p["reference"],"pad":p["pad"],"net":p["net"]})
-        for t in tracks:
-            if t["net"]==net:
-                continue
-            clearance=min(
-                segment_segment_distance(a,b,t["start"],t["end"])-half-t["width"]/2.0
-                for a,b in segs
-            )
-            consider(clearance,{"kind":"track","net":t["net"],"start_mm":list(t["start"]),"end_mm":list(t["end"]),"width_mm":round(t["width"],6)})
-        for v in vias:
-            if v["net"]==net:
-                continue
-            clearance=min(point_segment_distance(v["pos"],a,b)-v["radius"]-half for a,b in segs)
-            consider(clearance,{"kind":"via","net":v["net"],"position_mm":list(v["pos"])})
-        return round(best,6),nearest
+    def make_evaluator(net,region):
+        # Search paths cannot interact with copper whose copper bbox lies
+        # farther than half route width + rule clearance outside this region.
+        expand=WIDTH/2.0+RULE+1e-6
+        rr=(region[0]-expand,region[1]-expand,region[2]+expand,region[3]+expand)
+        lp=[p for p in pads if p["net"]!=net and rects_overlap(p["bbox"],rr)]
+        lt=[t for t in tracks if t["net"]!=net and rects_overlap(t["bbox"],rr)]
+        lv=[v for v in vias if v["net"]!=net and rects_overlap(v["bbox"],rr)]
 
-    # Resolve target endpoints from the current DRC only.
+        def evaluate(points):
+            segs=list(zip(points,points[1:]))
+            best=float("inf")
+            nearest=None
+            half=WIDTH/2.0
+
+            def consider(clearance,item):
+                nonlocal best,nearest
+                if clearance < best:
+                    best=clearance
+                    nearest=item
+
+            for p in lp:
+                clearance=min(segment_rect_distance(a,b,p["bbox"])-half for a,b in segs)
+                consider(clearance,{"kind":"pad","reference":p["reference"],"pad":p["pad"],"net":p["net"]})
+                if best + 1e-6 < RULE:
+                    # Still continue across obstacle types only if needed for a
+                    # more descriptive nearest item; current item already proves fail.
+                    pass
+            for t in lt:
+                clearance=min(
+                    segment_segment_distance(a,b,t["start"],t["end"])-half-t["width"]/2.0
+                    for a,b in segs
+                )
+                consider(clearance,{
+                    "kind":"track","net":t["net"],
+                    "start_mm":list(t["start"]),"end_mm":list(t["end"]),
+                    "width_mm":round(t["width"],6),
+                })
+            for v in lv:
+                clearance=min(point_segment_distance(v["pos"],a,b)-v["radius"]-half for a,b in segs)
+                consider(clearance,{"kind":"via","net":v["net"],"position_mm":list(v["pos"])})
+            return round(best,6),nearest
+
+        return evaluate,{"pads":len(lp),"tracks":len(lt),"vias":len(lv)}
+
     results=[]
     for spec in TARGETS:
         matches=[]
@@ -249,16 +282,20 @@ def main() -> None:
                 matches.append((idx,bydesc[spec["a"]],bydesc[spec["b"]]))
         if len(matches)!=1:
             raise SystemExit(f"route1bk target DRC cardinality failed {spec['id']}: {len(matches)}")
+
         idx,ai,bi=matches[0]
         A=(float(ai["pos"]["x"]),float(ai["pos"]["y"]))
         B=(float(bi["pos"]["x"]),float(bi["pos"]["y"]))
+        region=(min(A[0],B[0])-MARGIN,min(A[1],B[1])-MARGIN,max(A[0],B[0])+MARGIN,max(A[1],B[1])+MARGIN)
+        evaluate,obstacle_counts=make_evaluator(spec["net"],region)
 
-        xs=frange(min(A[0],B[0])-MARGIN,max(A[0],B[0])+MARGIN,GRID)
-        ys=frange(min(A[1],B[1])-MARGIN,max(A[1],B[1])+MARGIN,GRID)
+        xs=frange(region[0],region[2],GRID)
+        ys=frange(region[1],region[3],GRID)
 
-        candidates=[]
+        raw_paths=[]
         seen=set()
-        def add(kind,pts):
+
+        def queue(kind,pts):
             pts=normalize(pts)
             if len(pts)<2 or len(pts)>5:
                 return
@@ -267,51 +304,61 @@ def main() -> None:
                 return
             seen.add(key)
             length=path_length(pts)
-            if length > 32.0:
+            if length > MAX_PATH_LENGTH + EPS:
                 return
-            clr,nearest=evaluate(spec["net"],pts)
-            candidates.append({
+            raw_paths.append((len(pts)-1,round(length,6),kind,pts))
+
+        queue("L-HV",[A,(B[0],A[1]),B])
+        queue("L-VH",[A,(A[0],B[1]),B])
+        for x in xs:
+            queue("HVH",[A,(x,A[1]),(x,B[1]),B])
+        for y in ys:
+            queue("VHV",[A,(A[0],y),(B[0],y),B])
+        for x in xs:
+            for y in ys:
+                queue("HVHV",[A,(x,A[1]),(x,y),(B[0],y),B])
+                queue("VHVH",[A,(A[0],y),(x,y),(x,B[1]),B])
+
+        raw_paths.sort(key=lambda q:(q[0],q[1]))
+        first_pass=None
+        best_clearance=None
+        evaluated=0
+        for seg_count,length,kind,pts in raw_paths:
+            clr,nearest=evaluate(pts)
+            evaluated+=1
+            result={
                 "path_family":kind,
                 "points_mm":[list(p) for p in pts],
-                "segment_count":len(pts)-1,
-                "path_length_mm":round(length,6),
+                "segment_count":seg_count,
+                "path_length_mm":length,
                 "minimum_conservative_clearance_mm":clr,
                 "nearest_unrelated_copper":nearest,
                 "rule_pass":clr+1e-6>=RULE,
-            })
+            }
+            if best_clearance is None or clr > best_clearance["minimum_conservative_clearance_mm"]:
+                best_clearance=result
+            if result["rule_pass"]:
+                first_pass=result
+                break
 
-        # Existing simple families.
-        add("L-HV",[A,(B[0],A[1]),B])
-        add("L-VH",[A,(A[0],B[1]),B])
-        for x in xs:
-            add("HVH",[A,(x,A[1]),(x,B[1]),B])
-        for y in ys:
-            add("VHV",[A,(A[0],y),(B[0],y),B])
-
-        # Three-turn / four-segment escape families.
-        for x in xs:
-            for y in ys:
-                add("HVHV",[A,(x,A[1]),(x,y),(B[0],y),B])
-                add("VHVH",[A,(A[0],y),(x,y),(x,B[1]),B])
-
-        passing=[p for p in candidates if p["rule_pass"]]
-        passing.sort(key=lambda p:(p["segment_count"],p["path_length_mm"],-p["minimum_conservative_clearance_mm"]))
-        all_by_clearance=sorted(candidates,key=lambda p:(-p["minimum_conservative_clearance_mm"],p["path_length_mm"]))
         results.append({
             "id":spec["id"],
             "drc_index":idx,
             "net":spec["net"],
             "a":{"description":spec["a"],"position_mm":list(A)},
             "b":{"description":spec["b"],"position_mm":list(B)},
-            "candidate_path_count":len(candidates),
-            "passing_path_count":len(passing),
-            "best_passing_path":passing[0] if passing else None,
-            "top_passing_paths":passing[:10],
-            "best_clearance_path":all_by_clearance[0] if all_by_clearance else None,
+            "search_region_mm":list(region),
+            "local_obstacle_counts":obstacle_counts,
+            "candidate_path_count":len(raw_paths),
+            "evaluated_path_count":evaluated,
+            "passing_path_count":1 if first_pass else 0,
+            "best_passing_path":first_pass,
+            "best_clearance_path":best_clearance,
+            "search_stopped_after_first_pass":first_pass is not None,
         })
 
     out={
-        "revision":"r13-route1bk-lowcurrent-coarse-multibend-screen",
+        "revision":"r13-route1bk-lowcurrent-coarse-shortest-first-screen",
         "source_route1bj_sha256":src_sha,
         "source_gate":{
             "rule_violations":0,
@@ -325,6 +372,8 @@ def main() -> None:
         "grid_mm":GRID,
         "margin_mm":MARGIN,
         "max_segments":4,
+        "max_path_length_mm":MAX_PATH_LENGTH,
+        "search_policy":"shortest-first, stop after first legal path per target",
         "targets":results,
         "release_status":"NOT_FOR_GERBER",
     }
