@@ -1,0 +1,159 @@
+{
+  "revision": "r13-route1bj-r404-r302-1v8-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 16,
+  "base_accepted_revision": "route-1bi",
+  "base_commit": "df35a6cf0b82c6234024afa0f5de4764971bd733",
+  "candidate_commit": "2a1b5422a9ba6295c8e1fdc7848b0394430fbc6e",
+  "phase_a": {
+    "coarse_run_id": 33246360328,
+    "coarse_job_id": 99084399327,
+    "coarse_grid_mm": 0.25,
+    "coarse_selected_clearance_mm": 0.125,
+    "refined_run_id": 33246532809,
+    "refined_job_id": 99084854067,
+    "refined_artifact_id": 9713058941,
+    "refined_artifact_zip_sha256": "060b4c00984ec68e7fa21aeda5d54547b21d1ad9a8802f76c732bdff16978705",
+    "refined_grid_mm": 0.05,
+    "evaluated_candidate_count": 16,
+    "passing_candidate_count": 6,
+    "board_modified": false,
+    "selected_candidate": "R404.1/+1V8 to R302.1/+1V8",
+    "selected_minimum_conservative_clearance_mm": 0.175
+  },
+  "executed_authority": {
+    "workflow_name": "r13 route1bj R404-R302 +1V8 validation",
+    "workflow_run_id": 33248837585,
+    "validate_job_id": 99090868942,
+    "verify_artifact_job_id": 99091233686,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 114,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "mismatches": [],
+    "unexpected_pad_nets": [],
+    "artifact_verify": "PASS"
+  },
+  "probe": {
+    "board_modified": false,
+    "minimum_conservative_clearance_mm": 0.175,
+    "independent_r501_pad_gap_mm": 0.175,
+    "required_clearance_mm": 0.1,
+    "nearest_unrelated_copper": {
+      "kind": "pad",
+      "reference": "R501",
+      "pad": "1",
+      "net": "CHG_5V",
+      "position_mm": [18.005, 26.725]
+    }
+  },
+  "routing_scope": {
+    "net": "+1V8",
+    "from": {
+      "reference": "R404",
+      "pad": "1",
+      "value": "4.7k PU PROV",
+      "position_mm": [15.755, 26.725]
+    },
+    "to": {
+      "reference": "R302",
+      "pad": "1",
+      "value": "47k PU",
+      "position_mm": [20.255, 25.975]
+    },
+    "path_family": "VHV",
+    "path_points_mm": [
+      [15.755, 26.725],
+      [15.755, 26.2],
+      [20.255, 26.2],
+      [20.255, 25.975]
+    ],
+    "track_width_mm": 0.3,
+    "segment_lengths_mm": [0.525, 4.5, 0.225],
+    "track_length_mm": 5.25,
+    "track_segments_added": 3,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "preserved_pads": {
+    "R404.2": {
+      "net": "SYS_I2C_SCL",
+      "position_mm": [16.395, 26.725],
+      "routing_touched": false
+    },
+    "R302.2": {
+      "net": "FLASH_HOLD_N",
+      "position_mm": [20.895, 25.975],
+      "routing_touched": false
+    },
+    "R501.1": {
+      "net": "CHG_5V",
+      "position_mm": [18.005, 26.725],
+      "routing_touched": false
+    }
+  },
+  "preserved_geometry": {
+    "accepted_route1bi_geometry_modified": false,
+    "chg_5v_routing_touched": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9713740190,
+    "artifact_name": "r13-route1bj-r404-r302-1v8-evidence",
+    "zip_sha256": "94e0794c5ab18593cc51a267e2da96f80d87c1f97c7af377bffd74827ebd4945",
+    "pcb_sha256": "64b3f16ad984c45fb995c2694c3714d7200db9fb07f21be7fcb391aa9e04b6d8",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "routing_seed_sha256": "081e1d1a40bb020acda311fdd28dc1aee632581585829af1c1df97ba1576e5ea",
+    "drc_json_sha256": "31286703a68486b5e0bde2a00e231918d3f85a4f75bfba56d2b20f157a6cda30",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "summary_json_sha256": "c24492b9b45b10bff4ce09773c2c5f33fd0ee1efa1a3c0496284e6938c05caa3",
+    "probe_json_sha256": "3efeee547ecef8699464cd67b7535eab4b62222a3ce81437f55205476a41f1b2",
+    "dogleg_screen_json_sha256": "4f9aed1b94618e38e7bd0cd7680199f745c5607700f78e0c18a17b53e0342a9e",
+    "downloaded_artifact_digest_verified_in_actions": true,
+    "sha256_manifest_verified_in_actions": true,
+    "independent_download_zip_sha256_verified": true,
+    "independent_sha256_manifest_verified": true,
+    "independent_json_gates_verified": true
+  },
+  "selection_rationale": {
+    "selected": "R404/R302 joins two low-current +1V8 pull-up rail pads with 0.175 mm modeled margin and leaves both signal-side pads untouched.",
+    "nrf_decd": "Not selected because it is an nRF internal regulator/decoupling network.",
+    "dock_5v_raw": "Not selected because it is a materially longer power route requiring coordinated dock-power current/placement intent.",
+    "r403_boundary": "Rejected because the conservative result is 0.099999 mm, treated as below the 0.100 mm threshold."
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "accepted route-1bi reproduction",
+      "current-state 0.05 mm Manhattan dogleg screen",
+      "exact R404/R302/R501 identity, net and coordinate probe",
+      "0.175 mm conservative and independent R501 clearance checks",
+      "executed KiCad 9.0.9 DRC",
+      "exact 114 unconnected count",
+      "268-node physical pin/net audit",
+      "exact three-segment zero-via scope",
+      "R404 SYS_I2C_SCL / R302 FLASH_HOLD_N / R501 CHG_5V preservation",
+      "RF and supplier-gated preservation",
+      "downloaded Artifact digest/SHA256SUMS/JSON re-verification"
+    ]
+  },
+  "deferred_items_unchanged": [
+    "U1 adjacent-pad +1V8 closure",
+    "J7 routing",
+    "C401.2/GND RF-adjacent",
+    "U2.30/LDO2_IN to R106.2",
+    "CHG_5V",
+    "U2.14/SYS_I2C_SCL to R104.2",
+    "RF routing/matching",
+    "J3/J5/J6 supplier/mechanical interfaces",
+    "NRF_DECD internal supply network",
+    "DOCK_5V_RAW coordinated power routing"
+  ]
+}
