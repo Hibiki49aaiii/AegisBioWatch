@@ -19,7 +19,7 @@ SRC_REPORT = SRC_DIR / "routing-seed-r13-1bi.json"
 WIDTH = 0.30
 RULE = 0.10
 MAX_ENDPOINT_DISTANCE = 12.0
-GRID = 0.25
+GRID = 0.05
 LANE_MARGIN = 3.0
 EPS = 1e-9
 
