@@ -1,0 +1,97 @@
+name: r13 route1bc C2-C3 +1V8 validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bc-c2-c3-1v8-validation.yml'
+      - 'tools/reproduce-route1bb-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1bc-c2-c3-1v8.py'
+      - 'tools/write-pcb-r13-route1bc-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+      - name: Reproduce accepted route1bb
+        run: bash tools/reproduce-route1bb-accepted.sh
+      - name: Materialize route1bc
+        run: |
+          python3 -X faulthandler tools/materialize-pcb-r13-route1bc-c2-c3-1v8.py             --route1bb-drc-json /tmp/route1bb.json             --route1bb-pin-net-audit /tmp/route1bb-audit.json
+      - name: Validate route1bc
+        run: |
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1bc.json hardware/main-board/pcb/route-r13-1bc/AegisBioWatch-MainBoard-Route1bc-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py             --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml             --pcb hardware/main-board/pcb/route-r13-1bc/AegisBioWatch-MainBoard-Route1bc-r13.kicad_pcb             --output /tmp/route1bc-audit.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1bc.json'))
+          a=json.load(open('/tmp/route1bc-audit.json'))
+          r=json.load(open('hardware/main-board/pcb/route-r13-1bc/routing-seed-r13-1bc.json'))
+          c=r['connections']['C2.1/+1V8 to C3.1/+1V8']
+          out={
+            'rule_violations':len(d.get('violations',[])),
+            'unconnected_items':len(d.get('unconnected_items',[])),
+            'pin_net_audit':a.get('result'),
+            'audited_nodes':a.get('audited_present_source_nodes'),
+            'added_segments':r.get('track_segments_added'),
+            'vias_added':r.get('vias_added'),
+            'track_width_mm':r.get('track_width_mm'),
+            'component_moves':r.get('component_moves'),
+            'component_rotations':r.get('component_rotations'),
+            'c2_value':c.get('c2_value'),'c3_value':c.get('c3_value'),
+            'c2_pad1_mm':c.get('c2_pad1_mm'),'c3_pad1_mm':c.get('c3_pad1_mm'),
+            'c2_pad1_net':c.get('c2_pad1_net'),'c3_pad1_net':c.get('c3_pad1_net'),
+            'c2_pad2_mm':c.get('c2_pad2_mm'),'c3_pad2_mm':c.get('c3_pad2_mm'),
+            'c2_pad2_net':c.get('c2_pad2_net'),'c3_pad2_net':c.get('c3_pad2_net'),
+            'accepted_route1bb_geometry_modified':r.get('accepted_route1bb_geometry_modified'),
+            'rf_routing_touched':r.get('rf_routing_touched'),
+            'supplier_gated_interfaces_touched':r.get('supplier_gated_interfaces_touched')}
+          print(json.dumps(out,indent=2))
+          Path('/tmp/route1bc-summary.json').write_text(json.dumps(out,indent=2))
+          assert out['rule_violations']==0 and out['unconnected_items']==120
+          assert out['pin_net_audit']=='PASS' and out['audited_nodes']==268
+          assert out['added_segments']==1 and out['vias_added']==0 and out['track_width_mm']==0.30
+          assert out['component_moves']==[] and out['component_rotations']==[]
+          assert out['c2_value']=='100nF' and out['c3_value']=='100nF'
+          assert out['c2_pad1_mm']==[41.005,11.975] and out['c3_pad1_mm']==[41.005,13.475]
+          assert out['c2_pad1_net']=='+1V8' and out['c3_pad1_net']=='+1V8'
+          assert out['c2_pad2_mm']==[41.645,11.975] and out['c3_pad2_mm']==[41.645,13.475]
+          assert out['c2_pad2_net']=='GND' and out['c3_pad2_net']=='GND'
+          assert out['accepted_route1bb_geometry_modified'] is False
+          assert out['rf_routing_touched'] is False and out['supplier_gated_interfaces_touched'] is False
+          PY
+      - name: Package evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/e
+          for f in             hardware/main-board/pcb/route-r13-1bc/AegisBioWatch-MainBoard-Route1bc-r13.kicad_pcb             hardware/main-board/pcb/route-r13-1bc/AegisBioWatch-MainBoard-Route1bc-r13.kicad_pro             hardware/main-board/pcb/route-r13-1bc/routing-seed-r13-1bc.json             /tmp/route1bc.json /tmp/route1bc-summary.json /tmp/route1bc-audit.json; do
+            test -f "$f" && cp "$f" /tmp/e/
+          done
+          sha256sum /tmp/e/* > /tmp/e/SHA256SUMS.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1bc-c2-c3-1v8-evidence
+          path: /tmp/e/**
+          if-no-files-found: warn
