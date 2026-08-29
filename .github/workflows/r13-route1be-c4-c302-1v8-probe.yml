@@ -1,0 +1,48 @@
+name: r13 route1be C4-C302 +1V8 geometry probe
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1be-c4-c302-1v8-probe.yml'
+      - 'tools/reproduce-route1bd-accepted.sh'
+      - 'tools/probe-pcb-r13-route1be-c4-c302-1v8.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+      - name: Reproduce accepted route1bd
+        run: bash tools/reproduce-route1bd-accepted.sh
+      - name: Run read-only route1be geometry probe
+        run: |
+          python3 tools/probe-pcb-r13-route1be-c4-c302-1v8.py             --route1bd-drc-json /tmp/route1bd.json             --route1bd-pin-net-audit /tmp/route1bd-audit.json             --output /tmp/route1be-probe.json
+      - name: Package probe evidence
+        run: |
+          mkdir -p /tmp/e
+          cp /tmp/route1be-probe.json /tmp/e/
+          sha256sum /tmp/e/* > /tmp/e/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1be-c4-c302-1v8-probe
+          path: /tmp/e/**
+          if-no-files-found: error
