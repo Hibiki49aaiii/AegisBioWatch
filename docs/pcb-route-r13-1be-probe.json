@@ -1,0 +1,57 @@
+{
+  "revision": "r13-route1be-c4-c302-1v8-geometry-probe",
+  "status": "PROBE_PASS",
+  "issue": 11,
+  "base_accepted_revision": "route-1bd",
+  "base_commit": "8fb9fe94b36f3a2f0ebdafbff2252b860913cde6",
+  "probe_commit": "1a4510a3d396818f6312b7db6a2b6581e5c52ed9",
+  "workflow_run_id": 33240365333,
+  "job_id": 99068549793,
+  "artifact_id": 9711188488,
+  "artifact_digest": "sha256:8473817094d4dcb0709a5556c344456420a494287c8b5fbdd84929cc8481bdc4",
+  "source_gate": {
+    "rule_violations": 0,
+    "unconnected_items": 119,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268
+  },
+  "board_modified": false,
+  "endpoints": {
+    "C4.1/+1V8": {
+      "position_mm": [41.005, 14.975],
+      "pad_size_mm": [0.46, 0.40]
+    },
+    "C302.1/+1V8": {
+      "position_mm": [40.305, 19.585],
+      "pad_size_mm": [0.56, 0.62]
+    },
+    "vector_mm": {
+      "dx": -0.7,
+      "dy": 4.61,
+      "direct_length_mm": 4.6628
+    }
+  },
+  "relevant_existing_copper": {
+    "C4.2_GND_track": [[41.645, 14.975], [42.25, 14.975]],
+    "C4_GND_via_mm": [42.25, 14.975],
+    "C302.2_GND_track": [[41.265, 19.585], [41.9, 19.585]],
+    "C302_GND_via_mm": [41.9, 19.585]
+  },
+  "corridor_observation": {
+    "nearby_footprints": ["C4", "C302", "J101"],
+    "J101_bbox_right_mm": 39.9,
+    "intervening_signal_tracks": [],
+    "route_option_selected": "A_SINGLE_DIRECT_FCU_DIAGONAL"
+  },
+  "candidate": {
+    "net": "+1V8",
+    "start_mm": [41.005, 14.975],
+    "end_mm": [40.305, 19.585],
+    "track_width_mm": 0.30,
+    "segments": 1,
+    "vias": 0,
+    "expected_unconnected_items": 118,
+    "acceptance_authority": "executed KiCad 9.0.9 DRC + 268-node audit"
+  },
+  "release_status": "NOT_FOR_GERBER"
+}
