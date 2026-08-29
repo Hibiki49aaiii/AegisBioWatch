@@ -1,0 +1,114 @@
+{
+  "revision": "r13-route1bf-r301-r503-1v8-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 12,
+  "base_accepted_revision": "route-1be",
+  "base_commit": "54839f182121172fb2261bd1c6ee73b50178cee5",
+  "candidate_commit": "ce9bd1e01783f175c6a644bc9bb37661881dbb3e",
+  "executed_authority": {
+    "workflow_name": "r13 route1bf R301-R503 +1V8 validation",
+    "workflow_run_id": 33241086216,
+    "validate_job_id": 99070431354,
+    "verify_artifact_job_id": 99070672823,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 117,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "mismatches": [],
+    "unexpected_pad_nets": [],
+    "artifact_verify": "PASS"
+  },
+  "probe": {
+    "board_modified": false,
+    "blocker_count": 0,
+    "rule_clearance_mm": 0.1,
+    "lateral_gap_to_signal_pad_column_mm": 0.26,
+    "R301_value": "47k PU",
+    "R503_value": "47k PU"
+  },
+  "routing_scope": {
+    "net": "+1V8",
+    "from": {
+      "reference": "R301",
+      "pad": "1",
+      "value": "47k PU",
+      "position_mm": [3.005, 25.975]
+    },
+    "to": {
+      "reference": "R503",
+      "pad": "1",
+      "value": "47k PU",
+      "position_mm": [3.005, 27.475]
+    },
+    "track_width_mm": 0.3,
+    "track_length_mm": 1.5,
+    "track_segments_added": 1,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "signal_side_preservation": {
+    "R301.2": {
+      "net": "FLASH_WP_N",
+      "position_mm": [3.645, 25.975],
+      "routing_touched": false
+    },
+    "R503.2": {
+      "net": "CHG_PRESENT_N",
+      "position_mm": [3.645, 27.475],
+      "routing_touched": false
+    }
+  },
+  "preserved_geometry": {
+    "accepted_route1be_geometry_modified": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9711395327,
+    "artifact_name": "r13-route1bf-r301-r503-1v8-evidence",
+    "zip_sha256": "5a1b2c9c068712b83d079b4f98b208501b128fddd753c6d0b440a9e80204aabf",
+    "pcb_sha256": "8deb28a88fef3c9aca174fe5d40a2aaefeb011feabfb99b012b6cd775ecc653b",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "routing_seed_sha256": "e83c5ecc3e70e93ca7d3389776610eec6fa152f3c4f41ce52a4340dabeb52b68",
+    "drc_json_sha256": "d2976284dfe723bc663daebe473d7468e019b89da221bde02ee8c2db88f7d220",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "summary_json_sha256": "e7c5120c3b60e64b232ba89314cb004789cad185ee909b1c628887870a455456",
+    "probe_json_sha256": "424f6adb95ada94ccbb459d7fb20dc11598faf24705790f16ae3c7498bf6efea",
+    "downloaded_artifact_digest_verified_in_actions": true,
+    "sha256_manifest_verified_in_actions": true,
+    "independent_download_zip_sha256_verified": true,
+    "independent_sha256_manifest_verified": true,
+    "independent_json_gates_verified": true
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "accepted route-1be reproduction",
+      "executed read-only F.Cu blocker probe",
+      "executed KiCad 9.0.9 DRC",
+      "exact 117 unconnected count",
+      "268-node physical pin/net audit",
+      "exact one-segment zero-via routing scope",
+      "R301/R503 identity, value, net and coordinate gates",
+      "signal-side preservation",
+      "RF and supplier-gated preservation",
+      "downloaded Artifact digest/SHA256SUMS/JSON re-verification"
+    ]
+  },
+  "deferred_items_unchanged": [
+    "U1 adjacent-pad +1V8 closure",
+    "J7 routing",
+    "C401.2/GND RF-adjacent",
+    "U2.30/LDO2_IN to R106.2",
+    "CHG_5V",
+    "U2.14/SYS_I2C_SCL to R104.2",
+    "RF routing/matching",
+    "J3/J5/J6 supplier/mechanical interfaces"
+  ]
+}
