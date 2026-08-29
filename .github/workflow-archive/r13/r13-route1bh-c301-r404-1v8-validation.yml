@@ -1,0 +1,179 @@
+name: r13 route1bh C301-R404 +1V8 validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bh-c301-r404-1v8-validation.yml'
+      - 'tools/reproduce-route1bg-accepted.sh'
+      - 'tools/probe-pcb-r13-route1bh-c301-r404-1v8.py'
+      - 'tools/materialize-pcb-r13-route1bh-c301-r404-1v8.py'
+      - 'tools/write-pcb-r13-route1bh-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce accepted route1bg
+        run: bash tools/reproduce-route1bg-accepted.sh
+
+      - name: Run read-only route1bh clearance probe
+        run: |
+          python3 tools/probe-pcb-r13-route1bh-c301-r404-1v8.py             --route1bg-drc-json /tmp/route1bg.json             --route1bg-pin-net-audit /tmp/route1bg-audit.json             --output /tmp/route1bh-probe.json
+
+      - name: Materialize route1bh
+        run: |
+          python3 -X faulthandler tools/materialize-pcb-r13-route1bh-c301-r404-1v8.py             --route1bg-drc-json /tmp/route1bg.json             --route1bg-pin-net-audit /tmp/route1bg-audit.json
+
+      - name: Validate route1bh
+        run: |
+          kicad-cli pcb drc --format json --severity-all             -o /tmp/route1bh.json             hardware/main-board/pcb/route-r13-1bh/AegisBioWatch-MainBoard-Route1bh-r13.kicad_pcb
+
+          python3 tools/audit-pcb-pin-nets.py             --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml             --pcb hardware/main-board/pcb/route-r13-1bh/AegisBioWatch-MainBoard-Route1bh-r13.kicad_pcb             --output /tmp/route1bh-audit.json
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1bh.json'))
+          a=json.load(open('/tmp/route1bh-audit.json'))
+          p=json.load(open('/tmp/route1bh-probe.json'))
+          r=json.load(open('hardware/main-board/pcb/route-r13-1bh/routing-seed-r13-1bh.json'))
+          c=r['connections']['C301.1/+1V8 to R404.1/+1V8']
+
+          out={
+            'rule_violations':len(d.get('violations',[])),
+            'unconnected_items':len(d.get('unconnected_items',[])),
+            'pin_net_audit':a.get('result'),
+            'audited_nodes':a.get('audited_present_source_nodes'),
+            'probe_board_modified':p.get('board_modified'),
+            'probe_min_clearance_mm':p.get('minimum_conservative_unrelated_clearance_mm'),
+            'added_segments':r.get('track_segments_added'),
+            'vias_added':r.get('vias_added'),
+            'track_width_mm':r.get('track_width_mm'),
+            'track_length_mm':r.get('track_length_mm'),
+            'component_moves':r.get('component_moves'),
+            'component_rotations':r.get('component_rotations'),
+            'c301_value':c.get('c301_value'),
+            'r404_value':c.get('r404_value'),
+            'c301_pad1_mm':c.get('c301_pad1_mm'),
+            'r404_pad1_mm':c.get('r404_pad1_mm'),
+            'c301_pad1_net':c.get('c301_pad1_net'),
+            'r404_pad1_net':c.get('r404_pad1_net'),
+            'c301_pad2_mm':c.get('c301_pad2_mm'),
+            'c301_pad2_net':c.get('c301_pad2_net'),
+            'r404_pad2_mm':c.get('r404_pad2_mm'),
+            'r404_pad2_net':c.get('r404_pad2_net'),
+            'c301_gnd_routing_touched':r.get('c301_gnd_routing_touched'),
+            'r404_scl_routing_touched':r.get('r404_scl_routing_touched'),
+            'accepted_route1bg_geometry_modified':r.get('accepted_route1bg_geometry_modified'),
+            'rf_routing_touched':r.get('rf_routing_touched'),
+            'supplier_gated_interfaces_touched':r.get('supplier_gated_interfaces_touched')
+          }
+          print(json.dumps(out,indent=2))
+          Path('/tmp/route1bh-summary.json').write_text(json.dumps(out,indent=2))
+
+          assert out['rule_violations']==0 and out['unconnected_items']==115
+          assert out['pin_net_audit']=='PASS' and out['audited_nodes']==268
+          assert out['probe_board_modified'] is False
+          assert out['probe_min_clearance_mm'] is not None and out['probe_min_clearance_mm']>=0.100
+          assert out['added_segments']==1 and out['vias_added']==0
+          assert out['track_width_mm']==0.30 and abs(out['track_length_mm']-3.605551)<1e-6
+          assert out['component_moves']==[] and out['component_rotations']==[]
+          assert out['c301_value']=='100nF' and out['r404_value']=='4.7k PU PROV'
+          assert out['c301_pad1_mm']==[13.755,23.725] and out['r404_pad1_mm']==[15.755,26.725]
+          assert out['c301_pad1_net']=='+1V8' and out['r404_pad1_net']=='+1V8'
+          assert out['c301_pad2_mm']==[14.395,23.725] and out['c301_pad2_net']=='GND'
+          assert out['r404_pad2_mm']==[16.395,26.725] and out['r404_pad2_net']=='SYS_I2C_SCL'
+          assert out['c301_gnd_routing_touched'] is False
+          assert out['r404_scl_routing_touched'] is False
+          assert out['accepted_route1bg_geometry_modified'] is False
+          assert out['rf_routing_touched'] is False
+          assert out['supplier_gated_interfaces_touched'] is False
+          PY
+
+      - name: Package route1bh evidence
+        run: |
+          mkdir -p /tmp/e
+          cp hardware/main-board/pcb/route-r13-1bh/AegisBioWatch-MainBoard-Route1bh-r13.kicad_pcb /tmp/e/
+          cp hardware/main-board/pcb/route-r13-1bh/AegisBioWatch-MainBoard-Route1bh-r13.kicad_pro /tmp/e/
+          cp hardware/main-board/pcb/route-r13-1bh/routing-seed-r13-1bh.json /tmp/e/
+          cp /tmp/route1bh.json /tmp/e/
+          cp /tmp/route1bh-audit.json /tmp/e/
+          cp /tmp/route1bh-summary.json /tmp/e/
+          cp /tmp/route1bh-probe.json /tmp/e/
+          (cd /tmp/e && sha256sum             AegisBioWatch-MainBoard-Route1bh-r13.kicad_pcb             AegisBioWatch-MainBoard-Route1bh-r13.kicad_pro             routing-seed-r13-1bh.json             route1bh.json route1bh-audit.json route1bh-summary.json route1bh-probe.json             > SHA256SUMS.txt)
+          cat /tmp/e/SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bh-c301-r404-1v8-evidence
+          path: /tmp/e/**
+          if-no-files-found: error
+
+  verify-artifact:
+    needs: validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bh-c301-r404-1v8-evidence
+          path: /tmp/e
+
+      - name: Verify downloaded evidence package
+        run: |
+          cd /tmp/e
+          sha256sum -c SHA256SUMS.txt
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('/tmp/e')
+          d=json.loads((root/'route1bh.json').read_text())
+          a=json.loads((root/'route1bh-audit.json').read_text())
+          s=json.loads((root/'route1bh-summary.json').read_text())
+          r=json.loads((root/'routing-seed-r13-1bh.json').read_text())
+          p=json.loads((root/'route1bh-probe.json').read_text())
+          pcb=root/'AegisBioWatch-MainBoard-Route1bh-r13.kicad_pcb'
+
+          assert len(d.get('violations',[]))==0
+          assert len(d.get('unconnected_items',[]))==115
+          assert a.get('result')=='PASS' and a.get('audited_present_source_nodes')==268
+          assert s.get('rule_violations')==0 and s.get('unconnected_items')==115
+          assert s.get('pin_net_audit')=='PASS' and s.get('audited_nodes')==268
+          assert s.get('probe_min_clearance_mm')>=0.100
+          assert r.get('track_segments_added')==1 and r.get('vias_added')==0
+          assert r.get('output_sha256')==hashlib.sha256(pcb.read_bytes()).hexdigest()
+          assert p.get('board_modified') is False
+          assert p.get('minimum_conservative_unrelated_clearance_mm')>=0.100
+
+          print(json.dumps({
+            'artifact_verify':'PASS',
+            'rule_violations':0,
+            'unconnected_items':115,
+            'pin_net_audit':'PASS',
+            'audited_nodes':268,
+            'minimum_conservative_clearance_mm':p.get('minimum_conservative_unrelated_clearance_mm'),
+            'pcb_sha256':r.get('output_sha256')
+          },indent=2))
+          PY
