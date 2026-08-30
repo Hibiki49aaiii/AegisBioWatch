@@ -1,0 +1,222 @@
+{
+  "revision": "r13-route1bl-r106-vsys-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 18,
+  "base_accepted_revision": "route-1bk",
+  "base_commit": "038bb5c349d0e8a823c152539094e74827705768",
+  "candidate_commit": "d2a6e57abc1b72b1cce3cf32d21518717ca7a556",
+  "phase_a": {
+    "current_state_run_id": 33257200996,
+    "current_state_job_id": 99112904978,
+    "current_state_artifact_id": 9716233834,
+    "current_state_artifact_zip_sha256": "d95c949da67bea6690220ccc0004e12edea8f91f3a02b5a523fd56788eca06e1",
+    "expanded_run_id": 33257631053,
+    "expanded_job_id": 99114005797,
+    "expanded_artifact_id": 9716379240,
+    "expanded_artifact_zip_sha256": "bd9abb576ff2f69ac25863e9b5a23c0cdd9d66425e5e365396114eb422b0f1bc",
+    "c301_run_id": 33258188435,
+    "c301_job_id": 99115445926,
+    "c301_artifact_id": 9716526627,
+    "c301_artifact_zip_sha256": "d72e9542db322f9a409c048073257a4c13b70cf643ff68cb1b872ba5e02a7530",
+    "c301_paths_evaluated": 2884,
+    "c301_passing_paths": 0,
+    "c301_best_clearance_mm": 0.074999,
+    "r106_coarse_run_id": 33287660251,
+    "r106_coarse_job_id": 99193578209,
+    "r106_coarse_artifact_id": 9725015907,
+    "r106_coarse_artifact_zip_sha256": "57ce2edf5607791c52b71a058c57aaf88302cdcd4a1579279f7a6f7b8b47cc63",
+    "r106_coarse_paths_evaluated": 3444,
+    "r106_coarse_passing_paths": 1,
+    "r106_coarse_clearance_mm": 0.125,
+    "r106_refine_run_id": 33300792687,
+    "r106_refine_job_id": 99228424884,
+    "r106_refine_artifact_id": 9728930958,
+    "r106_refine_artifact_zip_sha256": "9e53819baf6d4174efe4c339376d4dcc6b1f028dffa0e1fc15780383f853ae02",
+    "r106_refine_grid_mm": 0.05,
+    "r106_refine_paths_evaluated": 88,
+    "r106_refine_passing_paths": 16,
+    "r106_refine_best_clearance_mm": 0.184166
+  },
+  "executed_authority": {
+    "workflow_name": "r13 route1bl R106 VSYS validation",
+    "workflow_run_id": 33339645685,
+    "validate_job_id": 99332825730,
+    "verify_artifact_job_id": 99333473586,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 112,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "mismatches": [],
+    "unexpected_pad_nets": [],
+    "artifact_verify": "PASS"
+  },
+  "routing_scope": {
+    "net": "VSYS",
+    "source_existing_track": {
+      "start_mm": [
+        8.9875,
+        28.25
+      ],
+      "end_mm": [
+        7.35,
+        28.25
+      ],
+      "width_mm": 0.3,
+      "modified": false
+    },
+    "to": {
+      "reference": "R106",
+      "pad": "1",
+      "value": "0R DNP/OPTION",
+      "net": "VSYS",
+      "position_mm": [
+        5.270826,
+        25.865834
+      ]
+    },
+    "preserved_adjacent_pad": {
+      "reference": "R106",
+      "pad": "2",
+      "net": "LDO2_IN",
+      "position_mm": [
+        5.910826,
+        25.865834
+      ],
+      "routing_touched": false
+    },
+    "path_family": "HVHV-effective",
+    "path_points_mm": [
+      [
+        7.35,
+        28.25
+      ],
+      [
+        7.2,
+        28.25
+      ],
+      [
+        7.2,
+        26.4
+      ],
+      [
+        5.270826,
+        26.4
+      ],
+      [
+        5.270826,
+        25.865834
+      ]
+    ],
+    "track_width_mm": 0.3,
+    "segment_lengths_mm": [
+      0.15,
+      1.85,
+      1.929174,
+      0.534166
+    ],
+    "track_length_mm": 4.46334,
+    "track_segments_added": 4,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "geometry": {
+    "minimum_conservative_clearance_mm": 0.184166,
+    "independent_r106p2_vertical_gap_mm": 0.184166,
+    "required_clearance_mm": 0.1,
+    "limiting_copper": "R106.2/LDO2_IN",
+    "overlap_with_existing_source_track_materialized": false
+  },
+  "physical_delta_audit": {
+    "result": "PASS",
+    "removed_items": 0,
+    "added_tracks": 4,
+    "added_vias": 0,
+    "footprint_state_unchanged": true,
+    "existing_vsys_source_track_count_before": 1,
+    "existing_vsys_source_track_count_after": 1
+  },
+  "preserved_geometry": {
+    "accepted_route1bk_geometry_modified": false,
+    "existing_vsys_source_track_modified": false,
+    "r106_ldo2_in_routing_touched": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9740198510,
+    "artifact_name": "r13-route1bl-r106-vsys-evidence",
+    "zip_sha256": "84c5ef27deb42bec2d444a7a7b6cf68d5ca961f04f3b780ad702c86af11f0d57",
+    "pcb_sha256": "01db4298b0b713ba0c7fb224bee0971110b19b93a79d8f574c3a8f6efe57d7eb",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "routing_seed_sha256": "c150107ea82f81187fcfc674e59b3fe575a441335142801f50f0591ccfd72bd5",
+    "drc_json_sha256": "23fe238c141452c010ad0c7a13b1d547a37927917f3d84e20f8d1a88e09db485",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "summary_json_sha256": "68d7f5ea8d1d8269f9e6742c2658e7c994f70f25778813503f2c3c5803b0510e",
+    "probe_json_sha256": "84b1914a7d81e6c9c1d03be70ce67196963b53968d77afa2653f299c2ac216b8",
+    "refine_json_sha256": "b964aa057543cb579e4d347a9578c0c4c5f12c1620e460162f9c7336ec4411ff",
+    "scope_json_sha256": "5821748047c40d6e67aa29cca9f3a0885aa08e321f762d961f40327c722e7d11",
+    "downloaded_artifact_digest_verified_in_actions": true,
+    "sha256_manifest_verified_in_actions": true,
+    "independent_download_zip_sha256_verified": true,
+    "independent_sha256_manifest_verified": true,
+    "independent_json_gates_verified": true,
+    "independent_pcb_sha_verified": true
+  },
+  "rejected_or_deferred_candidates": [
+    {
+      "candidate": "C301.1/+1V8 to accepted +1V8 rail",
+      "disposition": "REJECTED",
+      "reason": "2884 four-segment candidates; 0 pass; best clearance 0.074999 mm"
+    },
+    {
+      "candidate": "+1V8 track to R403.1/+1V8",
+      "disposition": "REJECTED",
+      "reason": "modeled clearance 0.099999 mm < 0.100000 mm threshold"
+    },
+    {
+      "candidate": "NRF_RESET_N",
+      "disposition": "REJECTED_FOR_THIS_INCREMENT",
+      "reason": "route approaches frozen C11/RF_B context"
+    },
+    {
+      "candidate": "R106.2/LDO2_IN",
+      "disposition": "DEFERRED_UNTOUCHED",
+      "reason": "explicit geometry-constrained LDO2_IN closure remains out of scope"
+    }
+  ],
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "accepted route-1bk reproduction at 0/113/268",
+      "current-state and targeted Phase A screening",
+      "0.05 mm local R106 refine",
+      "exact PCB source-track and R106 pad identity/net/coordinate probe",
+      "0.184166 mm modeled and independent R106.2 clearance",
+      "exact four-segment zero-via materialization",
+      "before/after physical delta audit",
+      "executed KiCad 9.0.9 DRC",
+      "exact 112 unconnected count",
+      "268-node physical pin/net audit",
+      "downloaded Artifact SHA256SUMS/JSON verification",
+      "independent Artifact verification"
+    ]
+  },
+  "deferred_items_unchanged": [
+    "U1 adjacent-pad/high-density closures",
+    "J7 routing",
+    "C401.2/GND RF-adjacent",
+    "U2.30/LDO2_IN to R106.2",
+    "CHG_5V",
+    "U2.14/SYS_I2C_SCL to R104.2",
+    "RF routing/matching",
+    "NRF_DECD internal regulator/decoupling network",
+    "J3/J5/J6 supplier/mechanical interfaces",
+    "DOCK_5V_RAW coordinated power routing"
+  ]
+}
