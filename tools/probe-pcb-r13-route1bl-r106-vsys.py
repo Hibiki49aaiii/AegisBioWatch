@@ -302,10 +302,13 @@ def main() -> None:
         raise SystemExit(f"route1bl exact probe effective-path clearance failed: {clearance}")
 
     p2_box=bbox(p2)
-    independent_r106p2_gap=round(p2_box[0] - (B[0] + WIDTH/2.0),6)
+    # Limiting geometry is the horizontal candidate segment at y=26.400 mm
+    # passing above R106.2/LDO2_IN.  Use the pad bounding-box bottom edge,
+    # then subtract half of the 0.30 mm candidate trace width.
+    independent_r106p2_gap=round(26.4 - p2_box[3] - WIDTH/2.0,6)
     if abs(independent_r106p2_gap-clearance)>1e-6:
         raise SystemExit(
-            f"route1bl exact probe independent R106.2 gap mismatch: {independent_r106p2_gap} vs {clearance}"
+            f"route1bl exact probe independent R106.2 vertical gap mismatch: {independent_r106p2_gap} vs {clearance}"
         )
 
     actual_lengths=[round(math.dist(a,b),6) for a,b in zip(points,points[1:])]
