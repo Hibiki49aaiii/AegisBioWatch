@@ -24,7 +24,7 @@ EPS = 1e-9
 
 TARGET_NET = "VSYS"
 TARGET_A_DESC = "Track [VSYS] on Top_layer, length 1.6375 mm"
-TARGET_B_DESC = "Pad 1 [VSYS] of R106 on Top_layer"
+TARGET_B_DESC = "Track [VSYS] on Top_layer, length 0.6208 mm"
 EXPECTED_A = (8.9875, 28.25)
 EXPECTED_B = (5.270826, 25.865834)
 EXPECTED_SOURCE_TRACK_START = (8.9875, 28.25)
