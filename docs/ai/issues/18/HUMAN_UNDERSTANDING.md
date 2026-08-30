@@ -1,32 +1,65 @@
 # Human Understanding — Issue #18
 
-## Why route-1bl must rescreen
-route-1bk connected the C305/C304 VSYS_HAPTIC capacitor islands. KiCad therefore reports a new 113-item ratsnest. That actual accepted state is the only valid input for route-1bl.
+## What changed
+route-1bl closes one VSYS ratsnest item by connecting the existing VSYS source track to `R106.1/VSYS`.
 
-## Preferred current candidate
-The shortest ordinary non-frozen-looking pad-to-existing-rail item is:
-- `C301.1/+1V8 @ (13.755,23.725)`
-- → existing `+1V8` rail endpoint `(15.755,26.725)`
-- ratsnest distance ≈ 3.6056 mm.
+New copper:
+`(7.35,28.25) → (7.20,28.25) → (7.20,26.40) → (5.270826,26.40) → (5.270826,25.865834)`
 
-C301 is a 100 nF 0201 bypass capacitor:
-- C301.1 = +1V8;
-- C301.2 = GND at (14.395,23.725).
+This is 4 segments, 0 vias, 0.30 mm F.Cu, total 4.463340 mm.
 
-The target coordinate is the top endpoint of the accepted route-1bj segment:
-- (15.755,26.725) → (15.755,26.200)
-- +1V8
-- F.Cu width 0.30 mm.
+## Why this candidate was selected
+The first preference, `C301.1/+1V8`, was not legal under the current geometry:
+- 2,884 four-segment candidates;
+- 0 passes;
+- best clearance 0.074999 mm.
 
-The DRC coordinate alone does not authorize a T-junction. The exact probe must verify that the target is a real endpoint of the accepted same-net segment and that the new route lands there without altering the existing route.
+Other candidates were also rejected:
+- +1V8→R403: 0.099999 mm, below the 0.100000 mm threshold;
+- NRF_RESET_N: route approached frozen RF_B/C11 context.
 
-## Alternatives
-A VSYS track→R106.1 item is only slightly longer, but R106.2 is the explicitly deferred LDO2_IN node. It is therefore lower priority.
+The R106.1 VSYS candidate was the next ordinary candidate that could pass full clearance while preserving the explicitly deferred `R106.2/LDO2_IN` node.
 
-Shorter items involving U1, J7, RF passives, C401, CHG_5V or nRF internal rails remain frozen/deferred.
+## Why the final route differs from the screen path
+The best screen path started at `(8.9875,28.25)`, but an accepted VSYS segment already exists from `(8.9875,28.25)` to `(7.35,28.25)`.
 
-## Search policy
-Use a read-only 0.05 mm Manhattan screen with 0.30 mm provisional F.Cu width and a hard conservative clearance floor of 0.100 mm.
+Materializing that portion again would create redundant overlapping copper, so route-1bl starts at the existing endpoint `(7.35,28.25)` and adds only the missing four segments.
 
-## Rollback
-Any failed screen, endpoint proof, exact probe, DRC, 113→112 decrement, audit, scope or Artifact-integrity gate leaves route-1bk unchanged as the accepted authority.
+## Clearance
+The refined screen found 16 legal paths out of 88 candidates.
+
+Selected geometry has:
+- modeled minimum unrelated-copper clearance = 0.184166 mm;
+- independent limiting gap to `R106.2/LDO2_IN` = 0.184166 mm;
+- required rule = 0.100000 mm.
+
+The limiting relation is the horizontal segment at y=26.400 mm passing above the R106.2 pad.
+
+## DRC representative instability
+KiCad may report different representative coordinates/descriptions for the same unconnected VSYS islands after regeneration. Those representative strings are not used as electrical authority.
+
+The durable gates are:
+- source DRC = 0 / 113;
+- exact PCB source-track identity;
+- exact R106.1/R106.2 pad identity/net/coordinates;
+- exact route geometry;
+- executed output DRC = 0 / 112;
+- 268-node audit PASS.
+
+## Physical scope proof
+A pcbnew before/after comparison verifies:
+- exactly four expected VSYS tracks added;
+- no track removed;
+- no via added;
+- all footprint positions and rotations unchanged;
+- existing VSYS source track unchanged.
+
+## Acceptance
+Dedicated validation run 33339645685 passed:
+- KiCad 9.0.9 DRC = 0 violations;
+- unconnected = 112;
+- physical pin/net audit = 268 PASS;
+- downloaded Artifact verification = PASS;
+- independent Artifact verification = PASS.
+
+Release remains NOT_FOR_GERBER.
