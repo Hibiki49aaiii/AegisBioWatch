@@ -171,12 +171,21 @@ def main() -> None:
         items=u.get("items",[])
         if len(items)!=2:
             continue
-        descs=[x["description"] for x in items]
-        if set(descs)=={TARGET_A_DESC,TARGET_B_DESC}:
-            bydesc={x["description"]:x for x in items}
-            matches.append((idx,bydesc[TARGET_A_DESC],bydesc[TARGET_B_DESC]))
+        pts=[
+            (float(x["pos"]["x"]),float(x["pos"]["y"]))
+            for x in items
+        ]
+        if set(pts)!={EXPECTED_A,EXPECTED_B}:
+            continue
+        if not all("[VSYS]" in x.get("description","") for x in items):
+            continue
+        bypos={
+            (float(x["pos"]["x"]),float(x["pos"]["y"])):x
+            for x in items
+        }
+        matches.append((idx,bypos[EXPECTED_A],bypos[EXPECTED_B]))
     if len(matches)!=1:
-        raise SystemExit(f"route1bl R106 DRC target cardinality failed: {len(matches)}")
+        raise SystemExit(f"route1bl R106 DRC coordinate/net target cardinality failed: {len(matches)}")
 
     drc_index,ai,bi=matches[0]
     A=(float(ai["pos"]["x"]),float(ai["pos"]["y"]))
