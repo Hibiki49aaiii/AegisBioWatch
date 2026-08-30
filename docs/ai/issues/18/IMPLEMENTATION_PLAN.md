@@ -5,7 +5,7 @@
 - Base accepted/archive SHA: `038bb5c349d0e8a823c152539094e74827705768`
 - Accepted electrical authority: route-1bk = 0 violations / 113 unconnected / 268 PASS
 - Accepted Artifact: 9715915878
-- Accepted PCB SHA-256: `283217e6a0ff89355999fe64b641185793ff4276b245983fe658cc1f602a3a`
+- Accepted PCB SHA-256: `283217e6a0ff89355999c0bc2fa5330d5348811caaea97deff6c8b27295a9ed8`
 
 ## Phase A — completed
 1. Reproduced route-1bk at 0 / 113 / 268 PASS.
