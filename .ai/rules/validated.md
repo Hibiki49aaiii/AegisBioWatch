@@ -47,3 +47,4 @@ Do not silently weaken this rule. If a future board revision, KiCad/toolchain ve
 - route-1ao successful workflow run `32282264856`, job `96163538284`, Artifact `9376332330`
 - `docs/pcb-route-r13-1bm-validation.json` and `tools/reproduce-route1bm-accepted.sh`
 - route-1bm successful workflow run `33403962140`, validate job `99526815463`, downloaded-Artifact verify job `99528757252`, Artifact `9762571974`, with independent ZIP/SHA256SUMS/JSON/PCB verification PASS
+\n- `docs/pcb-route-r13-1bn-validation.json` and `tools/reproduce-route1bn-accepted.sh`\n- route-1bn successful workflow run `33413080742`, validate job `99557105934`, downloaded-Artifact verify job `99558773007`, Artifact `9766085905`, with independent ZIP/SHA256SUMS/JSON/PCB verification PASS\n
