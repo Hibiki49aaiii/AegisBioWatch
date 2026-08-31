@@ -204,7 +204,7 @@ def main() -> None:
     ap.add_argument("--route1bm-pin-net-audit", "--pin-net-audit", dest="pin_net_audit", required=True)
     ap.add_argument("--source-pcb", default=str(SRC_PCB))
     ap.add_argument("--source-report", default=str(SRC_REPORT))
-    ap.add_argument("--expected-unconnected", type=int, default=112)
+    ap.add_argument("--expected-unconnected", type=int, default=111)
     ap.add_argument("--output", required=True)
     args = ap.parse_args()
 
