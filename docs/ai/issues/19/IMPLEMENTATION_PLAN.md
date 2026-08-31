@@ -55,3 +55,19 @@ For one selected candidate:
 - CHG_5V and SYS_I2C_SCL geometry-gated routes remain deferred.
 - Existing accepted route-1bl VSYS geometry remains unchanged unless a same-net landing is explicitly proven.
 - Release remains NOT_FOR_GERBER.
+
+
+## Phase B completion
+- Selected candidate: `R305.2/VSYS_HAPTIC -> U4.10/VSYS_HAPTIC`.
+- Exact path: `(31.315,18.595) -> (31.315,17.500) -> (25.000,17.500) -> (25.000,13.400) -> (23.005,13.400)`.
+- Exact scope: 4 F.Cu segments, 0 vias, 0.30 mm width, 13.505 mm total.
+- Conservative minimum unrelated-copper clearance: 0.200 mm; limiting copper `U4.9/HAPTIC_OUT_N`.
+- Executed KiCad 9.0.9 authority: workflow run `33403962140`, validate job `99526815463`, downloaded-Artifact verify job `99528757252`.
+- Result: **0 violations / 111 unconnected / 268-node audit PASS**.
+- Physical delta: 4 expected tracks added, 0 removed items, 0 vias, no component moves/rotations, accepted route-1bk bypass preserved.
+- Artifact `9762571974`, ZIP SHA-256 `82ee8d063d11bdd9c2fcf7c160fbb885b012ff75937b77c23837914c2548b3cf`.
+- Independent Artifact verification: ZIP digest, internal SHA256SUMS, DRC/audit/probe/scope and PCB SHA all PASS.
+- Accepted PCB SHA-256: `3f801870c08fd7729ce54eb51789c710690b0248efd1689e6d8e2f679bb705c4`.
+- Evidence: `docs/pcb-route-r13-1bm-validation.json`.
+- Accepted reproducer: `tools/reproduce-route1bm-accepted.sh`.
+- Release remains **NOT_FOR_GERBER**.
