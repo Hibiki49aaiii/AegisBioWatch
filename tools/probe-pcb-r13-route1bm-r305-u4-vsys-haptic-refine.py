@@ -289,11 +289,11 @@ def main() -> None:
             tracks.append({"net": net, "start": start, "end": end, "width": width})
             if net == TARGET_NET and abs(width - WIDTH) < 1e-6:
                 for a, b in zip(BYPASS_POINTS, BYPASS_POINTS[1:]):
-                    if {start, end} == {a, b}:
+                    if (near(start, a) and near(end, b)) or (near(start, b) and near(end, a)):
                         bypass_segment_hits.append((a, b))
-                if start == R305_PAD2 or end == R305_PAD2:
+                if near(start, R305_PAD2) or near(end, R305_PAD2):
                     r305_touching_tracks.append((start, end))
-                if start == U4_PAD10 or end == U4_PAD10:
+                if near(start, U4_PAD10) or near(end, U4_PAD10):
                     u4_touching_tracks.append((start, end))
 
     if len(bypass_segment_hits) != 3:
