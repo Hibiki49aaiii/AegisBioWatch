@@ -200,19 +200,24 @@ def endpoint_semantic_rank(c: dict) -> int:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--route1bl-drc-json", required=True)
-    ap.add_argument("--route1bl-pin-net-audit", required=True)
+    ap.add_argument("--route1bl-drc-json", "--drc-json", dest="drc_json", required=True)
+    ap.add_argument("--route1bl-pin-net-audit", "--pin-net-audit", dest="pin_net_audit", required=True)
+    ap.add_argument("--source-pcb", default=str(SRC_PCB))
+    ap.add_argument("--source-report", default=str(SRC_REPORT))
+    ap.add_argument("--expected-unconnected", type=int, default=112)
     ap.add_argument("--output", required=True)
     args = ap.parse_args()
 
-    report = load_json(SRC_REPORT)
-    src_sha = sha256(SRC_PCB)
+    source_pcb = Path(args.source_pcb)
+    source_report = Path(args.source_report)
+    report = load_json(source_report)
+    src_sha = sha256(source_pcb)
     if report.get("output_sha256") != src_sha:
         raise SystemExit("route1bm dogleg source SHA gate failed")
 
-    drc = load_json(Path(args.route1bl_drc_json))
-    audit = load_json(Path(args.route1bl_pin_net_audit))
-    if len(drc.get("violations", [])) != 0 or len(drc.get("unconnected_items", [])) != 112:
+    drc = load_json(Path(args.drc_json))
+    audit = load_json(Path(args.pin_net_audit))
+    if len(drc.get("violations", [])) != 0 or len(drc.get("unconnected_items", [])) != args.expected_unconnected:
         raise SystemExit("route1bm dogleg DRC source gate failed")
     if audit.get("result") != "PASS" or audit.get("audited_present_source_nodes") != 268:
         raise SystemExit("route1bm dogleg audit source gate failed")
@@ -236,7 +241,7 @@ def main() -> None:
         c["exclusion_reason"] = exclusion_reason(c)
         raw.append(c)
 
-    board = pcbnew.LoadBoard(str(SRC_PCB))
+    board = pcbnew.LoadBoard(str(source_pcb))
     pads: list[dict] = []
     tracks: list[dict] = []
     vias: list[dict] = []
@@ -412,9 +417,12 @@ def main() -> None:
     out = {
         "revision": "r13-route1bm-max4-coarse-screen",
         "source_route1bl_sha256": src_sha,
+        "source_pcb_sha256": src_sha,
+        "source_pcb": str(source_pcb),
+        "expected_unconnected": args.expected_unconnected,
         "source_gate": {
             "rule_violations": 0,
-            "unconnected_items": 112,
+            "unconnected_items": args.expected_unconnected,
             "pin_net_audit": "PASS",
             "audited_nodes": 268,
         },
