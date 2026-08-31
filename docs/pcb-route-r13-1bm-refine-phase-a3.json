@@ -1,0 +1,76 @@
+{
+  "revision": "r13-route1bm-phase-a3-r305-u4-vsys-haptic-local-refine",
+  "issue": 19,
+  "status": "PHASE_A3_LOCAL_REFINE_COMPLETE",
+  "release_status": "NOT_FOR_GERBER",
+  "base": {
+    "accepted_authority": "route-1bl",
+    "accepted_commit": "228fea4698bc661dd6f052cbc6cd9aefa8068690",
+    "rule_violations": 0,
+    "unconnected_items": 112,
+    "audited_nodes": 268,
+    "pin_net_audit": "PASS",
+    "accepted_authority_changed": false
+  },
+  "semantic_topology_review": {
+    "phase_a2_preferred_representative": "DRC #111 R305.2/VSYS_HAPTIC -> U4.10/VSYS_HAPTIC",
+    "phase_a2_alternate_representative": "DRC #110 accepted route-1bk VSYS_HAPTIC bypass-track bend -> U4.10/VSYS_HAPTIC",
+    "r305_pad2_mm": [31.315, 18.595],
+    "u4_pad10_mm": [23.005, 13.4],
+    "accepted_route1bk_bypass_bend_mm": [16.005, 21.65],
+    "conclusion": "The R305.2 feed pad and the accepted route-1bk C305/C304 bypass copper are physically distinct VSYS_HAPTIC source islands. KiCad DRC representative text/indices remain supporting provenance only; exact PCB pad/track identity is authority.",
+    "selected_family_for_refine": "R305.2/VSYS_HAPTIC -> U4.10/VSYS_HAPTIC VHVH",
+    "alternate_family_disposition": "HOLD_NOT_SELECTED"
+  },
+  "workflow": {
+    "name": "r13 route1bm R305-U4 VSYS_HAPTIC local refine",
+    "head_sha": "69b3902b8da4c3fe0369334e6e9d2a6f71eaec76",
+    "run_id": 33401419381,
+    "refine_job_id": 99518370134,
+    "verify_artifact_job_id": 99520085636,
+    "conclusion": "success",
+    "artifact_id": 9761558180,
+    "artifact_name": "r13-route1bm-r305-u4-vsys-haptic-refine",
+    "artifact_zip_digest": "sha256:62852014406c700b6f070c70042225ef6fd54268cf6d7e96e6536d4496e06d8d",
+    "downloaded_artifact_sha256sums_verified": true,
+    "downloaded_artifact_json_gates_verified": true
+  },
+  "refine": {
+    "board_modified": false,
+    "track_width_mm": 0.3,
+    "rule_clearance_mm": 0.1,
+    "grid_mm": 0.05,
+    "x_range_mm": [24.0, 26.0],
+    "y_range_mm": [16.5, 18.0],
+    "max_segments": 4,
+    "max_path_length_mm": 16.0,
+    "candidate_path_count": 1271,
+    "passing_path_count": 196,
+    "automated_sort_first": {
+      "path_family": "VHVH",
+      "points_mm": [[31.315,18.595],[31.315,17.45],[24.8,17.45],[24.8,13.4],[23.005,13.4]],
+      "path_length_mm": 13.505,
+      "minimum_conservative_clearance_mm": 0.2,
+      "nearest_unrelated_copper": "U1.13/DISP_QSPI_D0",
+      "disposition": "NOT_SELECTED_DUE_TO_FROZEN_U1_CONTEXT"
+    },
+    "selected_phase_b_path": {
+      "path_family": "VHVH",
+      "points_mm": [[31.315,18.595],[31.315,17.5],[25.0,17.5],[25.0,13.4],[23.005,13.4]],
+      "segment_count": 4,
+      "path_length_mm": 13.505,
+      "minimum_conservative_clearance_mm": 0.2,
+      "nearest_unrelated_copper": "U4.9/HAPTIC_OUT_N",
+      "selection_reason": "Same 0.200 mm modeled clearance and 13.505 mm length as the top numerical result while avoiding U1 high-density/frozen context; exact pad-to-pad landing and no T-junction into accepted route-1bk bypass copper."
+    }
+  },
+  "decision_state": {
+    "phase_a_complete": true,
+    "candidate_family_selected": true,
+    "selected_candidate": "R305.2/VSYS_HAPTIC -> U4.10/VSYS_HAPTIC",
+    "selected_path_materialized": false,
+    "phase_b_started": false,
+    "accepted_authority_changed": false,
+    "next_action": "Create an exact read-only Phase B probe for the selected 4-segment path, then materialize only that path and require executed KiCad 9.0.9 0 violations / exactly 111 unconnected / 268-node audit PASS plus exact delta and Artifact verification."
+  }
+}
