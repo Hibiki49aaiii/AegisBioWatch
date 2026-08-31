@@ -1,0 +1,90 @@
+{
+  "revision": "r13-route1bn-r403-1v8-local-refine-phase-a2",
+  "issue": 20,
+  "status": "PHASE_A2_LOCAL_REFINE_COMPLETE",
+  "release_status": "NOT_FOR_GERBER",
+  "base": {
+    "accepted_authority": "route-1bm",
+    "rule_violations": 0,
+    "unconnected_items": 111,
+    "audited_nodes": 268,
+    "pin_net_audit": "PASS",
+    "accepted_authority_changed": false
+  },
+  "executed_refine": {
+    "head_sha": "5b242c7f269915e7d2f26e28cb463779aefbd71e",
+    "workflow_name": "r13 route1bn R403 +1V8 local refine",
+    "workflow_run_id": 33410882186,
+    "refine_job_id": 99549846926,
+    "verify_artifact_job_id": 99551726561,
+    "artifact_id": 9765271636,
+    "artifact_name": "r13-route1bn-r403-1v8-refine",
+    "artifact_digest": "sha256:ab1b720160f1c6d27e797303de1861472e250f44aa69ca67b7b12d78b18f1f50",
+    "source_gate": {
+      "rule_violations": 0,
+      "unconnected_items": 111,
+      "pin_net_audit": "PASS",
+      "audited_nodes": 268
+    },
+    "board_modified": false,
+    "actual_drc_index": 13,
+    "r403_value": "4.7k PU PROV",
+    "grid_mm": 0.05,
+    "candidate_path_count": 441,
+    "passing_path_count": 251
+  },
+  "selected_phase_b_path": {
+    "net": "+1V8",
+    "from": {
+      "kind": "track_endpoint",
+      "position_mm": [41.005, 14.975],
+      "expected_track_length_mm": 4.6628
+    },
+    "to": {
+      "reference": "R403",
+      "pad": "1",
+      "net": "+1V8",
+      "position_mm": [40.255, 25.975]
+    },
+    "preserved_adjacent_pad": {
+      "reference": "R403",
+      "pad": "2",
+      "net": "SYS_I2C_SDA",
+      "position_mm": [40.895, 25.975]
+    },
+    "path_family": "VHVH",
+    "points_mm": [
+      [41.005, 14.975],
+      [41.005, 15.65],
+      [39.6, 15.65],
+      [39.6, 25.975],
+      [40.255, 25.975]
+    ],
+    "segment_count": 4,
+    "segment_lengths_mm": [0.675, 1.405, 10.325, 0.655],
+    "path_length_mm": 13.06,
+    "track_width_mm": 0.3,
+    "minimum_conservative_clearance_mm": 0.26,
+    "required_clearance_mm": 0.1,
+    "nearest_unrelated_copper": {
+      "kind": "pad",
+      "reference": "C4",
+      "pad": "2",
+      "net": "GND"
+    }
+  },
+  "semantic_decision": {
+    "candidate_selected_for_phase_b": true,
+    "exactly_one_candidate_selected": true,
+    "alternate_j8_status": "HOLD_NOT_SELECTED",
+    "reason": "The R403 closure is an ordinary +1V8 supply connection outside frozen scope. The executed 0.05 mm refine produced 251 passing VHVH paths; the shortest best path preserves 0.260 mm conservative clearance. The J8 numerical alternative remains held because its blank/unidentified pad context is unresolved."
+  },
+  "decision_state": {
+    "phase_a1_complete": true,
+    "phase_a2_refine_complete": true,
+    "phase_b_authorized": true,
+    "phase_b_started": false,
+    "accepted_authority_changed": false,
+    "next_action": "Run the exact Phase B identity probe and materialize only the documented four-segment +1V8 path, then require 0 DRC / 110 unconnected / 268-node audit PASS plus exact physical delta and Artifact verification."
+  }
+}

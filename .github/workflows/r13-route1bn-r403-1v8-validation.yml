@@ -1,0 +1,102 @@
+name: r13 route1bn R403 +1V8 validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bn-r403-1v8-validation.yml'
+      - 'tools/reproduce-route1bn-candidate.sh'
+      - 'tools/probe-pcb-r13-route1bn-r403-1v8.py'
+      - 'tools/materialize-pcb-r13-route1bn-r403-1v8.py'
+      - 'tools/write-pcb-r13-route1bn-report.py'
+      - 'docs/pcb-route-r13-1bn-r403-refine-phase-a2.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce and validate route1bn candidate
+        run: bash tools/reproduce-route1bn-candidate.sh
+
+      - name: Package route1bn evidence
+        run: |
+          mkdir -p /tmp/e
+          cp hardware/main-board/pcb/route-r13-1bn/AegisBioWatch-MainBoard-Route1bn-r13.kicad_pcb /tmp/e/
+          cp hardware/main-board/pcb/route-r13-1bn/AegisBioWatch-MainBoard-Route1bn-r13.kicad_pro /tmp/e/
+          cp hardware/main-board/pcb/route-r13-1bn/routing-seed-r13-1bn.json /tmp/e/
+          cp /tmp/route1bn.json /tmp/e/
+          cp /tmp/route1bn-audit.json /tmp/e/
+          cp /tmp/route1bn-summary.json /tmp/e/
+          cp /tmp/route1bn-probe.json /tmp/e/
+          cp /tmp/route1bn-scope.json /tmp/e/
+          (cd /tmp/e && sha256sum * > SHA256SUMS.txt)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bn-r403-1v8-evidence
+          path: /tmp/e/**
+          if-no-files-found: error
+
+  verify-artifact:
+    needs: validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bn-r403-1v8-evidence
+          path: /tmp/e
+
+      - name: Verify downloaded route1bn evidence
+        run: |
+          cd /tmp/e
+          sha256sum -c SHA256SUMS.txt
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('/tmp/e')
+          d=json.loads((root/'route1bn.json').read_text())
+          a=json.loads((root/'route1bn-audit.json').read_text())
+          s=json.loads((root/'route1bn-summary.json').read_text())
+          p=json.loads((root/'route1bn-probe.json').read_text())
+          q=json.loads((root/'route1bn-scope.json').read_text())
+          r=json.loads((root/'routing-seed-r13-1bn.json').read_text())
+          pcb=root/'AegisBioWatch-MainBoard-Route1bn-r13.kicad_pcb'
+          assert len(d.get('violations',[]))==0
+          assert len(d.get('unconnected_items',[]))==110
+          assert a.get('result')=='PASS' and a.get('audited_present_source_nodes')==268
+          assert a.get('mismatches',[])==[] and a.get('unexpected_pad_nets',[])==[]
+          assert s.get('source_unconnected_items')==111 and s.get('ratsnest_decrement')==1
+          assert s.get('rule_violations')==0 and s.get('unconnected_items')==110
+          assert s.get('pin_net_audit')=='PASS' and s.get('audited_nodes')==268
+          assert p.get('board_modified') is False
+          assert abs(p.get('path',{}).get('minimum_conservative_clearance_mm')-0.26)<1e-6
+          assert q.get('result')=='PASS'
+          assert q.get('added_track_count')==4 and q.get('added_via_count')==0
+          assert q.get('footprint_state_unchanged') is True and q.get('source_1v8_track_preserved') is True
+          assert r.get('track_segments_added')==4 and r.get('vias_added')==0
+          assert r.get('component_moves')==[] and r.get('component_rotations')==[]
+          assert r.get('design_rule_waiver') is False and r.get('via_in_pad') is False
+          assert r.get('output_sha256')==hashlib.sha256(pcb.read_bytes()).hexdigest()
+          print('DOWNLOADED_ARTIFACT_VERIFY PASS')
+          PY
