@@ -46,7 +46,8 @@ def main()->None:
                 "r403_pad1_net":"+1V8",
                 "r403_pad2_mm":[40.895,25.975],
                 "r403_pad2_net":"SYS_I2C_SDA",
-                "nearest_unrelated_copper":"C4.2/GND"
+                "co_limiting_unrelated_copper":["R403.2/SYS_I2C_SDA","C4.2/GND"],
+                "minimum_conservative_clearance_note":"Both endpoint-adjacent unrelated pads independently limit the documented path at 0.260 mm."
             }
         },
         "component_moves":[],

@@ -202,14 +202,19 @@ def main() -> None:
 
     board = pcbnew.LoadBoard(str(SRC_PCB))
     fps = {fp.GetReference(): fp for fp in board.GetFootprints()}
-    r403 = fps.get("R403")
+    r403, c4 = fps.get("R403"), fps.get("C4")
     if r403 is None or r403.GetValue() != "4.7k PU PROV":
         raise SystemExit("route1bn R403 identity gate failed")
+    if c4 is None or c4.GetValue() != "100nF":
+        raise SystemExit("route1bn C4 identity gate failed")
     p1, p2 = get_pad(r403, "1"), get_pad(r403, "2")
+    c4p2 = get_pad(c4, "2")
     if (p1.GetNetname(), xy(p1.GetPosition())) != (TARGET_NET, R403_PAD1):
         raise SystemExit("route1bn R403.1 gate failed")
     if (p2.GetNetname(), xy(p2.GetPosition())) != ("SYS_I2C_SDA", R403_PAD2):
         raise SystemExit("route1bn R403.2 preservation gate failed")
+    if (c4p2.GetNetname(), xy(c4p2.GetPosition())) != ("GND", (41.645, 14.975)):
+        raise SystemExit("route1bn C4.2 limiting-pad identity gate failed")
 
     source_tracks = []
     pads, tracks, vias = [], [], []
@@ -279,9 +284,27 @@ def main() -> None:
     clearance = round(best,6)
     if clearance < RULE or abs(clearance-EXPECTED_CLEARANCE) > 1e-6:
         raise SystemExit(f"route1bn exact clearance gate failed: {clearance}")
-    expected_nearest = {"kind":"pad","reference":"C4","pad":"2","net":"GND"}
-    if nearest != expected_nearest:
+
+    expected_limiters = [
+        {"kind":"pad","reference":"R403","pad":"2","net":"SYS_I2C_SDA"},
+        {"kind":"pad","reference":"C4","pad":"2","net":"GND"},
+    ]
+    if nearest not in expected_limiters:
         raise SystemExit(f"route1bn nearest-copper identity changed: {nearest}")
+
+    def pad_path_clearance(pad) -> float:
+        r = bbox(pad)
+        return round(min(segment_rect_distance(a,b,r)-half for a,b in segs), 6)
+
+    co_limiting_clearances = {
+        "R403.2/SYS_I2C_SDA": pad_path_clearance(p2),
+        "C4.2/GND": pad_path_clearance(c4p2),
+    }
+    if co_limiting_clearances != {
+        "R403.2/SYS_I2C_SDA": EXPECTED_CLEARANCE,
+        "C4.2/GND": EXPECTED_CLEARANCE,
+    }:
+        raise SystemExit(f"route1bn co-limiting clearance gate failed: {co_limiting_clearances}")
 
     out = {
         "revision":"r13-route1bn-r403-1v8-exact-probe",
@@ -306,7 +329,8 @@ def main() -> None:
             "track_width_mm":WIDTH,
             "minimum_conservative_clearance_mm":clearance,
             "required_clearance_mm":RULE,
-            "nearest_unrelated_copper":nearest
+            "nearest_unrelated_copper":nearest,
+            "co_limiting_clearances_mm":co_limiting_clearances
         },
         "vias_planned":0,
         "component_moves_planned":0,

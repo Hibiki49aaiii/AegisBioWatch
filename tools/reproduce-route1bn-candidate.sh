@@ -121,6 +121,7 @@ out={
   'probe_actual_drc_index':p.get('actual_drc_index'),
   'probe_min_clearance_mm':p.get('path',{}).get('minimum_conservative_clearance_mm'),
   'probe_nearest_unrelated_copper':p.get('path',{}).get('nearest_unrelated_copper'),
+  'probe_co_limiting_clearances_mm':p.get('path',{}).get('co_limiting_clearances_mm'),
   'segments_added':r.get('track_segments_added'),
   'vias_added':r.get('vias_added'),
   'track_width_mm':r.get('track_width_mm'),
@@ -151,7 +152,14 @@ assert out['pin_net_audit']=='PASS' and out['audited_nodes']==268
 assert out['mismatches']==[] and out['unexpected_pad_nets']==[]
 assert out['probe_board_modified'] is False and out['probe_actual_drc_index']==13
 assert abs(out['probe_min_clearance_mm']-0.26)<1e-6
-assert out['probe_nearest_unrelated_copper']=={'kind':'pad','reference':'C4','pad':'2','net':'GND'}
+assert out['probe_nearest_unrelated_copper'] in [
+  {'kind':'pad','reference':'R403','pad':'2','net':'SYS_I2C_SDA'},
+  {'kind':'pad','reference':'C4','pad':'2','net':'GND'},
+]
+assert out['probe_co_limiting_clearances_mm']=={
+  'R403.2/SYS_I2C_SDA':0.26,
+  'C4.2/GND':0.26,
+}
 assert out['segments_added']==4 and out['vias_added']==0 and out['track_width_mm']==0.30
 assert out['segment_lengths_mm']==[0.675,1.405,10.325,0.655]
 assert abs(out['track_length_mm']-13.06)<1e-6
