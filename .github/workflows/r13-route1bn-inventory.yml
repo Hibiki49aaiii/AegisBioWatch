@@ -76,6 +76,19 @@ jobs:
           },indent=2))
           PY
 
+      - name: Print current ratsnest endpoints
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/route1bn-inventory.json'))
+          for i,u in enumerate(x['unconnected_items']):
+              parts=[]
+              for p in u.get('items',[]):
+                  pos=p.get('pos',{})
+                  parts.append(f"{p.get('description','')} @ ({pos.get('x')},{pos.get('y')})")
+              print(f"RATSNEST[{i}] " + " <-> ".join(parts))
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: r13-route1bn-source-inventory
