@@ -1,0 +1,83 @@
+name: r13 route1bn accepted-source inventory
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bn-inventory.yml'
+      - 'tools/reproduce-route1bm-accepted.sh'
+      - 'docs/ai/issues/20/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce accepted route1bm
+        run: bash tools/reproduce-route1bm-accepted.sh
+
+      - name: Record route1bm ratsnest inventory
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          drc=json.load(open('/tmp/route1bm.json'))
+          audit=json.load(open('/tmp/route1bm-audit.json'))
+          pcb=Path('hardware/main-board/pcb/route-r13-1bm/AegisBioWatch-MainBoard-Route1bm-r13.kicad_pcb')
+
+          assert len(drc.get('violations',[])) == 0
+          assert len(drc.get('unconnected_items',[])) == 111
+          assert audit.get('result') == 'PASS'
+          assert audit.get('audited_present_source_nodes') == 268
+          assert audit.get('mismatches',[]) == []
+          assert audit.get('unexpected_pad_nets',[]) == []
+
+          out={
+            'revision':'r13-route1bn-phase-a0-source-inventory',
+            'source_revision':'route-1bm',
+            'source_gate':{
+              'rule_violations':0,
+              'unconnected_items':111,
+              'pin_net_audit':'PASS',
+              'audited_nodes':268,
+            },
+            'source_pcb_sha256':hashlib.sha256(pcb.read_bytes()).hexdigest(),
+            'board_modified':False,
+            'unconnected_items':drc['unconnected_items'],
+            'release_status':'NOT_FOR_GERBER',
+          }
+          Path('/tmp/route1bn-inventory.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps({
+            'source_gate':out['source_gate'],
+            'source_pcb_sha256':out['source_pcb_sha256'],
+            'board_modified':out['board_modified'],
+            'unconnected_count':len(out['unconnected_items']),
+          },indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bn-source-inventory
+          path: /tmp/route1bn-inventory.json
+          if-no-files-found: error
