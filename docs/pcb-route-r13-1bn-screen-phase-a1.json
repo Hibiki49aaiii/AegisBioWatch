@@ -1,0 +1,154 @@
+{
+  "revision": "r13-route1bn-phase-a1-current-screen",
+  "issue": 20,
+  "status": "PHASE_A1_COMPLETE_R403_SELECTED_FOR_REFINE",
+  "base": {
+    "accepted_authority": "route-1bm",
+    "rule_violations": 0,
+    "unconnected_items": 111,
+    "audited_nodes": 268,
+    "pin_net_audit": "PASS",
+    "accepted_authority_changed": false
+  },
+  "full_screen": {
+    "head_sha": "fab966bbf57a0e04664d3c43bb90169592d7d1d5",
+    "run_id": 33408592046,
+    "job_id": 99542246889,
+    "artifact_id": 9764836692,
+    "artifact_name": "r13-route1bn-max4-coarse-screen",
+    "artifact_zip_sha256": "24183f8fd74a2280402079a700a88669f24c4786841678e1d7aec47af0ab732c",
+    "independent_download_zip_sha256_verified": true,
+    "independent_zip_integrity_verified": true,
+    "independent_json_read_verified": true,
+    "source_route1bm_serialized_sha256": "f987fa0cd75d2aa7da128d08e18f115c7be2c1c01b38a1f891f06b4de2450e77",
+    "board_modified": false,
+    "track_width_mm": 0.3,
+    "rule_clearance_mm": 0.1,
+    "grid_mm": 0.25,
+    "lane_margin_mm": 4,
+    "max_endpoint_distance_mm": 12,
+    "raw_pair_count": 111,
+    "evaluated_candidate_count": 9,
+    "passing_candidate_count": 2,
+    "exclusion_summary": {
+      "excluded_ref": 51,
+      "too_long": 10,
+      "excluded_net": 35,
+      "unsupported_endpoint": 3,
+      "duplicate_terminal_same_component": 2,
+      "non_top_layer": 1
+    }
+  },
+  "focused_recheck": {
+    "head_sha": "fc596b485282cf2220bf12769c9f6144f76c71a1",
+    "run_id": 33409352266,
+    "focused_job_id": 99544737543,
+    "verify_artifact_job_id": 99547537615,
+    "artifact_id": 9764784350,
+    "artifact_name": "r13-route1bn-focused-coarse",
+    "artifact_zip_sha256": "0af9640a81874c5e614ccb1fc8ca8813e17b5238ec9e64f6ddce95d63b5e1b49",
+    "sha256sums_verified": true,
+    "downloaded_artifact_json_verified": true,
+    "source_route1bm_serialized_sha256": "ff56f59bb408d323256f936fb116ce16919536498f7716ad650346717d3b4c71",
+    "serialization_note": "Reproduced PCB byte hashes differ across executed PR contexts; per active routing authority Decision this is provenance only. Both runs execute 0/111/268 PASS and unchanged topology gates."
+  },
+  "numerical_passes": [
+    {
+      "drc_index": 3,
+      "net": "+1V8",
+      "from": "J8.1/+1V8 @ (12.105,15.260)",
+      "to": "+1V8 track endpoint @ (10.305,4.720)",
+      "path_family": "VHVH",
+      "points_mm": [
+        [
+          12.105,
+          15.26
+        ],
+        [
+          12.105,
+          15.75
+        ],
+        [
+          9.75,
+          15.75
+        ],
+        [
+          9.75,
+          4.72
+        ],
+        [
+          10.305,
+          4.72
+        ]
+      ],
+      "segment_count": 4,
+      "path_length_mm": 14.43,
+      "passing_path_count": 36,
+      "minimum_conservative_clearance_mm": 0.4397,
+      "nearest_unrelated_copper": {
+        "kind": "pad",
+        "reference": "J8",
+        "pad": "",
+        "net": ""
+      },
+      "disposition": "HOLD_FOR_EXACT_J8_CONTEXT",
+      "reason": "Best numerical clearance is limited by an unidentified/blank J8 pad; do not choose it while exact J8 interface context remains unresolved."
+    },
+    {
+      "drc_index": 13,
+      "net": "+1V8",
+      "from": "+1V8 track endpoint @ (41.005,14.975)",
+      "to": "R403.1/+1V8 @ (40.255,25.975)",
+      "path_family": "VHVH",
+      "points_mm": [
+        [
+          41.005,
+          14.975
+        ],
+        [
+          41.005,
+          15.75
+        ],
+        [
+          39.5,
+          15.75
+        ],
+        [
+          39.5,
+          25.975
+        ],
+        [
+          40.255,
+          25.975
+        ]
+      ],
+      "segment_count": 4,
+      "path_length_mm": 13.26,
+      "passing_path_count": 149,
+      "minimum_conservative_clearance_mm": 0.26,
+      "nearest_unrelated_copper": {
+        "kind": "pad",
+        "reference": "C4",
+        "pad": "2",
+        "net": "GND"
+      },
+      "disposition": "SELECTED_FOR_0P05MM_LOCAL_REFINE",
+      "reason": "Ordinary +1V8 supply closure outside frozen scope; distinct four-segment family from the rejected 0.099999 mm three-segment R403 path, and current route-1bm recheck preserves 0.260 mm modeled clearance."
+    }
+  ],
+  "semantic_decision": {
+    "selected_family": "+1V8 source track -> R403.1/+1V8 VHVH",
+    "alternate_j8_disposition": "HOLD_NOT_SELECTED",
+    "exactly_one_family_selected": true,
+    "materialization_authorized": false
+  },
+  "decision_state": {
+    "phase_a1_complete": true,
+    "phase_a2_refine_started": false,
+    "phase_b_started": false,
+    "accepted_authority_changed": false,
+    "board_modified": false,
+    "next_action": "Run the dedicated 0.05 mm read-only R403 VHVH local refine with exact source-track and R403 pad identity gates, then review one refined path before any materialization."
+  },
+  "release_status": "NOT_FOR_GERBER"
+}

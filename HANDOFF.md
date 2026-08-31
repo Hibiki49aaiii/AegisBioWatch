@@ -1,6 +1,6 @@
 # AegisBioWatch — Codex complete handoff
 
-Updated: 2026-08-31 15:10 UTC / 2026-09-01 00:10 JST  
+Updated: 2026-08-31 15:47 UTC / 2026-09-01 00:47 JST  
 Repository: `Hibiki49aaiii/AegisBioWatch`  
 Development branch: `agent/phase1-mainboard-schematic`  
 Draft PR: [#2 Phase 1: Main Board electrical architecture](https://github.com/Hibiki49aaiii/AegisBioWatch/pull/2)  
@@ -9,15 +9,18 @@ Manufacturing status: **NOT_FOR_GERBER**
 
 ## Current authoritative status — 2026-09-01
 
-- Issue #19 is formally complete and closed. The accepted routing authority is **route-1bm = 0 KiCad DRC violations / 111 unconnected / 268-node physical pin-net audit PASS**.
+- Issue #19 is formally complete and closed. The accepted routing authority remains **route-1bm = 0 KiCad DRC violations / 111 unconnected / 268-node physical pin-net audit PASS**.
 - route-1bm acceptance evidence: `docs/pcb-route-r13-1bm-validation.json`; accepted reproducer: `tools/reproduce-route1bm-accepted.sh`; validation run `33403962140`; Artifact `9762571974`.
 - Issue #20 is the active routing increment: **route-1bn from route-1bm authority**.
-- Issue #20 plan/Human Understanding are under `docs/ai/issues/20/`.
-- Phase A starts read-only from the reproduced route-1bm board. No route-1bn copper is accepted or materialized yet.
-- Source-inventory workflow commit: `0da992250770adb60b39b4c522b4b053bd971b3b`; run `33406910241` was started to re-prove 0/111/268 and capture the actual 111-item ratsnest.
-- Exact next action: finish and verify the route-1bm inventory Artifact, then perform route-1bn semantic/current-state coarse screening; refine only one family before any materialization.
+- Phase A1 is complete and read-only. Full current-state screen run `33408592046` / job `99542246889` reproduced 0/111/268 PASS, evaluated 9 ordinary candidates, and found exactly 2 numerical passes. Artifact `9764836692`, ZIP SHA-256 `24183f8fd74a2280402079a700a88669f24c4786841678e1d7aec47af0ab732c`; independent download/integrity/JSON read verified.
+- Focused recheck run `33409352266` / jobs `99544737543` and `99547537615` verified both surviving families and downloaded Artifact integrity. Artifact `9764784350`, ZIP SHA-256 `0af9640a81874c5e614ccb1fc8ca8813e17b5238ec9e64f6ddce95d63b5e1b49`.
+- J8.1/+1V8 remains **HOLD_NOT_SELECTED** despite 0.4397 mm modeled clearance because its limiting obstacle is an unidentified/blank J8 pad and exact interface context is unresolved.
+- The only family selected for Phase A2 refine is **+1V8 source track @ (41.005,14.975) → R403.1/+1V8 @ (40.255,25.975), VHVH**. Coarse path is 13.260 mm with 0.260 mm modeled clearance to C4.2/GND. This is a different four-segment family from the rejected historical 0.099999 mm three-segment R403 path.
+- Evidence: `docs/pcb-route-r13-1bn-screen-phase-a1.json`.
+- Completed inventory/coarse/focused screen workflows are archived. Active next workflow is `.github/workflows/r13-route1bn-r403-1v8-refine.yml`.
+- **No route-1bn copper is materialized or accepted.** route-1bm remains authority; release remains **NOT_FOR_GERBER**.
+- Exact next action: execute and verify the dedicated 0.05 mm R403 read-only refine, review one refined winner, and only then prepare Phase B exact probe/materializer.
 - Historical route-1bl/Issue #19 sections below are retained as provenance. Where they conflict with this section, current repository evidence, Issue #20, and executed validation are authoritative.
-
 
 This file is the one-entry handoff for a new Codex chat. It summarizes the GitHub source state, engineering authority, completed verification, current routing investigation, known failures, hard constraints, and the exact next action. Current repository files and executed validation remain more authoritative than this summary if a future conflict appears.
 
@@ -29,16 +32,14 @@ AegisBioWatch developmentをGitHub上の現状から継続してください。
 Repository: Hibiki49aaiii/AegisBioWatch
 Branch: agent/phase1-mainboard-schematic
 Draft PR: #2
-Continue existing Issue: #19 (do not create a replacement Issue)
+Continue existing Issue: #20
 Handoff: HANDOFF.md on the working branch
 
-Windowsの作業エリアは E:\ です。まず E:\ 配下に既存のAegisBioWatchリポジトリがあるか確認し、存在する場合は必ずそれを再利用してください。ない場合だけ E:\AegisBioWatch にcloneしてください。
+Windowsの作業エリアは E:\\ です。ローカル接続が利用できる場合は E:\\ 配下の既存AegisBioWatchリポジトリを必ず再利用し、未コミット作業を保持してください。GitHub上ではbranch HEAD、PR #2、Issue #20、Actions、HANDOFF.md、AGENTS.md、.ai/index.md、docs/ai/issues/20/、docs/pcb-route-r13-1bn-screen-phase-a1.jsonを最初に確認してください。
 
-最初にローカルのbranch/status/HEAD/remote、GitHubのbranch HEAD、PR #2、Issue #19、Actions、HANDOFF.md、AGENTS.md、.ai/index.md、Issue #19のImplementation Plan/Human Understanding、最新のroute-1bm Phase A証拠JSONを確認してください。ローカルの未コミット作業はユーザーの所有物として保持し、reset/clean/stash/force-pushを行わないでください。mainへ切り替えたりmainへ直接実装しないでください。
+現在の正式authorityは route-1bm = 0 KiCad DRC violations / 111 unconnected / 268-node audit PASSです。Issue #20 Phase A1は完了し、current route-1bm上の全screenは9候補中2 numerical PASSでした。J8は未同定blank pad contextのためHOLD。Phase A2 refine対象は +1V8 source track @ (41.005,14.975) -> R403.1/+1V8 @ (40.255,25.975) のVHVH 4-segment familyだけです。
 
-現在の正式な電気的・配線authorityはroute-1blの 0 KiCad DRC violations / 112 unconnected / 268-node pin-net audit PASSです。route-1bmはPhase A2のmax-four-segment粗探索まで完了し、まだ候補選定・0.05 mm refine・materialization・Phase B validationは未実施です。最新証拠を再取得してから、Issue #19の範囲内で意味レビュー→1候補だけの0.05 mm refineへ進んでください。
-
-GitHubをSource of Truthとし、変更は作業ブランチへcommit/pushし、Issue #19とPR #2を実態へ更新してください。実行していない検証をPASSと表現しないでください。安全かつ可逆な判断は自律的に進め、製造・本番・課金・credential・重大な仕様破壊・重大なsecurity判断だけ確認してください。
+No route-1bn copper is materialized or accepted. Active next action is .github/workflows/r13-route1bn-r403-1v8-refine.yml の0.05 mm read-only refineを実行・検証し、1経路だけをレビューしてからPhase B exact probe/materializerへ進むことです。実行していない検証をPASSと表現しないでください。releaseはNOT_FOR_GERBERです。
 ```
 
 ## 1. Git/GitHub state at handoff
