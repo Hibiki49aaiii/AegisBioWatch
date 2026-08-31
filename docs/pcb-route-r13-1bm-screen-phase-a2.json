@@ -1,0 +1,141 @@
+{
+  "revision": "r13-route1bm-phase-a2-max4-coarse-screen",
+  "issue": 19,
+  "status": "PHASE_A2_COARSE_SCREEN_COMPLETE",
+  "handoff_source_head": "9ec29c3aaad0546b77bd6d3c06a71daaeafa88da",
+  "base": {
+    "accepted_authority": "route-1bl",
+    "accepted_commit": "228fea4698bc661dd6f052cbc6cd9aefa8068690",
+    "rule_violations": 0,
+    "unconnected_items": 112,
+    "audited_nodes": 268,
+    "pin_net_audit": "PASS"
+  },
+  "workflow": {
+    "name": "r13 route1bm max4 coarse screening",
+    "run_id": 33341841716,
+    "job_id": 99338767728,
+    "conclusion": "success",
+    "artifact_id": 9740991302,
+    "artifact_name": "r13-route1bm-max4-coarse-screen",
+    "artifact_zip_sha256": "c035151d8ea1147bd8ed04732e54b82de35593735a5656e5405623c42814efc6",
+    "artifact_json_sha256": "990e5881ead894cc1b62d2553dacc984ec5f162f6a5d4c3790f91574f26edb46",
+    "independent_zip_sha256_verified": true,
+    "independent_zip_integrity_verified": true,
+    "independent_json_read_verified": true
+  },
+  "screen": {
+    "board_modified": false,
+    "track_width_mm": 0.3,
+    "rule_clearance_mm": 0.1,
+    "grid_mm": 0.25,
+    "lane_margin_mm": 4.0,
+    "max_endpoint_distance_mm": 12.0,
+    "raw_pair_count": 112,
+    "evaluated_candidate_count": 11,
+    "passing_candidate_count": 4,
+    "exclusion_summary": {
+      "excluded_ref": 51,
+      "too_long": 8,
+      "excluded_net": 35,
+      "unsupported_endpoint": 3,
+      "duplicate_terminal_same_component": 2,
+      "non_top_layer": 2
+    }
+  },
+  "passing_candidates": [
+    {
+      "priority_for_semantic_review": 1,
+      "drc_index": 111,
+      "net": "VSYS_HAPTIC",
+      "from": "R305.2/VSYS_HAPTIC @ (31.315,18.595)",
+      "to": "U4.10/VSYS_HAPTIC @ (23.005,13.400)",
+      "endpoint_semantic_rank": 0,
+      "coarse_path_family": "VHVH",
+      "coarse_path_points_mm": [[31.315,18.595],[31.315,17.500],[25.000,17.500],[25.000,13.400],[23.005,13.400]],
+      "segment_count": 4,
+      "path_length_mm": 13.505,
+      "passing_path_count": 129,
+      "minimum_conservative_clearance_mm": 0.2,
+      "nearest_unrelated_copper": "U4.9/HAPTIC_OUT_N",
+      "disposition": "REFINE_CANDIDATE_NOT_ACCEPTED"
+    },
+    {
+      "priority_for_semantic_review": 2,
+      "drc_index": 13,
+      "net": "+1V8",
+      "from": "+1V8 track endpoint @ (41.005,14.975)",
+      "to": "R403.1/+1V8 @ (40.255,25.975)",
+      "endpoint_semantic_rank": 1,
+      "coarse_path_family": "VHVH",
+      "coarse_path_points_mm": [[41.005,14.975],[41.005,15.750],[39.500,15.750],[39.500,25.975],[40.255,25.975]],
+      "segment_count": 4,
+      "path_length_mm": 13.26,
+      "passing_path_count": 149,
+      "minimum_conservative_clearance_mm": 0.26,
+      "nearest_unrelated_copper": "C4.2/GND",
+      "disposition": "REFINE_CANDIDATE_NOT_ACCEPTED",
+      "note": "This is a different four-segment family from the Phase A1 0.099999 mm HVH route; exact source-track identity and 0.05 mm refinement are still required."
+    },
+    {
+      "priority_for_semantic_review": 3,
+      "drc_index": 3,
+      "net": "+1V8",
+      "from": "J8.1/+1V8 @ (12.105,15.260)",
+      "to": "+1V8 track endpoint @ (10.305,4.720)",
+      "endpoint_semantic_rank": 1,
+      "coarse_path_family": "VHVH",
+      "coarse_path_points_mm": [[12.105,15.260],[12.105,15.750],[9.750,15.750],[9.750,4.720],[10.305,4.720]],
+      "segment_count": 4,
+      "path_length_mm": 14.43,
+      "passing_path_count": 36,
+      "minimum_conservative_clearance_mm": 0.4397,
+      "nearest_unrelated_copper": "unidentified/blank J8 pad reported by coarse model",
+      "disposition": "HOLD_FOR_EXACT_J8_CONTEXT_PROBE"
+    },
+    {
+      "priority_for_semantic_review": 4,
+      "drc_index": 110,
+      "net": "VSYS_HAPTIC",
+      "from": "VSYS_HAPTIC track endpoint @ (16.004999,21.650)",
+      "to": "U4.10/VSYS_HAPTIC @ (23.005,13.400)",
+      "endpoint_semantic_rank": 1,
+      "coarse_path_family": "HVHV",
+      "coarse_path_points_mm": [[16.004999,21.650],[17.000,21.650],[17.000,12.750],[23.005,12.750],[23.005,13.400]],
+      "segment_count": 4,
+      "path_length_mm": 16.550001,
+      "passing_path_count": 18,
+      "minimum_conservative_clearance_mm": 0.199999,
+      "nearest_unrelated_copper": "GND via @ (17.650,19.525)",
+      "disposition": "ALTERNATE_TO_DRC_INDEX_111_NOT_ACCEPTED"
+    }
+  ],
+  "notable_nonpassing_candidates": [
+    {
+      "drc_index": 4,
+      "candidate": "C301.1/+1V8 to +1V8 track @ (15.755,26.200)",
+      "passing_paths": 0,
+      "disposition": "REJECTED_BY_COARSE_SCREEN"
+    },
+    {
+      "drc_index": 32,
+      "candidate": "R501.2 to Q501.1 / CHG_SENSE_GATE",
+      "passing_paths": 0,
+      "disposition": "NO_COARSE_PATH"
+    },
+    {
+      "drc_index": 61,
+      "candidate": "U4.4 to R303.1 / HAPTIC_TRIG",
+      "passing_paths": 0,
+      "disposition": "NO_COARSE_PATH"
+    }
+  ],
+  "decision_state": {
+    "candidate_selected": false,
+    "phase_b_started": false,
+    "accepted_authority_changed": false,
+    "next_action": "Perform semantic/topology review of the four numerical passes, then create a 0.05 mm local refinement for one candidate family before any materialization.",
+    "preferred_first_review": "DRC index 111 R305.2/VSYS_HAPTIC to U4.10/VSYS_HAPTIC",
+    "release_status": "NOT_FOR_GERBER"
+  }
+}
