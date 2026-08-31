@@ -81,7 +81,7 @@ Historical phase-status files and old PCB README text are not current routing au
 
 ## Exact next action
 
-After Issue #20 is formally closed, create/continue exactly one next routing Issue from **route-1bn 0/110/268 PASS**. Start read-only: reproduce route-1bn, inventory the actual 110 ratsnest, apply the existing semantic exclusions, and screen only ordinary non-frozen candidates. Do not materialize the next route until one candidate has passed semantic review and a dedicated local refine.
+Issue #21 is now the active next routing increment: **route-1bo from route-1bn 0/110/268 PASS**. Phase A1 is read-only. Execute `.github/workflows/r13-route1bo-inventory.yml`, require route-1bn reproduction at 0/110/268 PASS, inventory the actual 110 ratsnest, and run the existing parameterized max-four-segment screen engine against the route-1bn PCB. Do not materialize route-1bo until one ordinary non-frozen candidate has passed semantic review and a dedicated 0.05 mm local refine.
 
 ## Paste into a new Codex task
 
