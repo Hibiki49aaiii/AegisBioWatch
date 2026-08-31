@@ -15,7 +15,7 @@ import pcbnew  # type: ignore
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PCB = ROOT / "hardware/main-board/pcb/route-r13-1bn/AegisBioWatch-MainBoard-Route1bn-r13.kicad_pcb"
 DEFAULT_REPORT = ROOT / "hardware/main-board/pcb/route-r13-1bn/routing-seed-r13-1bn.json"
-ENGINE = ROOT / "tools/probe-pcb-r13-route1bn-max4-coarse.py"
+ENGINE = ROOT / "tools/probe-pcb-r13-route1bm-max4-coarse.py"
 
 TARGET_NET = "+1V8"
 SOURCE_ENDPOINT = (10.305, 4.72)
