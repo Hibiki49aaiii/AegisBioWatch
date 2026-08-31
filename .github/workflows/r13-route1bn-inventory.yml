@@ -76,6 +76,38 @@ jobs:
           },indent=2))
           PY
 
+      - name: Screen route1bn max-four-segment candidates read-only
+        run: |
+          python3 tools/probe-pcb-r13-route1bm-max4-coarse.py \
+            --drc-json /tmp/route1bm.json \
+            --pin-net-audit /tmp/route1bm-audit.json \
+            --source-pcb hardware/main-board/pcb/route-r13-1bm/AegisBioWatch-MainBoard-Route1bm-r13.kicad_pcb \
+            --source-report hardware/main-board/pcb/route-r13-1bm/routing-seed-r13-1bm.json \
+            --expected-unconnected 111 \
+            --output /tmp/route1bn-max4.json
+
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/route1bn-max4.json'))
+          assert x['source_gate']['unconnected_items'] == 111
+          assert x['source_gate']['pin_net_audit'] == 'PASS'
+          assert x['source_gate']['audited_nodes'] == 268
+          assert x['board_modified'] is False
+          print('ROUTE1BN_EVALUATED', x['evaluated_candidate_count'])
+          print('ROUTE1BN_PASSING', x['passing_candidate_count'])
+          for c in x['passing_candidates'][:20]:
+              p=c['best_passing_path']
+              print('ROUTE1BN_PASS', c['drc_index'], c['net'],
+                    c['a']['description'], '<->', c['b']['description'],
+                    'semantic', c['endpoint_semantic_rank'],
+                    'clearance', p['minimum_conservative_clearance_mm'],
+                    'segments', p['segment_count'],
+                    'length', p['path_length_mm'],
+                    'family', p['path_family'],
+                    'points', p['points_mm'],
+                    'nearest', p['nearest_unrelated_copper'])
+          PY
+
       - name: Print current ratsnest endpoints
         run: |
           python3 - <<'PY'
@@ -92,5 +124,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: r13-route1bn-source-inventory
-          path: /tmp/route1bn-inventory.json
+          path: |
+            /tmp/route1bn-inventory.json
+            /tmp/route1bn-max4.json
           if-no-files-found: error
