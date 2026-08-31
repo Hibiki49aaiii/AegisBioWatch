@@ -1,11 +1,23 @@
 # AegisBioWatch — Codex complete handoff
 
-Updated: 2026-08-31 11:52 UTC / 2026-08-31 20:52 JST  
+Updated: 2026-08-31 15:10 UTC / 2026-09-01 00:10 JST  
 Repository: `Hibiki49aaiii/AegisBioWatch`  
 Development branch: `agent/phase1-mainboard-schematic`  
 Draft PR: [#2 Phase 1: Main Board electrical architecture](https://github.com/Hibiki49aaiii/AegisBioWatch/pull/2)  
-Active routing task: [Issue #19](https://github.com/Hibiki49aaiii/AegisBioWatch/issues/19)  
+Active routing task: [Issue #20](https://github.com/Hibiki49aaiii/AegisBioWatch/issues/20)  
 Manufacturing status: **NOT_FOR_GERBER**
+
+## Current authoritative status — 2026-09-01
+
+- Issue #19 is formally complete and closed. The accepted routing authority is **route-1bm = 0 KiCad DRC violations / 111 unconnected / 268-node physical pin-net audit PASS**.
+- route-1bm acceptance evidence: `docs/pcb-route-r13-1bm-validation.json`; accepted reproducer: `tools/reproduce-route1bm-accepted.sh`; validation run `33403962140`; Artifact `9762571974`.
+- Issue #20 is the active routing increment: **route-1bn from route-1bm authority**.
+- Issue #20 plan/Human Understanding are under `docs/ai/issues/20/`.
+- Phase A starts read-only from the reproduced route-1bm board. No route-1bn copper is accepted or materialized yet.
+- Source-inventory workflow commit: `0da992250770adb60b39b4c522b4b053bd971b3b`; run `33406910241` was started to re-prove 0/111/268 and capture the actual 111-item ratsnest.
+- Exact next action: finish and verify the route-1bm inventory Artifact, then perform route-1bn semantic/current-state coarse screening; refine only one family before any materialization.
+- Historical route-1bl/Issue #19 sections below are retained as provenance. Where they conflict with this section, current repository evidence, Issue #20, and executed validation are authoritative.
+
 
 This file is the one-entry handoff for a new Codex chat. It summarizes the GitHub source state, engineering authority, completed verification, current routing investigation, known failures, hard constraints, and the exact next action. Current repository files and executed validation remain more authoritative than this summary if a future conflict appears.
 
