@@ -1,0 +1,126 @@
+name: r13 route1bm R305-U4 VSYS_HAPTIC local refine
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bm-r305-u4-vsys-haptic-refine.yml'
+      - 'tools/reproduce-route1bl-accepted.sh'
+      - 'tools/probe-pcb-r13-route1bm-r305-u4-vsys-haptic-refine.py'
+      - 'docs/pcb-route-r13-1bm-screen-phase-a2.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refine:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce accepted route1bl
+        run: bash tools/reproduce-route1bl-accepted.sh
+
+      - name: Refine R305.2 to U4.10 VSYS_HAPTIC locally
+        run: |
+          python3 tools/probe-pcb-r13-route1bm-r305-u4-vsys-haptic-refine.py \
+            --route1bl-drc-json /tmp/route1bl.json \
+            --route1bl-pin-net-audit /tmp/route1bl-audit.json \
+            --output /tmp/route1bm-vsys-haptic-refine.json
+
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/route1bm-vsys-haptic-refine.json'))
+          assert x['source_gate']=={
+            'rule_violations':0,
+            'unconnected_items':112,
+            'pin_net_audit':'PASS',
+            'audited_nodes':268
+          }
+          assert x['board_modified'] is False
+          s=x['semantic_topology_review']
+          assert s['preferred_family']=='R305.2/VSYS_HAPTIC -> U4.10/VSYS_HAPTIC'
+          assert s['distinct_unconnected_representatives'] is True
+          assert s['accepted_bypass_segment_count']==3
+          assert s['r305_touching_vsys_haptic_track_count']==0
+          assert s['u4_touching_vsys_haptic_track_count']==0
+          assert s['candidate_selected_for_materialization'] is False
+          assert x['R305_value']=='0R / FB OPTION'
+          assert x['U4_value']=='DRV2605LDGSR'
+          assert x['from_pad']['position_mm']==[31.315,18.595]
+          assert x['to_pad']['position_mm']==[23.005,13.4]
+          assert abs(x['grid_mm']-0.05)<1e-9
+          assert x['x_range_mm']==[24.0,26.0]
+          assert x['y_range_mm']==[16.5,18.0]
+          assert x['max_segments']==4
+          assert x['passing_path_count']>=1
+          assert x['decision_state']['candidate_selected_for_phase_b'] is False
+          assert x['release_status']=='NOT_FOR_GERBER'
+          print('R305_U4_DRC',s['r305_u4_drc_indices'])
+          print('BYPASS_U4_DRC',s['bypass_u4_drc_indices'])
+          print('PATHS',x['candidate_path_count'])
+          print('PASSING',x['passing_path_count'])
+          print('COARSE_ANCHOR',x['coarse_anchor_result'])
+          print('BEST',x['best_passing_path'])
+          print('TOP',x['top_passing_paths'][:10])
+          PY
+
+          (
+            cd /tmp
+            sha256sum route1bm-vsys-haptic-refine.json > SHA256SUMS
+          )
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bm-r305-u4-vsys-haptic-refine
+          path: |
+            /tmp/route1bm-vsys-haptic-refine.json
+            /tmp/SHA256SUMS
+          if-no-files-found: error
+
+  verify-artifact:
+    needs: refine
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bm-r305-u4-vsys-haptic-refine
+          path: refine-artifact
+
+      - name: Verify downloaded refine Artifact
+        run: |
+          cd refine-artifact
+          sha256sum -c SHA256SUMS
+          python3 - <<'PY'
+          import json
+          x=json.load(open('route1bm-vsys-haptic-refine.json'))
+          assert x['source_gate']['rule_violations']==0
+          assert x['source_gate']['unconnected_items']==112
+          assert x['source_gate']['pin_net_audit']=='PASS'
+          assert x['source_gate']['audited_nodes']==268
+          assert x['board_modified'] is False
+          assert x['grid_mm']==0.05
+          assert x['semantic_topology_review']['distinct_unconnected_representatives'] is True
+          assert x['semantic_topology_review']['candidate_selected_for_materialization'] is False
+          assert x['passing_path_count']>=1
+          assert x['decision_state']['phase_b_started'] is False
+          assert x['release_status']=='NOT_FOR_GERBER'
+          print('DOWNLOADED_ARTIFACT_VERIFY PASS')
+          print('BEST',x['best_passing_path'])
+          PY
