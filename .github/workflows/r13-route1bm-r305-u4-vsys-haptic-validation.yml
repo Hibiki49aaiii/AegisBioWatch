@@ -1,0 +1,98 @@
+name: r13 route1bm R305-U4 VSYS_HAPTIC validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bm-r305-u4-vsys-haptic-validation.yml'
+      - 'tools/reproduce-route1bm-candidate.sh'
+      - 'tools/probe-pcb-r13-route1bm-r305-u4-vsys-haptic.py'
+      - 'tools/materialize-pcb-r13-route1bm-r305-u4-vsys-haptic.py'
+      - 'tools/write-pcb-r13-route1bm-report.py'
+      - 'docs/pcb-route-r13-1bm-refine-phase-a3.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce and validate route1bm candidate
+        run: bash tools/reproduce-route1bm-candidate.sh
+
+      - name: Package route1bm evidence
+        run: |
+          mkdir -p /tmp/e
+          cp hardware/main-board/pcb/route-r13-1bm/AegisBioWatch-MainBoard-Route1bm-r13.kicad_pcb /tmp/e/
+          cp hardware/main-board/pcb/route-r13-1bm/AegisBioWatch-MainBoard-Route1bm-r13.kicad_pro /tmp/e/
+          cp hardware/main-board/pcb/route-r13-1bm/routing-seed-r13-1bm.json /tmp/e/
+          cp /tmp/route1bm.json /tmp/e/
+          cp /tmp/route1bm-audit.json /tmp/e/
+          cp /tmp/route1bm-summary.json /tmp/e/
+          cp /tmp/route1bm-probe.json /tmp/e/
+          cp /tmp/route1bm-scope.json /tmp/e/
+          (cd /tmp/e && sha256sum * > SHA256SUMS.txt)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bm-r305-u4-vsys-haptic-evidence
+          path: /tmp/e/**
+          if-no-files-found: error
+
+  verify-artifact:
+    needs: validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bm-r305-u4-vsys-haptic-evidence
+          path: /tmp/e
+
+      - name: Verify downloaded route1bm evidence
+        run: |
+          cd /tmp/e
+          sha256sum -c SHA256SUMS.txt
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('/tmp/e')
+          d=json.loads((root/'route1bm.json').read_text())
+          a=json.loads((root/'route1bm-audit.json').read_text())
+          s=json.loads((root/'route1bm-summary.json').read_text())
+          p=json.loads((root/'route1bm-probe.json').read_text())
+          q=json.loads((root/'route1bm-scope.json').read_text())
+          r=json.loads((root/'routing-seed-r13-1bm.json').read_text())
+          pcb=root/'AegisBioWatch-MainBoard-Route1bm-r13.kicad_pcb'
+          assert len(d.get('violations',[]))==0
+          assert len(d.get('unconnected_items',[]))==111
+          assert a.get('result')=='PASS' and a.get('audited_present_source_nodes')==268
+          assert a.get('mismatches',[])==[] and a.get('unexpected_pad_nets',[])==[]
+          assert s.get('rule_violations')==0 and s.get('unconnected_items')==111
+          assert s.get('pin_net_audit')=='PASS' and s.get('audited_nodes')==268
+          assert p.get('board_modified') is False
+          assert abs(p.get('path',{}).get('minimum_conservative_clearance_mm')-0.20)<1e-6
+          assert q.get('result')=='PASS'
+          assert q.get('added_track_count')==4 and q.get('added_via_count')==0
+          assert q.get('footprint_state_unchanged') is True
+          assert q.get('accepted_route1bk_bypass_segments_preserved') is True
+          assert r.get('track_segments_added')==4 and r.get('vias_added')==0
+          assert r.get('component_moves')==[] and r.get('component_rotations')==[]
+          assert r.get('design_rule_waiver') is False and r.get('via_in_pad') is False
+          assert r.get('output_sha256')==hashlib.sha256(pcb.read_bytes()).hexdigest()
+          print('DOWNLOADED_ARTIFACT_VERIFY PASS')
+          PY
