@@ -205,6 +205,14 @@ def main() -> None:
     ap.add_argument("--source-pcb", default=str(SRC_PCB))
     ap.add_argument("--source-report", default=str(SRC_REPORT))
     ap.add_argument("--expected-unconnected", type=int, default=112)
+    ap.add_argument("--grid-mm", type=float, default=GRID)
+    ap.add_argument("--lane-margin-mm", type=float, default=LANE_MARGIN)
+    ap.add_argument("--only-drc-index", type=int)
+    ap.add_argument("--only-path-family", choices=["L-HV", "L-VH", "HVH", "VHV", "HVHV", "VHVH"])
+    ap.add_argument("--lane-x-min", type=float)
+    ap.add_argument("--lane-x-max", type=float)
+    ap.add_argument("--lane-y-min", type=float)
+    ap.add_argument("--lane-y-max", type=float)
     ap.add_argument("--output", required=True)
     args = ap.parse_args()
 
@@ -333,6 +341,8 @@ def main() -> None:
     for c in raw:
         if c["exclusion_reason"]:
             continue
+        if args.only_drc_index is not None and c["drc_index"] != args.only_drc_index:
+            continue
 
         A = (float(c["a"]["pos"][0]), float(c["a"]["pos"][1]))
         B = (float(c["b"]["pos"][0]), float(c["b"]["pos"][1]))
@@ -340,6 +350,8 @@ def main() -> None:
         candidates: list[dict] = []
 
         def add_path(kind: str, pts: list[tuple[float, float]], lane: float | None = None) -> None:
+            if args.only_path_family is not None and kind != args.only_path_family:
+                return
             pts = normalize_path(pts)
             if len(pts) < 2 or len(pts) > 5:
                 return
@@ -361,14 +373,19 @@ def main() -> None:
         add_path("L-HV", [A, (B[0], A[1]), B])
         add_path("L-VH", [A, (A[0], B[1]), B])
 
-        for lane_x in frange(min(A[0], B[0]) - LANE_MARGIN, max(A[0], B[0]) + LANE_MARGIN, GRID):
+        x_min = args.lane_x_min if args.lane_x_min is not None else min(A[0], B[0]) - args.lane_margin_mm
+        x_max = args.lane_x_max if args.lane_x_max is not None else max(A[0], B[0]) + args.lane_margin_mm
+        y_min = args.lane_y_min if args.lane_y_min is not None else min(A[1], B[1]) - args.lane_margin_mm
+        y_max = args.lane_y_max if args.lane_y_max is not None else max(A[1], B[1]) + args.lane_margin_mm
+
+        for lane_x in frange(x_min, x_max, args.grid_mm):
             add_path("HVH", [A, (lane_x, A[1]), (lane_x, B[1]), B], lane_x)
 
-        for lane_y in frange(min(A[1], B[1]) - LANE_MARGIN, max(A[1], B[1]) + LANE_MARGIN, GRID):
+        for lane_y in frange(y_min, y_max, args.grid_mm):
             add_path("VHV", [A, (A[0], lane_y), (B[0], lane_y), B], lane_y)
 
-        xs = frange(min(A[0], B[0]) - LANE_MARGIN, max(A[0], B[0]) + LANE_MARGIN, GRID)
-        ys = frange(min(A[1], B[1]) - LANE_MARGIN, max(A[1], B[1]) + LANE_MARGIN, GRID)
+        xs = frange(x_min, x_max, args.grid_mm)
+        ys = frange(y_min, y_max, args.grid_mm)
         for lane_x in xs:
             for lane_y in ys:
                 add_path("HVHV", [A, (lane_x, A[1]), (lane_x, lane_y), (B[0], lane_y), B])
@@ -429,8 +446,12 @@ def main() -> None:
         "board_modified": False,
         "track_width_mm": WIDTH,
         "rule_clearance_mm": RULE,
-        "grid_mm": GRID,
-        "lane_margin_mm": LANE_MARGIN,
+        "grid_mm": args.grid_mm,
+        "lane_margin_mm": args.lane_margin_mm,
+        "only_drc_index": args.only_drc_index,
+        "only_path_family": args.only_path_family,
+        "lane_x_range_mm": [args.lane_x_min, args.lane_x_max],
+        "lane_y_range_mm": [args.lane_y_min, args.lane_y_max],
         "max_endpoint_distance_mm": MAX_ENDPOINT_DISTANCE,
         "raw_pair_count": len(raw),
         "evaluated_candidate_count": len(evaluated),
