@@ -23,6 +23,7 @@ For the current r13 routing series, formal acceptance is based on executed KiCad
 - `docs/pcb-route-r13-1ao-validation.json` records executed result `0 violations / 134 unconnected / 268 audited nodes PASS`, exact 1 segment + 1 via, and zero moves/rotations.
 - route-1ao successful workflow run `32282264856`, job `96163538284`, Artifact `9376332330`.
 - route-1ao formal acceptance commit `9d1280f5b0296e8febd6d7e48e0544e76846eb78`.
+- route-1bm successful workflow run `33403962140` validated `0 violations / 111 unconnected / 268 audited nodes PASS`, exact 4-track / 0-via scope, and downloaded plus independent Artifact verification; evidence is `docs/pcb-route-r13-1bm-validation.json`.
 
 ## Tradeoffs
 
