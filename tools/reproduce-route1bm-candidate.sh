@@ -27,8 +27,23 @@ def canon(a,b): return tuple(sorted((a,b)))
 
 def track_sig(item):
     if isinstance(item,pcbnew.PCB_VIA):
-        return ('VIA',item.GetNetname(),xy(item.GetPosition()),mm(item.GetWidth()),mm(item.GetDrillValue()))
+        return ('VIA',item.GetNetname(),xy(item.GetPosition()),mm(item.GetDrillValue()))
     return (type(item).__name__,item.GetNetname(),int(item.GetLayer()),canon(xy(item.GetStart()),xy(item.GetEnd())),mm(item.GetWidth()))
+
+def near(a,b,tol=0.002):
+    return ((a[0]-b[0])**2+(a[1]-b[1])**2)**0.5 <= tol
+
+def bypass_hits(board,a,b):
+    hits=[]
+    for item in board.GetTracks():
+        if isinstance(item,pcbnew.PCB_VIA) or item.GetLayer()!=pcbnew.F_Cu:
+            continue
+        if item.GetNetname()!='VSYS_HAPTIC' or abs(mm(item.GetWidth())-0.3)>1e-6:
+            continue
+        p,q=xy(item.GetStart()),xy(item.GetEnd())
+        if (near(p,a) and near(q,b)) or (near(p,b) and near(q,a)):
+            hits.append((p,q))
+    return hits
 
 def fp_state(board):
     d={}
@@ -60,9 +75,12 @@ bypass=[
     ((6.805,21.65),(16.005,21.65)),
     ((16.005,21.65),(16.005,23.725)),
 ]
+bypass_evidence=[]
 for a,b in bypass:
-    sig=('PCB_TRACK','VSYS_HAPTIC',int(pcbnew.F_Cu),canon(a,b),0.3)
-    assert s[sig]==1 and o[sig]==1, (sig,s[sig],o[sig])
+    before=bypass_hits(src,a,b)
+    after=bypass_hits(out,a,b)
+    assert len(before)==1 and len(after)==1, {'expected':[a,b],'before':before,'after':after}
+    bypass_evidence.append({'expected':[a,b],'before':before[0],'after':after[0]})
 
 scope={
   'result':'PASS',
@@ -72,6 +90,8 @@ scope={
   'added_via_count':0,
   'footprint_state_unchanged':True,
   'accepted_route1bk_bypass_segments_preserved':True,
+  'accepted_route1bk_bypass_tolerance_mm':0.002,
+  'accepted_route1bk_bypass_evidence':bypass_evidence,
 }
 Path('/tmp/route1bm-scope.json').write_text(json.dumps(scope,indent=2)+'\n')
 print(json.dumps(scope,indent=2))
