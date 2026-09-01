@@ -152,7 +152,7 @@ def endpoint(desc: str, pos: dict) -> dict:
     }
 
 
-def exclusion_reason(candidate: dict) -> str | None:
+def exclusion_reason(candidate: dict, max_endpoint_distance_mm: float = MAX_ENDPOINT_DISTANCE) -> str | None:
     a, b, net = candidate["a"], candidate["b"], candidate["net"]
     if net in EXCLUDED_NETS or any(net.startswith(prefix) for prefix in EXCLUDED_NET_PREFIXES):
         return "excluded_net"
@@ -164,7 +164,7 @@ def exclusion_reason(candidate: dict) -> str | None:
         return "non_top_layer"
     if a["ref"] and b["ref"] and a["ref"] == b["ref"] and a["pad"] == b["pad"]:
         return "duplicate_terminal_same_component"
-    if candidate["endpoint_distance_mm"] > MAX_ENDPOINT_DISTANCE:
+    if candidate["endpoint_distance_mm"] > max_endpoint_distance_mm:
         return "too_long"
     return None
 
@@ -205,8 +205,17 @@ def main() -> None:
     ap.add_argument("--source-pcb", default=str(SRC_PCB))
     ap.add_argument("--source-report", default=str(SRC_REPORT))
     ap.add_argument("--expected-unconnected", type=int, default=111)
+    ap.add_argument("--grid-mm", type=float, default=GRID)
+    ap.add_argument("--lane-margin-mm", type=float, default=LANE_MARGIN)
+    ap.add_argument("--max-endpoint-distance-mm", type=float, default=MAX_ENDPOINT_DISTANCE)
     ap.add_argument("--output", required=True)
     args = ap.parse_args()
+
+    grid_mm = float(args.grid_mm)
+    lane_margin_mm = float(args.lane_margin_mm)
+    max_endpoint_distance_mm = float(args.max_endpoint_distance_mm)
+    if grid_mm <= 0 or lane_margin_mm < 0 or max_endpoint_distance_mm <= 0:
+        raise SystemExit("route screen search-parameter gate failed")
 
     source_pcb = Path(args.source_pcb)
     source_report = Path(args.source_report)
@@ -238,7 +247,7 @@ def main() -> None:
             "b": b,
             "endpoint_distance_mm": round(math.dist(a["pos"], b["pos"]), 6),
         }
-        c["exclusion_reason"] = exclusion_reason(c)
+        c["exclusion_reason"] = exclusion_reason(c, max_endpoint_distance_mm)
         raw.append(c)
 
     board = pcbnew.LoadBoard(str(source_pcb))
@@ -361,14 +370,14 @@ def main() -> None:
         add_path("L-HV", [A, (B[0], A[1]), B])
         add_path("L-VH", [A, (A[0], B[1]), B])
 
-        for lane_x in frange(min(A[0], B[0]) - LANE_MARGIN, max(A[0], B[0]) + LANE_MARGIN, GRID):
+        for lane_x in frange(min(A[0], B[0]) - lane_margin_mm, max(A[0], B[0]) + lane_margin_mm, grid_mm):
             add_path("HVH", [A, (lane_x, A[1]), (lane_x, B[1]), B], lane_x)
 
-        for lane_y in frange(min(A[1], B[1]) - LANE_MARGIN, max(A[1], B[1]) + LANE_MARGIN, GRID):
+        for lane_y in frange(min(A[1], B[1]) - lane_margin_mm, max(A[1], B[1]) + lane_margin_mm, grid_mm):
             add_path("VHV", [A, (A[0], lane_y), (B[0], lane_y), B], lane_y)
 
-        xs = frange(min(A[0], B[0]) - LANE_MARGIN, max(A[0], B[0]) + LANE_MARGIN, GRID)
-        ys = frange(min(A[1], B[1]) - LANE_MARGIN, max(A[1], B[1]) + LANE_MARGIN, GRID)
+        xs = frange(min(A[0], B[0]) - lane_margin_mm, max(A[0], B[0]) + lane_margin_mm, grid_mm)
+        ys = frange(min(A[1], B[1]) - lane_margin_mm, max(A[1], B[1]) + lane_margin_mm, grid_mm)
         for lane_x in xs:
             for lane_y in ys:
                 add_path("HVHV", [A, (lane_x, A[1]), (lane_x, lane_y), (B[0], lane_y), B])
@@ -390,6 +399,12 @@ def main() -> None:
         ))
 
         best = passing[0] if passing else None
+        all_by_clearance = sorted(candidates, key=lambda p: (
+            -p["minimum_conservative_clearance_mm"],
+            p["segment_count"],
+            p["path_length_mm"],
+        ))
+        best_clearance = all_by_clearance[0] if all_by_clearance else None
         evaluated.append({
             **c,
             "endpoint_semantic_rank": endpoint_semantic_rank(c),
@@ -397,6 +412,7 @@ def main() -> None:
             "passing_path_count": len(passing),
             "best_passing_path": best,
             "top_passing_paths": passing[:5],
+            "best_clearance_path": best_clearance,
         })
 
     passing_candidates = [c for c in evaluated if c["best_passing_path"] is not None]
@@ -429,9 +445,9 @@ def main() -> None:
         "board_modified": False,
         "track_width_mm": WIDTH,
         "rule_clearance_mm": RULE,
-        "grid_mm": GRID,
-        "lane_margin_mm": LANE_MARGIN,
-        "max_endpoint_distance_mm": MAX_ENDPOINT_DISTANCE,
+        "grid_mm": grid_mm,
+        "lane_margin_mm": lane_margin_mm,
+        "max_endpoint_distance_mm": max_endpoint_distance_mm,
         "raw_pair_count": len(raw),
         "evaluated_candidate_count": len(evaluated),
         "passing_candidate_count": len(passing_candidates),
