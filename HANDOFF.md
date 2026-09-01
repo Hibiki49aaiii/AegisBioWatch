@@ -1,6 +1,6 @@
 # AegisBioWatch — Codex complete handoff
 
-Updated: 2026-09-01 01:22 JST  
+Updated: 2026-09-01 21:30 JST  
 Repository: `Hibiki49aaiii/AegisBioWatch`  
 Development branch: `agent/phase1-mainboard-schematic`  
 Draft PR: #2  
@@ -8,34 +8,32 @@ Manufacturing status: **NOT_FOR_GERBER**
 
 ## Current authoritative status
 
-Issue #20 has completed the route-1bn validation gates. The accepted Main Board routing authority is now:
+Issue #21 completed the route-1bo validation gates. The accepted Main Board routing authority is now:
 
-**route-1bn = 0 KiCad 9.0.9 DRC violations / 110 unconnected / 268-node physical pin-net audit PASS**
+**route-1bo = 0 KiCad 9.0.9 DRC violations / 109 unconnected / 268-node physical pin-net audit PASS**
 
 Authority evidence:
-- candidate commit: `89f495f8f792bb53ae3cef8422610f6a3d3f7f45`
-- validation run: `33413080742`
-- validate job: `99557105934`
-- downloaded Artifact verify job: `99558773007`
-- Artifact: `9766085905` / `r13-route1bn-r403-1v8-evidence`
-- Artifact ZIP SHA-256: `a3e27b162ec50809f90d5f7b6937621d63de455ca6a70b4937be158f647bb0fd`
-- PCB SHA-256: `5abd1e61dc4686ffe0241a06864b0914a3e6ce143f7b2346a0095b528f4738db`
-- formal evidence: `docs/pcb-route-r13-1bn-validation.json`
-- accepted reproducer: `tools/reproduce-route1bn-accepted.sh`
+- candidate commit: `b1a0778fba6ac1e144523465ab5bc14335aee934`
+- validation run: `33447520649`
+- validate job: `99669842446`
+- downloaded Artifact verify job: `99671064031`
+- Artifact: `9778684430` / `r13-route1bo-j8-1v8-evidence`
+- Artifact digest: `sha256:9520621a3e47fbb75aab8ab1689b73977b473159a79082e7c9fa1c55437183e6`
+- PCB SHA-256: `e1239dfd912fbb910313b32af3e88f23e34cbc198a742a33ec6beb7b108410c6`
+- formal evidence: `docs/pcb-route-r13-1bo-validation.json`
+- accepted reproducer: `tools/reproduce-route1bo-accepted.sh`
 
-route-1bn adds exactly four 0.30 mm F.Cu `+1V8` segments, zero vias:
+route-1bo adds exactly four 0.30 mm F.Cu `+1V8` segments, zero vias:
 
 ```text
-(41.005,14.975)
- -> (41.005,15.650)
- -> (39.600,15.650)
- -> (39.600,25.975)
- -> (40.255,25.975)  R403.1/+1V8
+(10.305,4.720)
+ -> (9.700,4.720)
+ -> (9.700,15.800)
+ -> (12.105,15.800)
+ -> (12.105,15.260)  J8.1/+1V8
 ```
 
-Total new copper: 13.060 mm. The existing +1V8 source track is preserved. R403.2/SYS_I2C_SDA is untouched. Exact conservative clearance is 0.260 mm; the co-limiting unrelated pads are R403.2/SYS_I2C_SDA and C4.2/GND, both at 0.260 mm. Required rule remains 0.100 mm. No rule waiver, via-in-pad, footprint move, or rotation was used.
-
-A first Phase B validation run `33412259518` failed before materialization because the probe incorrectly required a single nearest obstacle (C4.2). Exact geometry showed R403.2 first; Artifact inspection proved R403.2 and C4.2 are equal 0.260 mm co-limiters. Commit `89f495f8…` corrected the evidence gate without weakening any design rule. The subsequent validation and independent Artifact verification passed.
+Total new copper: 14.630 mm. The existing +1V8 source track is preserved. Exact conservative clearance is 0.4897 mm against a numberless J8 pad. All three numberless J8 pads were proven by KiCad API to be exact netless `PAD_ATTRIB_NPTH` and were preserved before/after. No rule waiver, via-in-pad, footprint move, or rotation was used.
 
 ## Mandatory continuation rules
 
@@ -73,15 +71,15 @@ Continue to exclude unless a separate Issue/decision explicitly releases them:
 3. `.ai/intelligence/mainboard-routing-safety-invariants.md`
 4. `.ai/decisions/pcb-routing-acceptance-authority.md`
 5. `.ai/rules/validated.md` and `.ai/rules/rejected.md`
-6. `docs/pcb-route-r13-1bn-validation.json`
-7. `tools/reproduce-route1bn-accepted.sh`
+6. `docs/pcb-route-r13-1bo-validation.json`
+7. `tools/reproduce-route1bo-accepted.sh`
 8. the active routing Issue and PR #2
 
 Historical phase-status files and old PCB README text are not current routing authority when they conflict with executed evidence.
 
 ## Exact next action
 
-Issue #21 is now the active next routing increment: **route-1bo from route-1bn 0/110/268 PASS**. Phase A1 is read-only. Execute `.github/workflows/r13-route1bo-inventory.yml`, require route-1bn reproduction at 0/110/268 PASS, inventory the actual 110 ratsnest, and run the existing parameterized max-four-segment screen engine against the route-1bn PCB. Do not materialize route-1bo until one ordinary non-frozen candidate has passed semantic review and a dedicated 0.05 mm local refine.
+Close Issue #21 as completed after this authority commit, then create the next isolated routing Issue from **route-1bo 0/109/268 PASS**. The next increment must begin read-only: reproduce route-1bo, inventory the actual 109-item ratsnest, apply the same frozen/deferred exclusions, and only refine one ordinary non-frozen candidate if semantic review passes.
 
 ## Paste into a new Codex task
 
@@ -93,12 +91,12 @@ Branch: agent/phase1-mainboard-schematic
 Draft PR: #2
 Handoff: HANDOFF.md
 
-Current accepted routing authority is route-1bn = 0 KiCad 9.0.9 DRC violations / 110 unconnected / 268-node audit PASS.
-Evidence: docs/pcb-route-r13-1bn-validation.json
-Accepted reproducer: tools/reproduce-route1bn-accepted.sh
-Validation run: 33413080742
-Artifact: 9766085905
+Current accepted routing authority is route-1bo = 0 KiCad 9.0.9 DRC violations / 109 unconnected / 268-node audit PASS.
+Evidence: docs/pcb-route-r13-1bo-validation.json
+Accepted reproducer: tools/reproduce-route1bo-accepted.sh
+Validation run: 33447520649
+Artifact: 9778684430
 Release: NOT_FOR_GERBER
 
-If local access exists, reuse E:\\AegisBioWatch and preserve all local changes. Re-check GitHub HEAD/Issue/PR/Actions before writes. Start the next isolated routing increment read-only from route-1bn; do not lower rules or enter frozen scope.
+If local access exists, reuse E:\\AegisBioWatch and preserve all local changes. Re-check GitHub HEAD/Issue/PR/Actions before writes. Start the next isolated routing increment read-only from route-1bo; do not lower rules or enter frozen scope.
 ```
