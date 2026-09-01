@@ -79,7 +79,7 @@ Historical phase-status files and old PCB README text are not current routing au
 
 ## Exact next action
 
-Close Issue #21 as completed after this authority commit, then create the next isolated routing Issue from **route-1bo 0/109/268 PASS**. The next increment must begin read-only: reproduce route-1bo, inventory the actual 109-item ratsnest, apply the same frozen/deferred exclusions, and only refine one ordinary non-frozen candidate if semantic review passes.
+Issue #22 is active for **route-1bp from route-1bo 0/109/268 PASS**. Execute `.github/workflows/r13-route1bp-inventory.yml`. Require accepted route-1bo reproduction at 0/109/268 PASS, inventory the actual 109-item ratsnest, apply the established frozen/deferred exclusions, and inspect only the read-only coarse-screen Artifact. Do not materialize route-1bp until one ordinary non-frozen candidate passes semantic review and a dedicated 0.05 mm local refine.
 
 ## Paste into a new Codex task
 

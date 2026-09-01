@@ -1,0 +1,158 @@
+name: r13 route1bp accepted-source inventory and coarse screen
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bp-inventory.yml'
+      - 'tools/reproduce-route1bo-accepted.sh'
+      - 'tools/probe-pcb-r13-route1bn-max4-coarse.py'
+      - 'docs/ai/issues/22/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory-screen:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce accepted route1bo
+        run: bash tools/reproduce-route1bo-accepted.sh
+
+      - name: Record route1bo ratsnest inventory
+        run: |
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1bo.json'))
+          a=json.load(open('/tmp/route1bo-audit.json'))
+          pcb=Path('hardware/main-board/pcb/route-r13-1bo/AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb')
+          assert len(d.get('violations',[]))==0
+          assert len(d.get('unconnected_items',[]))==109
+          assert a.get('result')=='PASS' and a.get('audited_present_source_nodes')==268
+          assert a.get('mismatches',[])==[] and a.get('unexpected_pad_nets',[])==[]
+          out={
+            'revision':'r13-route1bp-phase-a1-source-inventory',
+            'source_revision':'route-1bo',
+            'source_gate':{'rule_violations':0,'unconnected_items':109,'pin_net_audit':'PASS','audited_nodes':268},
+            'source_pcb_sha256':hashlib.sha256(pcb.read_bytes()).hexdigest(),
+            'board_modified':False,
+            'unconnected_items':d['unconnected_items'],
+            'release_status':'NOT_FOR_GERBER',
+          }
+          Path('/tmp/route1bp-inventory.json').write_text(json.dumps(out,indent=2)+'\n')
+          print('SOURCE_GATE',out['source_gate'])
+          print('SOURCE_PCB_SHA256',out['source_pcb_sha256'])
+          print('BOARD_MODIFIED',out['board_modified'])
+          PY
+
+      - name: Screen route1bp max-four-segment candidates read-only
+        run: |
+          python3 tools/probe-pcb-r13-route1bn-max4-coarse.py \
+            --drc-json /tmp/route1bo.json \
+            --pin-net-audit /tmp/route1bo-audit.json \
+            --source-pcb hardware/main-board/pcb/route-r13-1bo/AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb \
+            --source-report hardware/main-board/pcb/route-r13-1bo/routing-seed-r13-1bo.json \
+            --expected-unconnected 109 \
+            --output /tmp/route1bp-screen-engine.json
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.load(open('/tmp/route1bp-screen-engine.json'))
+          assert x['source_gate']=={'rule_violations':0,'unconnected_items':109,'pin_net_audit':'PASS','audited_nodes':268}
+          assert x['board_modified'] is False
+          assert x['expected_unconnected']==109
+          assert x['source_pcb'].endswith('route-r13-1bo/AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb')
+          out=dict(x)
+          out['revision']='r13-route1bp-max4-coarse-screen'
+          out['source_revision']='route-1bo'
+          out['engine_revision']=x.get('revision')
+          out['issue']=22
+          Path('/tmp/route1bp-screen.json').write_text(json.dumps(out,indent=2)+'\n')
+          print('RAW_PAIRS',out['raw_pair_count'])
+          print('EVALUATED',out['evaluated_candidate_count'])
+          print('PASSING',out['passing_candidate_count'])
+          print('EXCLUSIONS',out['exclusion_summary'])
+          for i,c in enumerate(out['passing_candidates'][:30],1):
+              p=c['best_passing_path']
+              print('PASS',i,'DRC',c['drc_index'],c['net'],c['a']['description'],'<->',c['b']['description'],
+                    'semantic',c['endpoint_semantic_rank'],'clearance',p['minimum_conservative_clearance_mm'],
+                    'segments',p['segment_count'],'length',p['path_length_mm'],'family',p['path_family'],
+                    'points',p['points_mm'],'nearest',p['nearest_unrelated_copper'])
+          PY
+
+      - name: Print current ratsnest endpoints
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/route1bp-inventory.json'))
+          for i,u in enumerate(x['unconnected_items']):
+              parts=[]
+              for p in u.get('items',[]):
+                  pos=p.get('pos',{})
+                  parts.append(f"{p.get('description','')} @ ({pos.get('x')},{pos.get('y')})")
+              print(f"RATSNEST[{i}] " + " <-> ".join(parts))
+          PY
+
+      - name: Package read-only evidence
+        run: |
+          cd /tmp
+          sha256sum route1bp-inventory.json route1bp-screen.json route1bp-screen-engine.json > route1bp-SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bp-source-inventory-screen
+          path: |
+            /tmp/route1bp-inventory.json
+            /tmp/route1bp-screen.json
+            /tmp/route1bp-screen-engine.json
+            /tmp/route1bp-SHA256SUMS
+          if-no-files-found: error
+
+  verify-artifact:
+    needs: inventory-screen
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bp-source-inventory-screen
+          path: /tmp/e
+      - name: Verify downloaded read-only evidence
+        run: |
+          cd /tmp/e
+          sha256sum -c route1bp-SHA256SUMS
+          python3 - <<'PY'
+          import json
+          inv=json.load(open('route1bp-inventory.json'))
+          scr=json.load(open('route1bp-screen.json'))
+          assert inv['source_gate']=={'rule_violations':0,'unconnected_items':109,'pin_net_audit':'PASS','audited_nodes':268}
+          assert inv['board_modified'] is False
+          assert len(inv['unconnected_items'])==109
+          assert scr['revision']=='r13-route1bp-max4-coarse-screen'
+          assert scr['source_revision']=='route-1bo'
+          assert scr['source_gate']['unconnected_items']==109
+          assert scr['source_gate']['pin_net_audit']=='PASS'
+          assert scr['source_gate']['audited_nodes']==268
+          assert scr['board_modified'] is False
+          print('DOWNLOADED_ARTIFACT_VERIFY PASS')
+          print('PASSING',scr['passing_candidate_count'])
+          PY
