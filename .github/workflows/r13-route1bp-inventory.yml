@@ -1,4 +1,4 @@
-name: r13 route1bp accepted-source inventory and coarse screen
+name: r13 route1bp accepted-source inventory and targeted coarse screen
 
 on:
   pull_request:
@@ -64,10 +64,33 @@ jobs:
           print('BOARD_MODIFIED',out['board_modified'])
           PY
 
-      - name: Screen route1bp max-four-segment candidates read-only
+      - name: Isolate SYS_I2C_SDA ratsnest candidate read-only
+        run: |
+          python3 - <<'PY'
+          import copy,json
+          from pathlib import Path
+          source=json.load(open('/tmp/route1bo.json'))
+          assert len(source.get('violations',[]))==0
+          assert len(source.get('unconnected_items',[]))==109
+          idx=102
+          target=source['unconnected_items'][idx]
+          descriptions=[item.get('description','') for item in target.get('items',[])]
+          assert len(descriptions)==2
+          assert all('SYS_I2C_SDA' in d for d in descriptions), descriptions
+          assert any('R401' in d for d in descriptions), descriptions
+          isolated=copy.deepcopy(source)
+          for i,item in enumerate(isolated['unconnected_items']):
+              if i != idx:
+                  item['items']=[]
+          Path('/tmp/route1bp-target-drc.json').write_text(json.dumps(isolated,indent=2)+'\n')
+          print('TARGET_DRC_INDEX',idx)
+          print('TARGET_ENDPOINTS',descriptions)
+          PY
+
+      - name: Screen SYS_I2C_SDA candidate read-only
         run: |
           python3 tools/probe-pcb-r13-route1bn-max4-coarse.py \
-            --drc-json /tmp/route1bo.json \
+            --drc-json /tmp/route1bp-target-drc.json \
             --pin-net-audit /tmp/route1bo-audit.json \
             --source-pcb hardware/main-board/pcb/route-r13-1bo/AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb \
             --source-report hardware/main-board/pcb/route-r13-1bo/routing-seed-r13-1bo.json \
@@ -88,35 +111,28 @@ jobs:
           assert x['grid_mm']==0.25
           assert x['lane_margin_mm']==6.0
           assert x['max_endpoint_distance_mm']==18.0
+          assert x['raw_pair_count']==1, x['raw_pair_count']
+          assert x['evaluated_candidate_count']==1, x['evaluated_candidate_count']
+          candidate=x['evaluated_candidates'][0]
+          assert candidate['drc_index']==102
+          assert candidate['net']=='SYS_I2C_SDA'
           out=dict(x)
-          out['revision']='r13-route1bp-max4-coarse-screen'
+          out['revision']='r13-route1bp-sys-i2c-sda-targeted-coarse-screen'
           out['source_revision']='route-1bo'
           out['engine_revision']=x.get('revision')
           out['issue']=22
+          out['target_drc_index']=102
           Path('/tmp/route1bp-screen.json').write_text(json.dumps(out,indent=2)+'\n')
           print('RAW_PAIRS',out['raw_pair_count'])
           print('EVALUATED',out['evaluated_candidate_count'])
           print('PASSING',out['passing_candidate_count'])
           print('EXCLUSIONS',out['exclusion_summary'])
-          for i,c in enumerate(out['passing_candidates'][:30],1):
-              p=c['best_passing_path']
-              print('PASS',i,'DRC',c['drc_index'],c['net'],c['a']['description'],'<->',c['b']['description'],
-                    'semantic',c['endpoint_semantic_rank'],'clearance',p['minimum_conservative_clearance_mm'],
-                    'segments',p['segment_count'],'length',p['path_length_mm'],'family',p['path_family'],
-                    'points',p['points_mm'],'nearest',p['nearest_unrelated_copper'])
-          PY
-
-      - name: Print current ratsnest endpoints
-        run: |
-          python3 - <<'PY'
-          import json
-          x=json.load(open('/tmp/route1bp-inventory.json'))
-          for i,u in enumerate(x['unconnected_items']):
-              parts=[]
-              for p in u.get('items',[]):
-                  pos=p.get('pos',{})
-                  parts.append(f"{p.get('description','')} @ ({pos.get('x')},{pos.get('y')})")
-              print(f"RATSNEST[{i}] " + " <-> ".join(parts))
+          p=candidate.get('best_passing_path')
+          print('TARGET',candidate['drc_index'],candidate['net'],candidate['a']['description'],'<->',candidate['b']['description'])
+          if p:
+              print('PASS clearance',p['minimum_conservative_clearance_mm'],'segments',p['segment_count'],
+                    'length',p['path_length_mm'],'family',p['path_family'],'points',p['points_mm'],
+                    'nearest',p['nearest_unrelated_copper'])
           PY
 
       - name: Package read-only evidence
@@ -153,7 +169,7 @@ jobs:
           assert inv['source_gate']=={'rule_violations':0,'unconnected_items':109,'pin_net_audit':'PASS','audited_nodes':268}
           assert inv['board_modified'] is False
           assert len(inv['unconnected_items'])==109
-          assert scr['revision']=='r13-route1bp-max4-coarse-screen'
+          assert scr['revision']=='r13-route1bp-sys-i2c-sda-targeted-coarse-screen'
           assert scr['source_revision']=='route-1bo'
           assert scr['source_gate']['unconnected_items']==109
           assert scr['source_gate']['pin_net_audit']=='PASS'
@@ -162,6 +178,11 @@ jobs:
           assert scr['grid_mm']==0.25
           assert scr['lane_margin_mm']==6.0
           assert scr['max_endpoint_distance_mm']==18.0
+          assert scr['target_drc_index']==102
+          assert scr['raw_pair_count']==1
+          assert scr['evaluated_candidate_count']==1
+          assert scr['evaluated_candidates'][0]['drc_index']==102
+          assert scr['evaluated_candidates'][0]['net']=='SYS_I2C_SDA'
           print('DOWNLOADED_ARTIFACT_VERIFY PASS')
           print('PASSING',scr['passing_candidate_count'])
           PY
