@@ -1,4 +1,4 @@
-name: r13 route1bp accepted-source inventory and targeted coarse screen
+name: r13 route1bp accepted-source artifact targeted coarse screen
 
 on:
   pull_request:
@@ -6,13 +6,13 @@ on:
     types: [opened, reopened, synchronize]
     paths:
       - '.github/workflows/r13-route1bp-inventory.yml'
-      - 'tools/reproduce-route1bo-accepted.sh'
       - 'tools/probe-pcb-r13-route1bn-max4-coarse.py'
       - 'docs/ai/issues/22/**'
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   inventory-screen:
@@ -34,24 +34,54 @@ jobs:
           sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
           test "$(kicad-cli --version | head -n1)" = "9.0.9"
 
-      - name: Reproduce accepted route1bo
-        run: bash tools/reproduce-route1bo-accepted.sh
+      - name: Download accepted route1bo evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bo-j8-1v8-evidence
+          path: /tmp/route1bo-accepted
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 33447520649
+
+      - name: Verify accepted route1bo source gate
+        run: |
+          cd /tmp/route1bo-accepted
+          sha256sum -c SHA256SUMS.txt
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('/tmp/route1bo-accepted')
+          d=json.load(open(root/'route1bo.json'))
+          a=json.load(open(root/'route1bo-audit.json'))
+          s=json.load(open(root/'route1bo-summary.json'))
+          pcb=root/'AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb'
+          digest=hashlib.sha256(pcb.read_bytes()).hexdigest()
+          assert digest=='e1239dfd912fbb910313b32af3e88f23e34cbc198a742a33ec6beb7b108410c6'
+          assert len(d.get('violations',[]))==0
+          assert len(d.get('unconnected_items',[]))==109
+          assert a.get('result')=='PASS' and a.get('audited_present_source_nodes')==268
+          assert a.get('mismatches',[])==[] and a.get('unexpected_pad_nets',[])==[]
+          assert s.get('rule_violations')==0 and s.get('unconnected_items')==109
+          assert s.get('pin_net_audit')=='PASS' and s.get('audited_nodes')==268
+          assert s.get('pcb_sha256')==digest
+          print('ACCEPTED_ROUTE1BO_GATE PASS')
+          print('PCB_SHA256',digest)
+          PY
 
       - name: Record route1bo ratsnest inventory
         run: |
           python3 - <<'PY'
           import hashlib,json
           from pathlib import Path
-          d=json.load(open('/tmp/route1bo.json'))
-          a=json.load(open('/tmp/route1bo-audit.json'))
-          pcb=Path('hardware/main-board/pcb/route-r13-1bo/AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb')
-          assert len(d.get('violations',[]))==0
-          assert len(d.get('unconnected_items',[]))==109
-          assert a.get('result')=='PASS' and a.get('audited_present_source_nodes')==268
-          assert a.get('mismatches',[])==[] and a.get('unexpected_pad_nets',[])==[]
+          root=Path('/tmp/route1bo-accepted')
+          d=json.load(open(root/'route1bo.json'))
+          a=json.load(open(root/'route1bo-audit.json'))
+          pcb=root/'AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb'
           out={
             'revision':'r13-route1bp-phase-a1-source-inventory',
             'source_revision':'route-1bo',
+            'source_artifact_run_id':33447520649,
+            'source_artifact_id':9778684430,
             'source_gate':{'rule_violations':0,'unconnected_items':109,'pin_net_audit':'PASS','audited_nodes':268},
             'source_pcb_sha256':hashlib.sha256(pcb.read_bytes()).hexdigest(),
             'board_modified':False,
@@ -69,7 +99,7 @@ jobs:
           python3 - <<'PY'
           import copy,json
           from pathlib import Path
-          source=json.load(open('/tmp/route1bo.json'))
+          source=json.load(open('/tmp/route1bo-accepted/route1bo.json'))
           assert len(source.get('violations',[]))==0
           assert len(source.get('unconnected_items',[]))==109
           idx=102
@@ -91,9 +121,9 @@ jobs:
         run: |
           python3 tools/probe-pcb-r13-route1bn-max4-coarse.py \
             --drc-json /tmp/route1bp-target-drc.json \
-            --pin-net-audit /tmp/route1bo-audit.json \
-            --source-pcb hardware/main-board/pcb/route-r13-1bo/AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb \
-            --source-report hardware/main-board/pcb/route-r13-1bo/routing-seed-r13-1bo.json \
+            --pin-net-audit /tmp/route1bo-accepted/route1bo-audit.json \
+            --source-pcb /tmp/route1bo-accepted/AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb \
+            --source-report /tmp/route1bo-accepted/routing-seed-r13-1bo.json \
             --expected-unconnected 109 \
             --grid-mm 0.25 \
             --lane-margin-mm 6.0 \
@@ -107,7 +137,7 @@ jobs:
           assert x['source_gate']=={'rule_violations':0,'unconnected_items':109,'pin_net_audit':'PASS','audited_nodes':268}
           assert x['board_modified'] is False
           assert x['expected_unconnected']==109
-          assert x['source_pcb'].endswith('route-r13-1bo/AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb')
+          assert x['source_pcb'].endswith('AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb')
           assert x['grid_mm']==0.25
           assert x['lane_margin_mm']==6.0
           assert x['max_endpoint_distance_mm']==18.0
@@ -119,6 +149,8 @@ jobs:
           out=dict(x)
           out['revision']='r13-route1bp-sys-i2c-sda-targeted-coarse-screen'
           out['source_revision']='route-1bo'
+          out['source_artifact_run_id']=33447520649
+          out['source_artifact_id']=9778684430
           out['engine_revision']=x.get('revision')
           out['issue']=22
           out['target_drc_index']=102
@@ -167,10 +199,13 @@ jobs:
           inv=json.load(open('route1bp-inventory.json'))
           scr=json.load(open('route1bp-screen.json'))
           assert inv['source_gate']=={'rule_violations':0,'unconnected_items':109,'pin_net_audit':'PASS','audited_nodes':268}
+          assert inv['source_artifact_run_id']==33447520649 and inv['source_artifact_id']==9778684430
+          assert inv['source_pcb_sha256']=='e1239dfd912fbb910313b32af3e88f23e34cbc198a742a33ec6beb7b108410c6'
           assert inv['board_modified'] is False
           assert len(inv['unconnected_items'])==109
           assert scr['revision']=='r13-route1bp-sys-i2c-sda-targeted-coarse-screen'
           assert scr['source_revision']=='route-1bo'
+          assert scr['source_artifact_run_id']==33447520649 and scr['source_artifact_id']==9778684430
           assert scr['source_gate']['unconnected_items']==109
           assert scr['source_gate']['pin_net_audit']=='PASS'
           assert scr['source_gate']['audited_nodes']==268
