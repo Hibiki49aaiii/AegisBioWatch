@@ -1,0 +1,29 @@
+{
+  "status": "ACCEPTED",
+  "revision": "route-1w",
+  "scope": "R103.1/+1V8 <-> R104.1/+1V8 local I2C pull-up branch",
+  "workflow_run_id": 31475238554,
+  "artifact_id": 9095044201,
+  "artifact_name": "r13-route1w-i2c-pullup-1v8-evidence",
+  "artifact_digest": "sha256:15c7a2eb9cf062418a569f7885957babbfc947272cc3fe3838c45463d1a9e7c3",
+  "kicad_version": "9.0.9",
+  "rule_violations": 0,
+  "unconnected_items": 152,
+  "pin_net_audit": "PASS",
+  "audited_nodes": 268,
+  "source_route1v_sha256_same_run": "ca84ec5f6fa6afa496a4421494ca06dd6e3aa438d1f7f0a938649198f2b75a90",
+  "route1w_pcb_sha256_same_run": "27a0d8f2879b5b4603e142ba94dc91fe56d3b2a9a2d00192d779651439a50860",
+  "geometry": {
+    "r103_1_mm": [12.214871, 34.223282],
+    "r104_1_mm": [13.154075, 34.312249],
+    "track_width_mm": 0.20,
+    "segments": 1,
+    "vias": 0
+  },
+  "i2c_signal_pads_touched": false,
+  "component_moves": [],
+  "component_rotations": [],
+  "ldo2_in_status": "DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD",
+  "chg_5v_status": "REJECTED_AND_DEFERRED",
+  "release_status": "NOT_FOR_GERBER"
+}

@@ -1,0 +1,161 @@
+name: r13 route1i PVSS trees validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1i-pvss-trees-validation.yml'
+      - 'tools/reproduce-route1h-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1i-pvss-trees.py'
+      - 'tools/write-pcb-r13-route1i-report.py'
+      - 'tools/materialize-pcb-r13-route1j-nettie-gnd.py'
+      - 'tools/write-pcb-r13-route1j-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+    paths:
+      - '.github/workflows/r13-route1i-pvss-trees-validation.yml'
+      - 'tools/reproduce-route1h-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1i-pvss-trees.py'
+      - 'tools/write-pcb-r13-route1i-report.py'
+      - 'tools/materialize-pcb-r13-route1j-nettie-gnd.py'
+      - 'tools/write-pcb-r13-route1j-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce and validate accepted route1h baseline
+        run: bash tools/reproduce-route1h-accepted.sh
+
+      - name: Materialize route1i PVSS trees
+        run: |
+          python3 -X faulthandler tools/materialize-pcb-r13-route1i-pvss-trees.py \
+            --route1h-drc-json /tmp/route1h.json \
+            --route1h-pin-net-audit /tmp/route1h-audit.json
+
+      - name: KiCad route1i DRC and audit
+        run: |
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1i.json hardware/main-board/pcb/route-r13-1i/AegisBioWatch-MainBoard-Route1i-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py \
+            --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
+            --pcb hardware/main-board/pcb/route-r13-1i/AegisBioWatch-MainBoard-Route1i-r13.kicad_pcb \
+            --output /tmp/route1i-audit.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1i.json')); a=json.load(open('/tmp/route1i-audit.json')); r=json.load(open('hardware/main-board/pcb/route-r13-1i/routing-seed-r13-1i.json'))
+          out={
+            'rule_violations':len(d.get('violations',[])),
+            'unconnected_items':len(d.get('unconnected_items',[])),
+            'pin_net_audit':a.get('result'),
+            'audited_nodes':a.get('audited_present_source_nodes'),
+            'added_segments':r.get('track_segments_added'),
+            'vias_added':r.get('vias_added'),
+            'component_moves':r.get('component_moves'),
+            'component_rotations':r.get('component_rotations'),
+          }
+          print(json.dumps(out,indent=2)); Path('/tmp/route1i-summary.json').write_text(json.dumps(out,indent=2))
+          if out['rule_violations']!=0 or out['unconnected_items']!=172: raise SystemExit('route1i DRC/ratsnest gate failed')
+          if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1i audit gate failed')
+          if out['added_segments']!=6 or out['vias_added']!=2 or out['component_moves']!=[]: raise SystemExit('route1i routing scope gate failed')
+          rot=out['component_rotations'] or {}
+          if sorted(rot)!=['NT101'] or rot['NT101'].get('from_deg')!=0.0 or rot['NT101'].get('to_deg')!=180.0: raise SystemExit('route1i rotation scope gate failed')
+          PY
+
+      - name: Package route1i evidence
+        if: always()
+        run: |
+          rm -rf /tmp/e-route1i
+          mkdir -p /tmp/e-route1i
+          for f in \
+            hardware/main-board/pcb/route-r13-1i/AegisBioWatch-MainBoard-Route1i-r13.kicad_pcb \
+            hardware/main-board/pcb/route-r13-1i/AegisBioWatch-MainBoard-Route1i-r13.kicad_pro \
+            hardware/main-board/pcb/route-r13-1i/routing-seed-r13-1i.json \
+            /tmp/route1i.json \
+            /tmp/route1i-summary.json \
+            /tmp/route1i-audit.json; do
+            test -f "$f" && cp "$f" /tmp/e-route1i/
+          done
+          sha256sum /tmp/e-route1i/* > /tmp/e-route1i/SHA256SUMS.txt || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1i-pvss-trees-evidence
+          path: /tmp/e-route1i/**
+          if-no-files-found: warn
+
+      - name: Materialize route1j NetTie GND connections
+        run: |
+          python3 -X faulthandler tools/materialize-pcb-r13-route1j-nettie-gnd.py \
+            --route1i-drc-json /tmp/route1i.json \
+            --route1i-pin-net-audit /tmp/route1i-audit.json
+
+      - name: KiCad route1j DRC and audit
+        run: |
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1j.json hardware/main-board/pcb/route-r13-1j/AegisBioWatch-MainBoard-Route1j-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py \
+            --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
+            --pcb hardware/main-board/pcb/route-r13-1j/AegisBioWatch-MainBoard-Route1j-r13.kicad_pcb \
+            --output /tmp/route1j-audit.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1j.json')); a=json.load(open('/tmp/route1j-audit.json')); r=json.load(open('hardware/main-board/pcb/route-r13-1j/routing-seed-r13-1j.json'))
+          out={
+            'rule_violations':len(d.get('violations',[])),
+            'unconnected_items':len(d.get('unconnected_items',[])),
+            'pin_net_audit':a.get('result'),
+            'audited_nodes':a.get('audited_present_source_nodes'),
+            'added_segments':r.get('track_segments_added'),
+            'vias_added':r.get('vias_added'),
+            'component_moves':r.get('component_moves'),
+            'component_rotations':r.get('component_rotations'),
+          }
+          print(json.dumps(out,indent=2)); Path('/tmp/route1j-summary.json').write_text(json.dumps(out,indent=2))
+          if out['rule_violations']!=0 or out['unconnected_items']!=170: raise SystemExit('route1j DRC/ratsnest gate failed')
+          if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1j audit gate failed')
+          if out['added_segments']!=2 or out['vias_added']!=2: raise SystemExit('route1j routing scope gate failed')
+          if out['component_moves']!=[] or out['component_rotations']!=[]: raise SystemExit('route1j placement scope gate failed')
+          PY
+
+      - name: Package route1j evidence
+        if: always()
+        run: |
+          rm -rf /tmp/e-route1j
+          mkdir -p /tmp/e-route1j
+          for f in \
+            hardware/main-board/pcb/route-r13-1j/AegisBioWatch-MainBoard-Route1j-r13.kicad_pcb \
+            hardware/main-board/pcb/route-r13-1j/AegisBioWatch-MainBoard-Route1j-r13.kicad_pro \
+            hardware/main-board/pcb/route-r13-1j/routing-seed-r13-1j.json \
+            /tmp/route1j.json \
+            /tmp/route1j-summary.json \
+            /tmp/route1j-audit.json; do
+            test -f "$f" && cp "$f" /tmp/e-route1j/
+          done
+          sha256sum /tmp/e-route1j/* > /tmp/e-route1j/SHA256SUMS.txt || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1j-nettie-gnd-evidence
+          path: /tmp/e-route1j/**
+          if-no-files-found: warn

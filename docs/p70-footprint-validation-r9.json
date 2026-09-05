@@ -1,0 +1,10 @@
+{
+  "device": "Harwin P70-7000045",
+  "source": "Harwin technical drawing P70-7000045",
+  "recommended_pad_mm": 1.20,
+  "recommended_pad_tolerance_mm": 0.05,
+  "kicad_cli": "9.0.9",
+  "footprint": "hardware/charging-dock/kicad/AegisBioWatch_Dock.pretty/Harwin_P70-7000045.kicad_mod",
+  "kicad_svg_export": "PASS",
+  "watch_side_s70_land_pattern_frozen": false
+}

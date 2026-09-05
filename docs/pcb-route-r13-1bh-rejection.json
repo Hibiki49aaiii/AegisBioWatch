@@ -1,0 +1,83 @@
+{
+  "revision": "r13-route1bh-c301-r404-1v8-rejected",
+  "status": "REJECTED_BEFORE_MATERIALIZATION",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 14,
+  "base_accepted_revision": "route-1bg",
+  "base_commit": "cf138dd4835cc152c60c49d99f8a6d145745acbb",
+  "candidate_commit": "f679081582bd2fa6916c62204327593b565f5179",
+  "executed_probe": {
+    "workflow_name": "r13 route1bh C301-R404 +1V8 validation",
+    "workflow_run_id": 33242636304,
+    "validate_job_id": 99074468233,
+    "kicad_version": "9.0.9",
+    "source_rule_violations": 0,
+    "source_unconnected_items": 116,
+    "source_pin_net_audit": "PASS",
+    "source_audited_nodes": 268,
+    "board_modified": false,
+    "minimum_conservative_unrelated_clearance_mm": -0.15,
+    "required_clearance_mm": 0.1,
+    "probe_result": "FAIL"
+  },
+  "candidate": {
+    "net": "+1V8",
+    "from": "C301.1",
+    "from_position_mm": [13.755, 23.725],
+    "to": "R404.1",
+    "to_position_mm": [15.755, 26.725],
+    "direct_length_mm": 3.605551,
+    "proposed_width_mm": 0.3
+  },
+  "blocking_geometry": [
+    {
+      "kind": "pad",
+      "reference": "C105",
+      "pad": "1",
+      "net": "VBUSOUT_SENSE",
+      "bbox_mm": [14.960102, 24.906239, 15.860102, 25.856239],
+      "conservative_clearance_mm": -0.15,
+      "finding": "candidate centerline intersects copper bounding box"
+    },
+    {
+      "kind": "via",
+      "net": "VBUSOUT_SENSE",
+      "position_mm": [15.0, 25.05],
+      "bbox_mm": [14.775, 24.825, 15.225001, 25.275001],
+      "conservative_clearance_mm": -0.074076
+    },
+    {
+      "kind": "track",
+      "net": "VBUSOUT_SENSE",
+      "start_mm": [15.0, 25.05],
+      "end_mm": [15.410102, 25.381239],
+      "width_mm": 0.25,
+      "conservative_clearance_mm": 0.025925
+    },
+    {
+      "kind": "pad",
+      "reference": "C301",
+      "pad": "2",
+      "net": "GND",
+      "bbox_mm": [14.165, 23.525, 14.625, 23.925],
+      "conservative_clearance_mm": 0.080201,
+      "finding": "below 0.100 mm rule even independent of C105 blocker"
+    }
+  ],
+  "disposition": {
+    "materializer_executed": false,
+    "candidate_pcb_created": false,
+    "drc_on_candidate_executed": false,
+    "rule_waiver_used": false,
+    "component_moves": [],
+    "component_rotations": [],
+    "accepted_authority_remains": "route-1bg",
+    "accepted_authority_metrics": {
+      "rule_violations": 0,
+      "unconnected_items": 116,
+      "pin_net_audit": "PASS",
+      "audited_nodes": 268
+    }
+  },
+  "decision": "Reject direct C301.1-to-R404.1 route. Do not dogleg ad hoc in this increment; select another isolated candidate from the accepted route-1bg ratsnest unless a separately probed dogleg is justified later."
+}

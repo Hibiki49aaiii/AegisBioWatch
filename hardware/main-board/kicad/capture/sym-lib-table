@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "AegisBioWatch")(type "KiCad")(uri "${KIPRJMOD}/AegisBioWatch.kicad_sym")(options "")(descr "AegisBioWatch Rev.0 native symbols"))
+)

@@ -1,0 +1,129 @@
+name: r13 route1bn focused coarse recheck
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bn-focused-coarse.yml'
+      - 'tools/reproduce-route1bm-accepted.sh'
+      - 'tools/probe-pcb-r13-route1bm-max4-coarse.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce accepted route1bm
+        run: bash tools/reproduce-route1bm-accepted.sh
+
+      - name: Focused current-route recheck for J8 and R403
+        run: |
+          SRC_PCB=hardware/main-board/pcb/route-r13-1bm/AegisBioWatch-MainBoard-Route1bm-r13.kicad_pcb
+          SRC_REPORT=hardware/main-board/pcb/route-r13-1bm/routing-seed-r13-1bm.json
+
+          python3 tools/probe-pcb-r13-route1bm-max4-coarse.py \
+            --drc-json /tmp/route1bm.json \
+            --pin-net-audit /tmp/route1bm-audit.json \
+            --source-pcb "$SRC_PCB" \
+            --source-report "$SRC_REPORT" \
+            --expected-unconnected 111 \
+            --only-drc-index 3 \
+            --output /tmp/route1bn-j8-coarse.json
+
+          python3 tools/probe-pcb-r13-route1bm-max4-coarse.py \
+            --drc-json /tmp/route1bm.json \
+            --pin-net-audit /tmp/route1bm-audit.json \
+            --source-pcb "$SRC_PCB" \
+            --source-report "$SRC_REPORT" \
+            --expected-unconnected 111 \
+            --only-drc-index 13 \
+            --output /tmp/route1bn-r403-coarse.json
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          j8=json.load(open('/tmp/route1bn-j8-coarse.json'))
+          r403=json.load(open('/tmp/route1bn-r403-coarse.json'))
+          expected={'rule_violations':0,'unconnected_items':111,'pin_net_audit':'PASS','audited_nodes':268}
+          for x,idx in ((j8,3),(r403,13)):
+              assert x['source_gate']==expected
+              assert x['board_modified'] is False
+              assert x['only_drc_index']==idx
+
+          out={
+            'revision':'r13-route1bn-phase-a1-focused-coarse-recheck',
+            'issue':20,
+            'source_gate':expected,
+            'board_modified':False,
+            'candidates':{
+              'j8_index_3': j8['passing_candidates'],
+              'r403_index_13': r403['passing_candidates'],
+            },
+            'release_status':'NOT_FOR_GERBER',
+          }
+          Path('/tmp/route1bn-focused.json').write_text(json.dumps(out,indent=2)+'\n')
+          print('J8_PASSING',j8['passing_candidate_count'])
+          if j8['passing_candidates']:
+              print('J8_BEST',j8['passing_candidates'][0]['best_passing_path'])
+          print('R403_PASSING',r403['passing_candidate_count'])
+          if r403['passing_candidates']:
+              print('R403_BEST',r403['passing_candidates'][0]['best_passing_path'])
+          print(json.dumps(out,indent=2))
+          PY
+
+          (
+            cd /tmp
+            sha256sum route1bn-j8-coarse.json route1bn-r403-coarse.json route1bn-focused.json > route1bn-focused-SHA256SUMS
+          )
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bn-focused-coarse
+          path: |
+            /tmp/route1bn-j8-coarse.json
+            /tmp/route1bn-r403-coarse.json
+            /tmp/route1bn-focused.json
+            /tmp/route1bn-focused-SHA256SUMS
+          if-no-files-found: error
+
+  verify-artifact:
+    needs: focused
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bn-focused-coarse
+          path: artifact
+      - name: Verify downloaded focused Artifact
+        run: |
+          cd artifact
+          sha256sum -c route1bn-focused-SHA256SUMS
+          python3 - <<'PY'
+          import json
+          x=json.load(open('route1bn-focused.json'))
+          assert x['source_gate']=={'rule_violations':0,'unconnected_items':111,'pin_net_audit':'PASS','audited_nodes':268}
+          assert x['board_modified'] is False
+          assert x['release_status']=='NOT_FOR_GERBER'
+          print('DOWNLOADED_ARTIFACT_VERIFY PASS')
+          PY

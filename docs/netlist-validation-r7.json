@@ -1,0 +1,30 @@
+{
+  "kicad_version": "9.0.9",
+  "checks": 63,
+  "passed": 63,
+  "failed": 0,
+  "representative_checks": [
+    {"ref":"U1","pin":"4","expected":"DISP_PWR_EN","actual":"DISP_PWR_EN","pass":true},
+    {"ref":"U1","pin":"11","expected":"DISP_QSPI_D3","actual":"DISP_QSPI_D3","pass":true},
+    {"ref":"U1","pin":"12","expected":"DISP_QSPI_SCK","actual":"DISP_QSPI_SCK","pass":true},
+    {"ref":"U1","pin":"13","expected":"DISP_QSPI_D0","actual":"DISP_QSPI_D0","pass":true},
+    {"ref":"U1","pin":"14","expected":"DISP_QSPI_D2","actual":"DISP_QSPI_D2","pass":true},
+    {"ref":"U1","pin":"15","expected":"DISP_QSPI_D1","actual":"DISP_QSPI_D1","pass":true},
+    {"ref":"U1","pin":"16","expected":"DISP_QSPI_CS_N","actual":"DISP_QSPI_CS_N","pass":true},
+    {"ref":"U1","pin":"17","expected":"AUX_SPI_SCK","actual":"AUX_SPI_SCK","pass":true},
+    {"ref":"U1","pin":"19","expected":"AUX_SPI_MOSI","actual":"AUX_SPI_MOSI","pass":true},
+    {"ref":"U1","pin":"20","expected":"AUX_SPI_MISO","actual":"AUX_SPI_MISO","pass":true},
+    {"ref":"U1","pin":"27","expected":"DISP_RST_N","actual":"DISP_RST_N","pass":true},
+    {"ref":"U2","pin":"21","expected":"CHG_5V","actual":"CHG_5V","pass":true},
+    {"ref":"U2","pin":"32","expected":"+3V0","actual":"+3V0","pass":true},
+    {"ref":"U3","pin":"1","expected":"FLASH_CS_N","actual":"FLASH_CS_N","pass":true},
+    {"ref":"U3","pin":"2","expected":"AUX_SPI_MISO","actual":"AUX_SPI_MISO","pass":true},
+    {"ref":"U3","pin":"5","expected":"AUX_SPI_MOSI","actual":"AUX_SPI_MOSI","pass":true},
+    {"ref":"U3","pin":"6","expected":"AUX_SPI_SCK","actual":"AUX_SPI_SCK","pass":true},
+    {"ref":"NT101","pin":"1","expected":"/PMIC_CHARGER/PVSS1_LOCAL","actual":"/PMIC_CHARGER/PVSS1_LOCAL","pass":true},
+    {"ref":"NT101","pin":"2","expected":"GND","actual":"GND","pass":true},
+    {"ref":"NT102","pin":"1","expected":"/PMIC_CHARGER/PVSS2_LOCAL","actual":"/PMIC_CHARGER/PVSS2_LOCAL","pass":true},
+    {"ref":"NT102","pin":"2","expected":"GND","actual":"GND","pass":true}
+  ],
+  "note": "The full local validation executed 63 critical pin-to-net checks; representative checks are retained in Git while the r7 artifact contains the complete validation file."
+}

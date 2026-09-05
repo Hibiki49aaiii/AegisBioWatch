@@ -1,0 +1,80 @@
+{
+  "revision": "r13-route1bo-j8-1v8-phase-a2",
+  "status": "PHASE_A2_LOCAL_REFINE_COMPLETE",
+  "issue": 21,
+  "release_status": "NOT_FOR_GERBER",
+  "base": {
+    "accepted_authority": "route-1bn",
+    "rule_violations": 0,
+    "unconnected_items": 110,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268
+  },
+  "phase_a1": {
+    "workflow_run_id": 33414128987,
+    "inventory_job_id": 99560606286,
+    "verify_artifact_job_id": 99565200085,
+    "artifact_id": 9766840998,
+    "artifact_digest": "sha256:8e2604481ca5c3e9e9d79cd3653aaf71cee4fb1c19d1bcb4e732b63058b1169d",
+    "raw_pairs": 110,
+    "evaluated_candidates": 8,
+    "passing_candidates": 1,
+    "board_modified": false
+  },
+  "phase_a2": {
+    "workflow_run_id": 33446851666,
+    "refine_job_id": 99667764079,
+    "verify_artifact_job_id": 99668973400,
+    "artifact_id": 9778457767,
+    "artifact_digest": "sha256:73aade236876505bdca08ff126c8bf399f46498d7a88f8ebf4521c237f89ec38",
+    "grid_mm": 0.05,
+    "paths_evaluated": 441,
+    "passing_paths": 288,
+    "board_modified": false
+  },
+  "semantic_decision": {
+    "candidate_selected_for_phase_b": true,
+    "selection": "+1V8 source track -> J8.1/+1V8",
+    "reason": "The accepted route-1bn 110-item screen produced exactly one ordinary passing candidate. The three numberless J8 items are netless drill-sized pads in the TC2030_SWD_6 footprint. Phase B is conditional on an exact KiCad PAD_ATTRIB_NPTH identity gate before any copper is created.",
+    "phase_b_materialization_condition": "All three numberless J8 pads must be exact PAD_ATTRIB_NPTH with empty net, expected coordinates and 0.9906 mm drill/size."
+  },
+  "selected_phase_b_path": {
+    "drc_index": 3,
+    "net": "+1V8",
+    "source_track_endpoint_mm": [10.305, 4.72],
+    "source_track_expected_length_mm": 6.365,
+    "target": {
+      "reference": "J8",
+      "value": "TC2030_SWD_6",
+      "pad": "1",
+      "net": "+1V8",
+      "position_mm": [12.105, 15.26]
+    },
+    "path_family": "HVHV",
+    "points_mm": [
+      [10.305, 4.72],
+      [9.7, 4.72],
+      [9.7, 15.8],
+      [12.105, 15.8],
+      [12.105, 15.26]
+    ],
+    "segment_count": 4,
+    "segment_lengths_mm": [0.605, 11.08, 2.405, 0.54],
+    "path_length_mm": 14.63,
+    "track_width_mm": 0.3,
+    "minimum_conservative_clearance_mm": 0.4897,
+    "required_clearance_mm": 0.1,
+    "nearest_unrelated_copper": {
+      "kind": "pad",
+      "reference": "J8",
+      "pad": "",
+      "net": ""
+    }
+  },
+  "j8_numberless_pad_observation": [
+    {"position_mm": [10.835, 14.625], "size_mm": [0.9906, 0.9906], "drill_mm": [0.9906, 0.9906], "attribute": "3", "net": ""},
+    {"position_mm": [15.915, 13.609], "size_mm": [0.9906, 0.9906], "drill_mm": [0.9906, 0.9906], "attribute": "3", "net": ""},
+    {"position_mm": [15.915, 15.641], "size_mm": [0.9906, 0.9906], "drill_mm": [0.9906, 0.9906], "attribute": "3", "net": ""}
+  ],
+  "accepted_authority_changed": false
+}

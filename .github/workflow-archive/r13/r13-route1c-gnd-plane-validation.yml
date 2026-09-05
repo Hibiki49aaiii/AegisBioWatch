@@ -1,0 +1,94 @@
+name: r13 route1c In1 GND plane validation
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+    paths:
+      - '.github/workflows/r13-route1c-gnd-plane-validation.yml'
+      - 'tools/audit-pcb-pin-nets.py'
+      - 'tools/materialize-pcb-r13-route1b-recovered.py'
+      - 'tools/materialize-pcb-r13-route1c-gnd-plane.py'
+      - 'tools/materialize-pcb-r13-recovered.py'
+      - 'tools/recover-r8-netlist-from-legacy.py'
+      - 'tools/rebuild-pcb-r11-from-r8-r10.py'
+      - 'tools/rebuild-pcb-r11-recovered.py'
+      - 'hardware/main-board/kicad/capture/**'
+      - 'hardware/main-board/kicad/generated/BOM-r8.csv'
+      - 'hardware/main-board/pcb/AegisBioWatch-MainBoard-Floorplan-r10.kicad_pcb'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+      - name: Recover r8 and rebuild r11
+        run: |
+          python3 tools/recover-r8-netlist-from-legacy.py
+          python3 tools/rebuild-pcb-r11-recovered.py --netlist hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml
+          kicad-cli pcb drc --format json --severity-all -o /tmp/r11.json hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb --output /tmp/r11-audit.json
+          python3 - <<'PY'
+          import json; from pathlib import Path
+          d=json.load(open('/tmp/r11.json')); s={'rule_violations':len(d.get('violations',[])),'unconnected_items':len(d.get('unconnected_items',[]))}; print(s); Path('/tmp/r11-summary.json').write_text(json.dumps(s))
+          if s!={'rule_violations':0,'unconnected_items':186}: raise SystemExit('r11 gate failed')
+          PY
+      - name: Materialize and validate r13 placement
+        run: |
+          python3 tools/materialize-pcb-r13-recovered.py --drc-summary /tmp/r11-summary.json --pin-net-audit /tmp/r11-audit.json
+          kicad-cli pcb drc --format json --severity-all -o /tmp/r13.json hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/placement-r13/AegisBioWatch-MainBoard-Placement-r13.kicad_pcb --output /tmp/r13-audit.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/r13.json')); v=len(d.get('violations',[])); u=len(d.get('unconnected_items',[])); print('r13',v,u)
+          if v!=0 or u!=186: raise SystemExit('r13 placement gate failed')
+          PY
+      - name: Materialize and validate route1b
+        run: |
+          python3 tools/materialize-pcb-r13-route1b-recovered.py --placement-drc-json /tmp/r13.json --placement-pin-net-audit /tmp/r13-audit.json
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1b.json hardware/main-board/pcb/route-r13-1b/AegisBioWatch-MainBoard-Route1b-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/route-r13-1b/AegisBioWatch-MainBoard-Route1b-r13.kicad_pcb --output /tmp/route1b-audit.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/route1b.json')); v=len(d.get('violations',[])); u=len(d.get('unconnected_items',[])); print('route1b',v,u)
+          if v!=0 or u!=184: raise SystemExit('route1b gate failed')
+          PY
+      - name: Materialize route1c In1 GND plane
+        run: python3 tools/materialize-pcb-r13-route1c-gnd-plane.py --route1b-drc-json /tmp/route1b.json --route1b-pin-net-audit /tmp/route1b-audit.json
+      - name: KiCad route1c DRC
+        run: |
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1c.json hardware/main-board/pcb/route-r13-1c/AegisBioWatch-MainBoard-Route1c-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml --pcb hardware/main-board/pcb/route-r13-1c/AegisBioWatch-MainBoard-Route1c-r13.kicad_pcb --output /tmp/route1c-audit.json
+          python3 - <<'PY'
+          import json, re; from pathlib import Path
+          d=json.load(open('/tmp/route1c.json')); a=json.load(open('/tmp/route1c-audit.json')); r=json.load(open('hardware/main-board/pcb/route-r13-1c/routing-seed-r13-1c.json'))
+          text=Path('hardware/main-board/pcb/route-r13-1c/AegisBioWatch-MainBoard-Route1c-r13.kicad_pcb').read_text()
+          out={'rule_violations':len(d.get('violations',[])),'unconnected_items':len(d.get('unconnected_items',[])),'pin_net_audit':a.get('result'),'gnd_zone_named':r['zone_name'] in text,'in1_layer_present':'(layer "In1.Cu")' in text,'filled_polygon_count':text.count('(filled_polygon')}
+          print(json.dumps(out,indent=2)); Path('/tmp/route1c-summary.json').write_text(json.dumps(out,indent=2))
+          if out['rule_violations']!=0: raise SystemExit('route1c has rule violations')
+          if out['unconnected_items']>184: raise SystemExit('route1c increased ratsnest')
+          if out['pin_net_audit']!='PASS': raise SystemExit('route1c pin/net audit failed')
+          if not out['gnd_zone_named'] or not out['in1_layer_present'] or out['filled_polygon_count']<1: raise SystemExit('route1c GND plane evidence missing')
+          PY
+      - name: Package evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/e
+          for f in hardware/main-board/pcb/route-r13-1c/AegisBioWatch-MainBoard-Route1c-r13.kicad_pcb hardware/main-board/pcb/route-r13-1c/routing-seed-r13-1c.json /tmp/route1c.json /tmp/route1c-summary.json /tmp/route1c-audit.json; do test -f "$f" && cp "$f" /tmp/e/; done
+          sha256sum /tmp/e/* > /tmp/e/SHA256SUMS.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1c-gnd-plane-evidence
+          path: /tmp/e/**

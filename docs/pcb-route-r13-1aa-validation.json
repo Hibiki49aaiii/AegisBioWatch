@@ -1,0 +1,33 @@
+{
+  "status": "ACCEPTED",
+  "revision": "route-1aa",
+  "scope": "C109.2/GND local closure into continuous In1.Cu GND",
+  "workflow_run_id": 32044164012,
+  "artifact_id": 9292505154,
+  "artifact_name": "r13-route1aa-c109-gnd-evidence",
+  "artifact_digest": "sha256:8b848e682571f2925f09d73515130669ec19a8631240a3d18936ac278f05c49d",
+  "kicad_version": "9.0.9",
+  "rule_violations": 0,
+  "unconnected_items": 148,
+  "pin_net_audit": "PASS",
+  "audited_nodes": 268,
+  "source_route1z_sha256_same_run": "75b873971b23c766ee4e1f1d6b0d5f2b89b76683f93dd67b83c6b5172f365b94",
+  "route1aa_pcb_sha256_same_run": "afbcc43164de7856a891c7d3dd29a3e0096941bdd00806a581ae1917c6549e96",
+  "accepted_geometry": {
+    "c109_2_gnd_mm": [11.82989, 20.851691],
+    "gnd_via_mm": [12.55, 20.85],
+    "track_width_mm": 0.30,
+    "via_size_mm": 0.60,
+    "via_drill_mm": 0.30,
+    "segments": 1,
+    "vias_added": 1
+  },
+  "design_rationale": "Dedicated short local GND via for the DISP_SW capacitor; avoids daisy-chaining this capacitor through unrelated nRF decoupling ground pads.",
+  "disp_sw_status": "SIGNAL_SIDE_UNCHANGED_PENDING_SEPARATE_VALIDATION",
+  "chg_5v_status": "UNCHANGED_REJECTED_AND_DEFERRED",
+  "i2c_scl_status": "DEFERRED_STANDARD_RULE_CORRIDOR_NOT_DEMONSTRATED",
+  "ldo2_in_status": "DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD",
+  "component_moves": [],
+  "component_rotations": [],
+  "release_status": "NOT_FOR_GERBER"
+}

@@ -1,0 +1,175 @@
+name: recovered r8 topology and r11 validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+    paths:
+      - '.github/workflows/r11-recovered-topology-validation.yml'
+      - 'tools/recover-r8-netlist-from-legacy.py'
+      - 'tools/rebuild-pcb-r11-from-r8-r10.py'
+      - 'tools/rebuild-pcb-r11-recovered.py'
+      - 'hardware/main-board/kicad/capture/**'
+      - 'hardware/main-board/kicad/generated/BOM-r8.csv'
+      - 'hardware/main-board/pcb/AegisBioWatch-MainBoard-Floorplan-r10.kicad_*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover-and-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9 and footprint libraries
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+          python3 -c 'import pcbnew; print(pcbnew.GetBuildVersion())'
+
+      - name: Recover deterministic r8 PCB topology
+        run: python3 tools/recover-r8-netlist-from-legacy.py
+
+      - name: Rebuild real-net r11 seed from recovered topology and r10 floorplan
+        run: |
+          python3 tools/rebuild-pcb-r11-recovered.py \
+            --netlist hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml
+
+      - name: KiCad 9.0.9 PCB DRC on rebuilt r11
+        shell: bash
+        run: |
+          set -euxo pipefail
+          kicad-cli pcb drc --format json --severity-all \
+            -o /tmp/drc-r11-rebuilt.json \
+            hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          d=json.load(open('/tmp/drc-r11-rebuilt.json'))
+          v=d.get('violations',[]); u=d.get('unconnected_items',[])
+          summary={
+              'rule_violations':len(v),
+              'unconnected_items':len(u),
+              'violation_types':dict(Counter(x.get('type','?') for x in v if isinstance(x,dict))),
+          }
+          Path('/tmp/drc-r11-rebuilt-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print(json.dumps(summary,indent=2))
+          if v:
+              print('First DRC violations:')
+              print(json.dumps(v[:30],indent=2))
+          PY
+
+      - name: Audit every physical PCB pad against recovered XML
+        shell: bash
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, xml.etree.ElementTree as ET
+          from collections import defaultdict
+          from pathlib import Path
+          import pcbnew
+
+          xmlp=Path('hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml')
+          pcbp=Path('hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb')
+          r=ET.parse(xmlp).getroot()
+          expected={}
+          for n in r.findall('./nets/net'):
+              name=n.attrib['name']
+              for node in n.findall('node'):
+                  expected[(node.attrib['ref'],node.attrib['pin'])]=name
+
+          b=pcbnew.LoadBoard(str(pcbp))
+          physical=defaultdict(list)
+          for fp in b.GetFootprints():
+              ref=fp.GetReference()
+              for pad in fp.Pads():
+                  physical[(ref,str(pad.GetNumber()))].append(pad.GetNetname() or '')
+
+          audited=[k for k in expected if k[0] not in {'J3','J5','J6'}]
+          mismatches=[]
+          for k in audited:
+              nets=physical.get(k,[])
+              if not nets or any(n != expected[k] for n in nets):
+                  mismatches.append({
+                      'ref':k[0], 'pin':k[1], 'expected':expected[k],
+                      'physical_pad_nets':nets,
+                  })
+
+          unexpected=[]
+          for (ref,pin), nets in physical.items():
+              if (ref,pin) not in expected:
+                  nonempty=[n for n in nets if n]
+                  if nonempty:
+                      unexpected.append({'ref':ref,'pin':pin,'physical_pad_nets':nets})
+
+          duplicate_groups={
+              f'{ref}.{pin}':nets for (ref,pin),nets in physical.items() if len(nets)>1
+          }
+          report={
+              'source_nodes':len(expected),
+              'audited_present_source_nodes':len(audited),
+              'physical_pad_count':sum(len(v) for v in physical.values()),
+              'duplicate_pad_number_groups':duplicate_groups,
+              'mismatches':mismatches,
+              'unexpected_pad_nets':unexpected,
+              'result':'PASS' if not mismatches and not unexpected else 'FAIL',
+          }
+          Path('/tmp/r11-rebuilt-pin-net-audit.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          PY
+
+      - name: Assert recovered r11 validation gate
+        shell: bash
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          drc=Path('/tmp/drc-r11-rebuilt-summary.json')
+          audit=Path('/tmp/r11-rebuilt-pin-net-audit.json')
+          if not drc.exists() or not audit.exists():
+              raise SystemExit('missing required executed validation evidence')
+          d=json.loads(drc.read_text())
+          a=json.loads(audit.read_text())
+          print(f"Recovered r11 gate: rule violations={d['rule_violations']}, unconnected={d['unconnected_items']}, pin/net={a['result']}")
+          if d['rule_violations'] != 0:
+              raise SystemExit('recovered r11 still has KiCad rule violations')
+          if a['result'] != 'PASS' or a['audited_present_source_nodes'] != 268:
+              raise SystemExit('recovered r11 pin/net audit failed')
+          PY
+
+      - name: Package executed evidence
+        shell: bash
+        if: always()
+        run: |
+          mkdir -p /tmp/r11-recovered-evidence
+          for f in \
+            docs/r8-topology-recovery-validation.json \
+            hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
+            hardware/main-board/pcb/placement-r11-rebuilt/placement-seed-manifest-r11-rebuilt.json \
+            hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb \
+            hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pro \
+            /tmp/drc-r11-rebuilt.json \
+            /tmp/drc-r11-rebuilt-summary.json \
+            /tmp/r11-rebuilt-pin-net-audit.json; do
+              test -f "$f" && cp "$f" /tmp/r11-recovered-evidence/
+          done
+          sha256sum /tmp/r11-recovered-evidence/* | tee /tmp/r11-recovered-evidence/SHA256SUMS.txt || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r11-recovered-topology-evidence
+          path: /tmp/r11-recovered-evidence/**
+          if-no-files-found: warn

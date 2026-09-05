@@ -1,0 +1,93 @@
+{
+  "revision": "r13-route1bi-phase-a3-dogleg-selection",
+  "status": "SELECTED_FOR_PHASE_B",
+  "source_authority": "route-1bg",
+  "source_commit": "cf138dd4835cc152c60c49d99f8a6d145745acbb",
+  "source_metrics": {
+    "rule_violations": 0,
+    "unconnected_items": 116,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268
+  },
+  "workflow_run_id": 33245640868,
+  "job_id": 99082503654,
+  "artifact_id": 9712771982,
+  "artifact_zip_sha256": "dae9cb709e959a18e1be7a2220272d08f13018ac35769080b065f6f4e81a2d78",
+  "board_modified": false,
+  "evaluated_candidate_count": 17,
+  "passing_candidate_count": 4,
+  "selected": {
+    "drc_index": 3,
+    "net": "+1V8",
+    "from": "U3.8",
+    "from_value": "W25Q256JWPIQ 256Mbit",
+    "from_position_mm": [11.08, 4.72],
+    "to": "C1.1",
+    "to_value": "10uF",
+    "to_position_mm": [10.305, 11.085],
+    "path_family": "L-HV",
+    "points_mm": [
+      [11.08, 4.72],
+      [10.305, 4.72],
+      [10.305, 11.085]
+    ],
+    "segment_count": 2,
+    "segment_lengths_mm": [0.775, 6.365],
+    "total_length_mm": 7.14,
+    "track_width_mm": 0.3,
+    "minimum_conservative_clearance_mm": 0.3,
+    "nearest_unrelated_copper": {
+      "kind": "pad",
+      "reference": "U3",
+      "pad": "5",
+      "net": "AUX_SPI_MOSI"
+    },
+    "semantic_reason": "Flash +1V8 supply to local 10uF decoupling/bulk capacitor; ordinary pad-to-pad power closure."
+  },
+  "alternatives": [
+    {
+      "candidate": "R302.1/+1V8 to R404.1/+1V8",
+      "path_family": "VHV",
+      "segment_count": 3,
+      "total_length_mm": 5.25,
+      "minimum_conservative_clearance_mm": 0.125,
+      "disposition": "not selected",
+      "reason": "smaller margin and nearest blocker is R501.1/CHG_5V"
+    },
+    {
+      "candidate": "D101.2/DOCK_5V_RAW to D102.1/DOCK_5V_RAW",
+      "path_family": "HVH",
+      "segment_count": 3,
+      "total_length_mm": 12.555,
+      "minimum_conservative_clearance_mm": 0.26576,
+      "disposition": "not selected",
+      "reason": "materially longer power-path closure; defer until dock power routing is addressed as a group"
+    },
+    {
+      "candidate": "+1V8 track to R403.1/+1V8",
+      "path_family": "HVH",
+      "segment_count": 3,
+      "total_length_mm": 12.76,
+      "minimum_conservative_clearance_mm": 0.099999,
+      "disposition": "rejected",
+      "reason": "numerically at/below the 0.100 mm threshold; insufficient engineering margin"
+    }
+  ],
+  "package_context": {
+    "U3_footprint": "WSON-8-1EP_8x6mm_P1.27mm_EP3.4x4.3mm",
+    "U3_pad7": {
+      "net": "FLASH_HOLD_N",
+      "position_mm": [11.08, 5.99]
+    },
+    "U3_pad5": {
+      "net": "AUX_SPI_MOSI",
+      "position_mm": [11.08, 8.53]
+    },
+    "C1_pad2": {
+      "net": "GND",
+      "position_mm": [11.265, 11.085]
+    },
+    "note": "Selected x=10.305 vertical lane runs inside the WSON courtyard but between the right-side signal pad row and the exposed-pad region. No unrelated F.Cu copper blocker is present in the conservative probe. Final KiCad DRC is mandatory; release remains NOT_FOR_GERBER."
+  },
+  "decision": "Proceed to exact Phase B validation. Do not treat the Phase A3 screen as accepted routing authority."
+}

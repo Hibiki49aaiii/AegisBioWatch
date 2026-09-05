@@ -1,0 +1,56 @@
+{
+  "revision": "r13-route1j-nettie-gnd",
+  "status": "ACCEPTED_EXECUTED_KICAD_BASELINE",
+  "source_baseline": "r13-route1i-pvss-trees",
+  "workflow": {
+    "name": "r13 route1j NetTie GND validation",
+    "run_id": 31344241727,
+    "kicad_version": "9.0.9"
+  },
+  "result": {
+    "rule_violations": 0,
+    "unconnected_items": 170,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268
+  },
+  "scope": {
+    "track_segments_added": 2,
+    "vias_added": 2,
+    "gnd_track_width_mm": 0.3,
+    "via_size_mm": 0.6,
+    "via_drill_mm": 0.3,
+    "component_moves": [],
+    "component_rotations": [],
+    "pvss_local_copper_modified": false,
+    "in1_gnd_plane_preserved_and_refilled": true,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  },
+  "connections": {
+    "NT101.2/GND": {
+      "pad_mm": [9.938265, 24.624113],
+      "gnd_via_mm": [10.35, 25.05],
+      "target_reference": "continuous In1.Cu GND zone"
+    },
+    "NT102.2/GND": {
+      "pad_mm": [9.650627, 32.045243],
+      "gnd_via_mm": [10.35, 32.05],
+      "target_reference": "continuous In1.Cu GND zone"
+    }
+  },
+  "rejected_geometry": {
+    "NT101_GND_VIA_mm": [10.4, 25.2],
+    "actual_clearance_mm": 0.0935,
+    "required_clearance_mm": 0.1,
+    "reason": "clearance to PVSS1_LOCAL In2.Cu trunk; rejected rather than waived"
+  },
+  "same_run_pcb_sha256": "0381fb090fbad8a6fecec3f9618361aa1ed6d23b1281a833cd3b967e5f00ed35",
+  "evidence_artifact": {
+    "id": 9046780427,
+    "name": "r13-route1j-nettie-gnd-evidence",
+    "digest": "sha256:92c4bd1378ce1efecfec80bd75ff3d78d37e8c56ac753ccad2b8a9a96ff35984",
+    "size_bytes": 72422
+  },
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}

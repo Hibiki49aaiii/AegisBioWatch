@@ -1,0 +1,106 @@
+name: Phase 1 r13 KiCad validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited]
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild-r11:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Diagnose r7 archive and r8 patch integrity
+        run: python3 tools/diagnose-native-r7-r8-chain.py | tee /tmp/native-chain-diagnostic.json
+
+      - name: Install and assert KiCad 9.0.9 plus footprint libraries
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y kicad kicad-footprints
+          KICAD_VERSION="$(kicad-cli --version | head -n1)"
+          echo "$KICAD_VERSION"
+          echo "$KICAD_VERSION" | grep -E '(^|[[:space:]])9\.0\.9([[:space:]]|$)'
+
+      - name: Materialize r8 electrical authority
+        run: python3 tools/materialize-native-r8.py
+
+      - name: Re-run r8 ERC
+        shell: bash
+        run: |
+          kicad-cli sch erc --format json --severity-all \
+            -o /tmp/erc-r8.json \
+            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-Rev0.kicad_sch
+          cat /tmp/erc-r8.json
+
+      - name: Export authoritative r8 XML netlist
+        shell: bash
+        run: |
+          kicad-cli sch export netlist --format kicadxml \
+            -o /tmp/aegis-r8.xml \
+            hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-Rev0.kicad_sch
+
+      - name: Probe footprint assignments
+        env:
+          R8_NETLIST: /tmp/aegis-r8.xml
+        run: python3 tools/probe-r8-netlist-footprints.py | tee /tmp/r8-footprint-probe.json
+
+      - name: Rebuild real-net r11 from r8 plus r10
+        run: |
+          python3 tools/rebuild-pcb-r11-from-r8-r10.py --netlist /tmp/aegis-r8.xml \
+            | tee /tmp/r11-rebuild.log
+
+      - name: KiCad r11 rebuilt PCB DRC
+        shell: bash
+        run: |
+          set +e
+          kicad-cli pcb drc --format json --severity-all \
+            -o /tmp/drc-r11-rebuilt.json \
+            hardware/main-board/pcb/placement-r11-rebuilt/AegisBioWatch-MainBoard-PlacementSeed-r11-rebuilt.kicad_pcb
+          RC=$?
+          echo "R11_DRC_RC=$RC" >> "$GITHUB_ENV"
+          test -f /tmp/drc-r11-rebuilt.json && cat /tmp/drc-r11-rebuilt.json
+          exit 0
+
+      - name: Summarize rebuilt r11 state
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          erc=json.loads(Path('/tmp/erc-r8.json').read_text())
+          d=json.loads(Path('/tmp/drc-r11-rebuilt.json').read_text())
+          v=d.get('violations',[]); u=d.get('unconnected_items',[])
+          print('r8 ERC violations=', len(erc.get('violations',[])))
+          print('rebuilt r11 rule violations=', len(v))
+          print('rebuilt r11 unconnected items=', len(u))
+          print('violation types=', dict(Counter(x.get('type','?') for x in v if isinstance(x,dict))))
+          print('first violations=', json.dumps(v[:20], indent=2))
+          PY
+
+      - name: Preserve rebuild evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-r11-rebuilt-evidence
+          if-no-files-found: warn
+          path: |
+            /tmp/native-chain-diagnostic.json
+            /tmp/erc-r8.json
+            /tmp/aegis-r8.xml
+            /tmp/r8-footprint-probe.json
+            /tmp/r11-rebuild.log
+            /tmp/drc-r11-rebuilt.json
+            hardware/main-board/pcb/placement-r11-rebuilt/**

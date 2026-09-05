@@ -1,0 +1,92 @@
+name: r13 route1h segfault probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad kicad-footprints unzip
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Restore accepted route1g same-run evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/9040511709/zip" \
+            -o /tmp/route1g.zip
+          rm -rf /tmp/route1g-artifact
+          mkdir -p /tmp/route1g-artifact hardware/main-board/pcb/route-r13-1g
+          unzip -q /tmp/route1g.zip -d /tmp/route1g-artifact
+          find /tmp/route1g-artifact -maxdepth 2 -type f -printf '%P\n' | sort
+          cp "$(find /tmp/route1g-artifact -name 'AegisBioWatch-MainBoard-Route1g-r13.kicad_pcb' -print -quit)" hardware/main-board/pcb/route-r13-1g/AegisBioWatch-MainBoard-Route1g-r13.kicad_pcb
+          cp "$(find /tmp/route1g-artifact -name 'routing-seed-r13-1g.json' -print -quit)" hardware/main-board/pcb/route-r13-1g/routing-seed-r13-1g.json
+          cp "$(find /tmp/route1g-artifact -name 'route1g.json' -print -quit)" /tmp/route1g.json
+          cp "$(find /tmp/route1g-artifact -name 'route1g-audit.json' -print -quit)" /tmp/route1g-audit.json
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path('hardware/main-board/pcb/route-r13-1g/AegisBioWatch-MainBoard-Route1g-r13.kicad_pcb')
+          r=json.load(open('hardware/main-board/pcb/route-r13-1g/routing-seed-r13-1g.json'))
+          h=hashlib.sha256(p.read_bytes()).hexdigest()
+          d=json.load(open('/tmp/route1g.json')); a=json.load(open('/tmp/route1g-audit.json'))
+          print({'pcb_sha256':h,'report_sha256':r.get('output_sha256'),'violations':len(d.get('violations',[])),'unconnected':len(d.get('unconnected_items',[])),'audit':a.get('result')})
+          if h!=r.get('output_sha256') or len(d.get('violations',[]))!=0 or len(d.get('unconnected_items',[]))!=178 or a.get('result')!='PASS':
+              raise SystemExit('accepted route1g artifact gate failed')
+          PY
+
+      - name: Materialize route1h with faulthandler
+        run: |
+          set -o pipefail
+          python3 -X faulthandler tools/materialize-pcb-r13-route1h-pvss-input-loops.py \
+            --route1g-drc-json /tmp/route1g.json \
+            --route1g-pin-net-audit /tmp/route1g-audit.json \
+            2>&1 | tee /tmp/route1h-materialize.log
+
+      - name: DRC route1h when materialized
+        if: success()
+        run: |
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1h.json hardware/main-board/pcb/route-r13-1h/AegisBioWatch-MainBoard-Route1h-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py \
+            --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
+            --pcb hardware/main-board/pcb/route-r13-1h/AegisBioWatch-MainBoard-Route1h-r13.kicad_pcb \
+            --output /tmp/route1h-audit.json || true
+
+      - name: Package probe evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/e
+          for f in \
+            /tmp/route1h-materialize.log \
+            /tmp/route1h.json \
+            /tmp/route1h-audit.json \
+            hardware/main-board/pcb/route-r13-1h/AegisBioWatch-MainBoard-Route1h-r13.kicad_pcb \
+            hardware/main-board/pcb/route-r13-1h/routing-seed-r13-1h.json; do
+            test -f "$f" && cp "$f" /tmp/e/
+          done
+          sha256sum /tmp/e/* > /tmp/e/SHA256SUMS.txt || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1h-segfault-probe-evidence
+          path: /tmp/e/**
+          if-no-files-found: warn

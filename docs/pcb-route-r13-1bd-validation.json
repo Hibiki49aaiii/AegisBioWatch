@@ -1,0 +1,80 @@
+{
+  "revision": "r13-route1bd-c3-c4-1v8-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 10,
+  "base_accepted_revision": "route-1bc",
+  "candidate_commit": "3dfa1af4e01e523a4c230676ee2644cd4d49b72b",
+  "executed_authority": {
+    "workflow_name": "r13 route1bd C3-C4 +1V8 validation",
+    "workflow_run_id": 33240001708,
+    "job_id": 99067590485,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 119,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268
+  },
+  "routing_scope": {
+    "net": "+1V8",
+    "from": {"reference": "C3", "pad": "1", "value": "100nF", "position_mm": [41.005, 13.475]},
+    "to": {"reference": "C4", "pad": "1", "value": "100nF", "position_mm": [41.005, 14.975]},
+    "adjacent_ground_pads": {
+      "C3.2_mm": [41.645, 13.475],
+      "C4.2_mm": [41.645, 14.975]
+    },
+    "track_width_mm": 0.3,
+    "track_length_mm": 1.5,
+    "track_segments_added": 1,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "preflight": {
+    "conservative_lateral_gap_to_adjacent_gnd_pad_column_mm": 0.26,
+    "minimum_clearance_rule_mm": 0.1,
+    "executed_kicad_remains_authoritative": true
+  },
+  "preservation_gates": {
+    "accepted_route1bc_geometry_modified": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9711077464,
+    "artifact_name": "r13-route1bd-c3-c4-1v8-evidence",
+    "zip_sha256": "9d7dca83481394b87fe6292b444ca04638a54f26ad512f5289151c2ce4c356b7",
+    "pcb_sha256": "597d86745b63580962a57ee3b04677185648229fd4a5fee1301036cc89fa1690",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "drc_json_sha256": "1e62901c42245755275c19cd5b458d90b60730601e76ecc5d696824d2d3042d7",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "summary_json_sha256": "3306857429922f0422316c9a6799025abbbb86ca09438b006b5895ab507b3509",
+    "routing_seed_sha256": "26043799f19264501f6a482d2fc1071fca35bd2fb043e1538e32c0d127ae3b42",
+    "sha256sums_sha256": "f271be45e2d2a4fd007693c3ec0943ae2933492b6c53de805e417d01d5e4130b"
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "executed KiCad DRC",
+      "expected unconnected count",
+      "268-node pin/net audit",
+      "exact one-segment zero-via scope",
+      "component identity/net/coordinate gates",
+      "accepted baseline preservation",
+      "frozen interface preservation"
+    ]
+  },
+  "deferred_items_unchanged": [
+    "C4.1/+1V8 to C302.1/+1V8",
+    "J7 GND chain",
+    "C401.2/GND RF-adjacent",
+    "U2.30/LDO2_IN to R106.2",
+    "CHG_5V",
+    "U2.14/SYS_I2C_SCL to R104.2",
+    "RF routing/matching",
+    "J3/J5/J6 supplier/mechanical interfaces"
+  ]
+}

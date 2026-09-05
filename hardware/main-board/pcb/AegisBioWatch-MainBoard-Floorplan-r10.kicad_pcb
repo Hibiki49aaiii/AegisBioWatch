@@ -1,0 +1,730 @@
+(kicad_pcb
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(general
+		(thickness 0.8)
+		(legacy_teardrops no)
+	)
+	(paper "A4")
+	(title_block
+		(title "AegisBioWatch Main Board Floorplan")
+		(date "2026-08-09")
+		(rev "Phase 1 r10 floorplan")
+		(company "AegisBioWatch")
+		(comment 1 "PROVISIONAL floorplan; not Gerber authority")
+		(comment 2 "Electrical authority remains validated r8 until J3/J5/J6 close")
+	)
+	(layers
+		(0 "F.Cu" signal "Top_layer")
+		(4 "In1.Cu" signal)
+		(6 "In2.Cu" signal)
+		(2 "B.Cu" signal)
+		(9 "F.Adhes" user "F.Adhesive")
+		(11 "B.Adhes" user "B.Adhesive")
+		(13 "F.Paste" user)
+		(15 "B.Paste" user)
+		(5 "F.SilkS" user "F.Silkscreen")
+		(7 "B.SilkS" user "B.Silkscreen")
+		(1 "F.Mask" user)
+		(3 "B.Mask" user)
+		(17 "Dwgs.User" user "User.Drawings")
+		(19 "Cmts.User" user "User.Comments")
+		(25 "Edge.Cuts" user)
+		(27 "Margin" user)
+		(31 "F.CrtYd" user "F.Courtyard")
+		(29 "B.CrtYd" user "B.Courtyard")
+		(35 "F.Fab" user)
+		(33 "B.Fab" user)
+	)
+	(setup
+		(stackup
+			(layer "F.SilkS"
+				(type "Top Silk Screen")
+				(color "White")
+				(material "Liquid Photo")
+			)
+			(layer "F.Paste"
+				(type "Top Solder Paste")
+			)
+			(layer "F.Mask"
+				(type "Top Solder Mask")
+				(color "Green")
+				(thickness 0.01)
+				(material "Dry Film")
+				(epsilon_r 3.3)
+				(loss_tangent 0)
+			)
+			(layer "F.Cu"
+				(type "copper")
+				(thickness 0.018)
+			)
+			(layer "dielectric 1"
+				(type "prepreg")
+				(thickness 0.1)
+				(material "FR4")
+				(epsilon_r 4.5)
+				(loss_tangent 0.02)
+			)
+			(layer "In1.Cu"
+				(type "copper")
+				(thickness 0.018)
+			)
+			(layer "dielectric 2"
+				(type "core")
+				(thickness 0.526)
+				(material "FR4")
+				(epsilon_r 4.5)
+				(loss_tangent 0.02)
+			)
+			(layer "In2.Cu"
+				(type "copper")
+				(thickness 0.018)
+			)
+			(layer "dielectric 3"
+				(type "prepreg")
+				(thickness 0.1)
+				(material "FR4")
+				(epsilon_r 4.5)
+				(loss_tangent 0.02)
+			)
+			(layer "B.Cu"
+				(type "copper")
+				(thickness 0.018)
+			)
+			(layer "B.Mask"
+				(type "Bottom Solder Mask")
+				(color "Green")
+				(thickness 0.01)
+				(material "Dry Film")
+				(epsilon_r 3.3)
+				(loss_tangent 0)
+			)
+			(layer "B.Paste"
+				(type "Bottom Solder Paste")
+			)
+			(layer "B.SilkS"
+				(type "Bottom Silk Screen")
+				(color "White")
+				(material "Liquid Photo")
+			)
+			(copper_finish "ENIG")
+			(dielectric_constraints no)
+		)
+		(pad_to_mask_clearance 0)
+		(allow_soldermask_bridges_in_footprints no)
+		(tenting front back)
+		(aux_axis_origin 0 0)
+		(grid_origin 0 0)
+		(pcbplotparams
+			(layerselection 0x00000000_00000000_000010fc_ffffffff)
+			(plot_on_all_layers_selection 0x00000000_00000000_00001000_00000000)
+			(disableapertmacros no)
+			(usegerberextensions no)
+			(usegerberattributes yes)
+			(usegerberadvancedattributes yes)
+			(creategerberjobfile yes)
+			(dashed_line_dash_ratio 12.000000)
+			(dashed_line_gap_ratio 3.000000)
+			(svgprecision 6)
+			(plotframeref no)
+			(mode 1)
+			(useauxorigin no)
+			(hpglpennumber 1)
+			(hpglpenspeed 20)
+			(hpglpendiameter 15.000000)
+			(pdf_front_fp_property_popups yes)
+			(pdf_back_fp_property_popups yes)
+			(pdf_metadata yes)
+			(pdf_single_document no)
+			(dxfpolygonmode yes)
+			(dxfimperialunits yes)
+			(dxfusepcbnewfont yes)
+			(psnegative no)
+			(psa4output no)
+			(plot_black_and_white yes)
+			(plotinvisibletext no)
+			(sketchpadsonfab no)
+			(plotpadnumbers no)
+			(hidednponfab no)
+			(sketchdnponfab yes)
+			(crossoutdnponfab yes)
+			(subtractmaskfromsilk no)
+			(outputformat 1)
+			(mirror no)
+			(drillshape 0)
+			(scaleselection 1)
+			(outputdirectory "plots/")
+		)
+	)
+	(net 0 "")
+	(gr_rect
+		(start 0 0)
+		(end 45 39.5)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(fill none)
+		(layer "Dwgs.User")
+		(uuid "2c7d9a70-050a-41d1-a053-6ee7c3c0e2d9")
+	)
+	(gr_text "CASE MAX 45.0 x 39.5"
+		(at 22.5 0.9 0)
+		(layer "Dwgs.User")
+		(uuid "92b34dc9-2dc2-452c-ae04-fced9b855cb4")
+		(effects
+			(font
+				(size 0.85 0.85)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 2.36 2.69)
+		(end 42.64 36.81)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "Dwgs.User")
+		(uuid "69f0c295-f1c3-47d3-a21b-5e5c40a2ab32")
+	)
+	(gr_text "GL175AMC10C envelope 40.28 x 34.12 (rotated)"
+		(at 22.5 38.2 0)
+		(layer "Dwgs.User")
+		(uuid "9801c832-8b53-4ac6-b021-f95a90dff615")
+		(effects
+			(font
+				(size 0.62 0.62)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 2 2.75)
+		(end 43 36.75)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill none)
+		(layer "Edge.Cuts")
+		(uuid "965deabe-b0ff-4f1f-9041-c7bad54913ed")
+	)
+	(gr_text "PROVISIONAL MAIN PCB 41.0 x 34.0 / 0.8 mm / 4L"
+		(at 22.5 4.0 0)
+		(layer "F.SilkS")
+		(uuid "00fbd47c-b941-4421-b193-39959c4a5966")
+		(effects
+			(font
+				(size 0.85 0.85)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_text "FLOORPLAN ONLY"
+		(at 11.5 6.1 0)
+		(layer "F.SilkS")
+		(uuid "1cdd6052-069b-4302-ac90-7232544f6053")
+		(effects
+			(font
+				(size 0.85 0.85)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 4.5 1.75)
+		(end 29.0 37.75)
+		(stroke
+			(width 0.18)
+			(type solid)
+		)
+		(fill none)
+		(layer "Dwgs.User")
+		(uuid "3df63096-be3c-4d69-b029-5c284834dca5")
+	)
+	(gr_text "LP372435TB battery rear projection 24.5 x 36 x 4 mm"
+		(at 4.0 19.75 90)
+		(layer "Dwgs.User")
+		(uuid "6e221ff5-5a20-4412-98ba-38ec13d85d6b")
+		(effects
+			(font
+				(size 0.6 0.6)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 30.0 13.0)
+		(end 42.0 25.5)
+		(stroke
+			(width 0.18)
+			(type solid)
+		)
+		(fill none)
+		(layer "Dwgs.User")
+		(uuid "947876cd-005f-4284-9d1b-636308350fda")
+	)
+	(gr_text "BIO BOARD\n12 x 12.5 reserve"
+		(at 36.0 19.25 0)
+		(layer "Dwgs.User")
+		(uuid "bfb14612-897b-4d5b-bca1-8c189b49d92c")
+		(effects
+			(font
+				(size 0.58 0.58)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_circle
+		(center 36.5 31.0)
+		(end 41.7 31.0)
+		(stroke
+			(width 0.18)
+			(type solid)
+		)
+		(fill none)
+		(layer "Dwgs.User")
+		(uuid "bc29ca59-76e0-4a02-b6a4-76342b348994")
+	)
+	(gr_text "C10-100 LRA\n10 mm reserve"
+		(at 36.5 31.0 0)
+		(layer "Dwgs.User")
+		(uuid "9d44b5c4-5e4a-4967-a09a-121b5c8c4417")
+		(effects
+			(font
+				(size 0.55 0.55)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 27.5 9.0)
+		(end 35.0 17.5)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "882c89b7-2bfa-45a7-9f1f-8d065513ab99")
+	)
+	(gr_text "U1 + RF + XO\nnRF54L15 cluster"
+		(at 31.25 13.25 0)
+		(layer "Cmts.User")
+		(uuid "cb3f313b-3310-463a-beb5-110bbc534ec5")
+		(effects
+			(font
+				(size 0.54 0.54)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 19.0 10.0)
+		(end 26.0 16.5)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "4624da90-5ef0-48c1-86dd-f516ddaf89d3")
+	)
+	(gr_text "U3 FLASH\nW25Q256JW"
+		(at 22.5 13.25 0)
+		(layer "Cmts.User")
+		(uuid "fe6afb3b-4afa-45ea-a04d-fe2be0901ae6")
+		(effects
+			(font
+				(size 0.54 0.54)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 5.0 23.0)
+		(end 17.5 34.0)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "495c7a21-5893-43b1-82be-f697e2f48a8d")
+	)
+	(gr_text "U2 nPM1300\nPMIC cluster"
+		(at 11.25 28.5 0)
+		(layer "Cmts.User")
+		(uuid "ea0a3421-afc4-4e92-895d-0670fecea230")
+		(effects
+			(font
+				(size 0.54 0.54)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 34.0 25.0)
+		(end 40.5 29.0)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "642e67e6-3314-4f35-9f51-cbd22d436727")
+	)
+	(gr_text "U4 DRV2605L\nHAPTIC"
+		(at 37.25 27.0 0)
+		(layer "Cmts.User")
+		(uuid "d7a06b60-3388-4adb-ab1d-643b9de6e0a2")
+		(effects
+			(font
+				(size 0.54 0.54)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 29.5 20.5)
+		(end 41.5 24.5)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "1e0f5eb3-13d0-4b4a-91d9-7af229c9ce6f")
+	)
+	(gr_text "J7 MAIN-BIO\nFH12-20"
+		(at 35.5 22.5 0)
+		(layer "Cmts.User")
+		(uuid "8988648e-3525-4181-9c4c-f00fbe89ab37")
+		(effects
+			(font
+				(size 0.54 0.54)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 5.0 16.0)
+		(end 14.0 21.0)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "d1cb614c-1db0-4fa8-a362-b0504539f19b")
+	)
+	(gr_text "J8 SWD\nTC2030"
+		(at 9.5 18.5 0)
+		(layer "Cmts.User")
+		(uuid "ae4d9d45-f34e-4ec6-8035-822f27575147")
+		(effects
+			(font
+				(size 0.54 0.54)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 17.0 29.0)
+		(end 28.5 35.0)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "0c29ec1a-7041-4b06-93ff-8948e2fd797a")
+	)
+	(gr_text "J5/J6 DISPLAY+TOUCH\nFPC LAND TBD"
+		(at 22.75 32.0 0)
+		(layer "Cmts.User")
+		(uuid "edeaa080-d17f-49ca-a670-22334940f379")
+		(effects
+			(font
+				(size 0.54 0.54)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 5.0 33.0)
+		(end 15.0 36.0)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "0ad80b2c-d65b-4297-9ad3-e7e3f160aeaa")
+	)
+	(gr_text "J3 DOCK TARGETS\nREAR GEOMETRY TBD"
+		(at 10.0 34.5 0)
+		(layer "Cmts.User")
+		(uuid "0a84fa32-e040-417f-a3b8-c1ec166fbac0")
+		(effects
+			(font
+				(size 0.54 0.54)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 41.0 17.0)
+		(end 43.0 22.0)
+		(stroke
+			(width 0.18)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "440ed98e-29c2-46fc-b7ca-21c95395084c")
+	)
+	(gr_text "J9 SIDE\nEVQPUK02K"
+		(at 42.0 19.5 90)
+		(layer "Cmts.User")
+		(uuid "77b3b638-1267-4771-8f74-e19b66586b3a")
+		(effects
+			(font
+				(size 0.5 0.5)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_rect
+		(start 2.0 27.0)
+		(end 4.5 31.5)
+		(stroke
+			(width 0.18)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "3ac93a24-c108-458a-aa10-66dc70fb3411")
+	)
+	(gr_text "J101\nSHIP/WAKE"
+		(at 3.25 29.25 90)
+		(layer "Cmts.User")
+		(uuid "207e04a3-7494-45ba-b5c7-01cd82db1fdd")
+		(effects
+			(font
+				(size 0.48 0.48)
+				(thickness 0.12)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu" "In1.Cu" "In2.Cu" "B.Cu")
+		(uuid "5360bc8f-6a43-4ab8-b8f7-aff9802abd99")
+		(hatch full 0.508)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.254)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads not_allowed)
+			(copperpour not_allowed)
+			(footprints not_allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.508)
+			(thermal_bridge_width 0.508)
+		)
+		(polygon
+			(pts
+				(xy 31.0 2.75)
+				(xy 43.0 2.75)
+				(xy 43.0 9.0)
+				(xy 31.0 9.0)
+			)
+		)
+	)
+	(gr_rect
+		(start 31.0 2.75)
+		(end 43.0 9.0)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "6dd13bce-2eb5-4548-88ed-20232118a5c9")
+	)
+	(gr_text "RF ANTENNA / PLASTIC WINDOW\nALL-COPPER + COMPONENT KEEP-OUT"
+		(at 37.0 5.9 0)
+		(layer "Cmts.User")
+		(uuid "36fe9e82-e6bb-4c67-8c99-5b33443958cc")
+		(effects
+			(font
+				(size 0.54 0.54)
+				(thickness 0.12)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "In1.Cu" "In2.Cu")
+		(uuid "96b86c12-329b-4cec-b375-b7f8152e1295")
+		(hatch full 0.508)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.254)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads not_allowed)
+			(copperpour not_allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.508)
+			(thermal_bridge_width 0.508)
+		)
+		(polygon
+			(pts
+				(xy 28.0 8.5)
+				(xy 36.5 8.5)
+				(xy 36.5 13.5)
+				(xy 28.0 13.5)
+			)
+		)
+	)
+	(gr_rect
+		(start 28.0 8.5)
+		(end 36.5 13.5)
+		(stroke
+			(width 0.18)
+			(type solid)
+		)
+		(fill none)
+		(layer "Cmts.User")
+		(uuid "2060b4be-92e4-4312-8b29-7e61e6199709")
+	)
+	(gr_text "RF MATCH INNER KO\nCOPY QFAA REFERENCE"
+		(at 27.8 7.6 0)
+		(layer "Cmts.User")
+		(uuid "21a7e3b5-4325-4fb3-9154-acd86f40a9ca")
+		(effects
+			(font
+				(size 0.48 0.48)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_text "QSPI corridor"
+		(at 23.5 8.0 0)
+		(layer "Cmts.User")
+		(uuid "af04fcfd-7976-4b79-ae4a-487b3849948c")
+		(effects
+			(font
+				(size 0.46 0.46)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_text "AUX SPI"
+		(at 22.0 18.0 0)
+		(layer "Cmts.User")
+		(uuid "03696c08-b523-4fca-beec-976be0260a05")
+		(effects
+			(font
+				(size 0.46 0.46)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_text "I2C + BIO"
+		(at 31.0 19.0 0)
+		(layer "Cmts.User")
+		(uuid "7a3cf5b3-2aad-4150-a7ce-19183ba6050f")
+		(effects
+			(font
+				(size 0.46 0.46)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_text "VBAT / VSYS high-current"
+		(at 11.0 22.0 0)
+		(layer "Cmts.User")
+		(uuid "bc19b1c6-0b14-44a0-87e8-5ee518c6c783")
+		(effects
+			(font
+				(size 0.46 0.46)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_text "Keep switching loops inside PMIC cluster; do not route through RF keep-out"
+		(at 22.5 37.9 0)
+		(layer "Cmts.User")
+		(uuid "a1462591-5f90-4d4e-8fb2-325c95c0bda4")
+		(effects
+			(font
+				(size 0.5 0.5)
+				(thickness 0.12)
+			)
+		)
+	)
+	(gr_text "DATUM: case top-left = (0,0). PCB outline is provisional until enclosure CAD freeze."
+		(at 0.8 40.8 0)
+		(layer "Cmts.User")
+		(uuid "c5ba4042-8b14-47d3-a634-d8b375c4e6c5")
+		(effects
+			(font
+				(size 0.53 0.53)
+				(thickness 0.12)
+			)
+			(justify left)
+		)
+	)
+	(gr_text "Planning stack: FCu / 0.10 / In1 solid GND / 0.526 / In2 power+slow / 0.10 / BCu. Final fab stack + 50-ohm width TBD."
+		(at 0.8 42.0 0)
+		(layer "Cmts.User")
+		(uuid "41bbb173-65f7-47b8-a544-c78b0b772830")
+		(effects
+			(font
+				(size 0.49 0.49)
+				(thickness 0.12)
+			)
+			(justify left)
+		)
+	)
+	(gr_text "RF radiator must remain clear of battery, display metal, magnets and enclosure metal; reserve plastic RF window."
+		(at 0.8 43.1 0)
+		(layer "Cmts.User")
+		(uuid "19d11c26-c958-4fd9-b7e5-3d3a3c717817")
+		(effects
+			(font
+				(size 0.49 0.49)
+				(thickness 0.12)
+			)
+			(justify left)
+		)
+	)
+	(embedded_fonts no)
+)

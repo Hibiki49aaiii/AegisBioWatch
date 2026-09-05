@@ -1,0 +1,27 @@
+{
+  "revision": "r13-route1bi-phase-a1-screen",
+  "status": "SCREENED_NOT_SELECTED",
+  "source_authority": "route-1bg",
+  "source_metrics": {"rule_violations": 0, "unconnected_items": 116, "pin_net_audit": "PASS", "audited_nodes": 268},
+  "workflow_run_id": 33242917242,
+  "job_id": 99075208312,
+  "artifact_id": 9711921131,
+  "artifact_zip_sha256": "a3b5dec3a1185837526e5914589352b282d7d18b7d74b304098fd82c7c4d0454",
+  "board_modified": false,
+  "screened_candidates": 7,
+  "ranking": [
+    {"id": "j9-side-button-duplicate", "clearance_mm": 1.05, "length_mm": 5.15, "geometry_pass": true, "selected": false, "reason": "duplicate switch terminal; manufacturer circuit shows same-side terminals internally common, so a bridge under the switch is electrically redundant"},
+    {"id": "j101-ship-hold-duplicate", "clearance_mm": 0.3, "length_mm": 4.4, "geometry_pass": true, "selected": false, "reason": "duplicate-terminal switch candidate; no need to add redundant body-spanning copper"},
+    {"id": "c1-j8-1v8", "clearance_mm": -0.15, "length_mm": 4.546496, "geometry_pass": false},
+    {"id": "r302-r404-1v8", "clearance_mm": -0.15, "length_mm": 4.562072, "geometry_pass": false},
+    {"id": "pmic-1v8-track-bridge", "clearance_mm": -0.15, "length_mm": 4.741308, "geometry_pass": false},
+    {"id": "vsys-track-bridge", "clearance_mm": -0.25, "length_mm": 4.415644, "geometry_pass": false},
+    {"id": "pullup-island-to-1v8-rail", "clearance_mm": -0.25, "length_mm": 6.03249, "geometry_pass": false}
+  ],
+  "external_semantic_reference": {
+    "part": "Panasonic EVQPUK02K",
+    "official_product_page": "https://industry.panasonic.com/global/en/products/control/switch/light-touch/number/evqpuk02k",
+    "catalog_note": "EVQPUK circuit diagram identifies paired switch terminals; duplicate-pad bridge is not selected solely to reduce ratsnest."
+  },
+  "decision": "Proceed to broad Phase A2 screening instead of implementing either geometry-only passer."
+}

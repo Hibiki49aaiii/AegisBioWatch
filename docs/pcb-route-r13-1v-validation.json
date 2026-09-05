@@ -1,0 +1,50 @@
+{
+  "revision": "r13-route1v-c113-1v8-closure",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "workflow": {
+    "name": "r13 route1v C113 1V8 validation",
+    "run_id": 31472339995,
+    "job_id": 93718212158,
+    "head_sha": "f95ffa2d07bc2d3ddb639811281eb818ba1710f1",
+    "kicad_version": "9.0.9",
+    "conclusion": "success"
+  },
+  "executed_results": {
+    "rule_violations": 0,
+    "unconnected_items": 153,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "track_segments_added": 2,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "same_run_source_route1u_sha256": "f2ae4ac3bffe5de28beae79abcb2f2e40cbfef1015a79a05ee49ccacf083840b",
+  "same_run_pcb_sha256": "dcb569c1145221a26633531e15d9cda64f6a78892153d742c090fefa8d21f62c",
+  "artifact": {
+    "name": "r13-route1v-c113-1v8-evidence",
+    "id": 9093870578,
+    "digest": "sha256:0c8b7875af0e74cc044ff51b7a8e2326b61f338fdb7b96462fca590fa9520fcb"
+  },
+  "accepted_geometry": {
+    "u2_12_1v8_mm": [11.1875, 30.95],
+    "bend_mm": [11.1875, 31.45],
+    "c113_1_1v8_mm": [12.245188, 32.399818],
+    "track_width_mm": 0.20
+  },
+  "rejected_geometry": {
+    "type": "direct U2.12 to C113.1 segment",
+    "run_id": 31471988394,
+    "artifact_id": 9093754195,
+    "failure": "short and front solder-mask bridge to adjacent U2.13/SYS_I2C_SDA"
+  },
+  "scope": {
+    "logical_connectivity_added": ["U2.12/+1V8 <-> C113.1/+1V8"],
+    "ldo2_in": "DEFERRED_GEOMETRY_CONSTRAINED_NO_VIA_IN_PAD",
+    "chg_5v": "REJECTED_AND_DEFERRED",
+    "accepted_route1u_geometry_modified": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  }
+}

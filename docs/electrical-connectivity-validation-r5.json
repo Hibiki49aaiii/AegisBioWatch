@@ -1,0 +1,32 @@
+{
+  "revision": "Phase 1 r5",
+  "schematics": [
+    {"file":"BIO_INTERFACE.sch","components":5,"component_closures":5,"explicit_wires":29,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true},
+    {"file":"DISPLAY_TOUCH.sch","components":7,"component_closures":7,"explicit_wires":26,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true},
+    {"file":"MCU_RF_CLOCK.sch","components":22,"component_closures":22,"explicit_wires":42,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true},
+    {"file":"PMIC_CHARGER.sch","components":28,"component_closures":28,"explicit_wires":55,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true},
+    {"file":"STORAGE_HAPTIC.sch","components":12,"component_closures":12,"explicit_wires":20,"component_blocks_balanced":true,"header_ok":true,"footer_ok":true}
+  ],
+  "electrical_wire_endpoint_validation": [
+    {"file":"MCU_RF_CLOCK.sch","checks":36,"passed":36,"failures":[],"basis":"r4 unchanged sheet + r5 conflict re-scan"},
+    {"file":"STORAGE_HAPTIC.sch","checks":20,"passed":20,"failures":[],"basis":"r4 unchanged sheet + r5 conflict re-scan"},
+    {"file":"DISPLAY_TOUCH.sch","checks":26,"passed":26,"failures":[],"basis":"r4 unchanged sheet + r5 conflict re-scan"},
+    {"file":"BIO_INTERFACE.sch","checks":29,"passed":29,"failures":[],"basis":"r4 unchanged sheet + r5 conflict re-scan"},
+    {"file":"PMIC_CHARGER.sch","checks":55,"passed":55,"failures":[],"basis":"legacy passive/net-tie/connector pin endpoint geometry"}
+  ],
+  "npm1300_symbol_pin_label_validation": {"checks":33,"passed":33,"failures":[],"basis":"AegisBioWatch local nPM1300-QEXX legacy symbol pin geometry vs sheet labels"},
+  "npm1300_reference_bom_crosscheck": {
+    "reference_config":"nPM1300 QFN Configuration 1",
+    "vendor_counts":{"1uF":2,"10uF":9,"2.2uF":1,"100nF":1,"2.2uH":2},
+    "aegis_reference_counts":{"1uF":2,"10uF":9,"2.2uF":1,"100nF":1,"2.2uH":2},
+    "application_additions":{"100nF_HF_VSYS":1},
+    "match":true
+  },
+  "total_explicit_wires":172,
+  "total_wire_endpoint_checks":166,
+  "total_wire_endpoint_checks_passed":166,
+  "wire_connected_net_label_conflicts":{},
+  "manufacturing_release":false,
+  "erc":"not_run_kicad_cli_unavailable",
+  "status":"SCHEMATIC_CAPTURE_R5_PMIC_PASSIVES_ENDPOINTS_VALIDATED"
+}

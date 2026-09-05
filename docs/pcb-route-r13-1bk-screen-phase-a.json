@@ -1,0 +1,119 @@
+{
+  "revision": "r13-route1bk-phase-a-selection",
+  "status": "SELECTED_FOR_PHASE_B",
+  "source_authority": "route-1bj",
+  "source_commit": "5e2cc80c83d63e10bf76c78eb7f7956ccc627e14",
+  "source_metrics": {
+    "rule_violations": 0,
+    "unconnected_items": 114,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268
+  },
+  "ordinary_screen": {
+    "workflow_run_id": 33253752823,
+    "job_id": 99103802453,
+    "artifact_id": 9715225538,
+    "artifact_zip_sha256": "e7407646b496b8d531e0be98b2be5be5ad701d472541cdc0cb33d01cb704988a",
+    "grid_mm": 0.05,
+    "lane_margin_mm": 3.0,
+    "evaluated_candidate_count": 13,
+    "passing_candidate_count": 3,
+    "board_modified": false,
+    "independent_artifact_zip_sha256_verified": true
+  },
+  "expanded_screen": {
+    "workflow_run_id": 33254148238,
+    "job_id": 99104830838,
+    "artifact_id": 9715340474,
+    "artifact_zip_sha256": "405c4a42d2069a27f3fa2030ba19109c6af15d41a5d21c99d695146f49370737",
+    "grid_mm": 0.05,
+    "lane_margin_mm": 6.0,
+    "max_endpoint_distance_mm": 18.0,
+    "disposition": "No better ordinary low-risk candidate. NRF_RESET_N pass rejected because nearest copper is RF_B/C11."
+  },
+  "low_current_screen": {
+    "workflow_run_id": 33255144664,
+    "job_id": 99107430649,
+    "artifact_id": 9715676488,
+    "artifact_zip_sha256": "83c8b1654ec65d2806da2993a650af208266a28663cc52fc8bdd0b831d29be71",
+    "grid_mm": 0.25,
+    "margin_mm": 3.0,
+    "max_segments": 4,
+    "targets": {
+      "CHG_SENSE_GATE_R502_R501": 0,
+      "CHG_SENSE_GATE_R501_Q501": 0,
+      "HAPTIC_TRIG": 0
+    },
+    "board_modified": false
+  },
+  "selected": {
+    "drc_index": 111,
+    "net": "VSYS_HAPTIC",
+    "from": "C305.1",
+    "from_value": "1uF",
+    "from_position_mm": [6.805, 22.335],
+    "to": "C304.1",
+    "to_value": "100nF",
+    "to_position_mm": [16.005, 23.725],
+    "path_family": "VHV",
+    "points_mm": [
+      [6.805, 22.335],
+      [6.805, 21.65],
+      [16.005, 21.65],
+      [16.005, 23.725]
+    ],
+    "segment_count": 3,
+    "segment_lengths_mm": [0.685, 9.2, 2.075],
+    "total_length_mm": 11.96,
+    "track_width_mm": 0.3,
+    "minimum_conservative_clearance_mm": 0.125,
+    "nearest_unrelated_copper": {
+      "kind": "via",
+      "net": "GND",
+      "position_mm": [12.75, 22.225],
+      "diameter_mm": 0.6,
+      "drill_mm": 0.3
+    },
+    "independent_gap_mm": 0.125
+  },
+  "power_context": {
+    "U4": "DRV2605LDGSR",
+    "U4_pad10": {
+      "net": "VSYS_HAPTIC",
+      "position_mm": [23.005, 13.4]
+    },
+    "R305": "0R / FB OPTION",
+    "R305_pad1": {
+      "net": "VSYS",
+      "position_mm": [30.295, 18.595]
+    },
+    "R305_pad2": {
+      "net": "VSYS_HAPTIC",
+      "position_mm": [31.315, 18.595]
+    },
+    "F_Cu_thickness_mm": 0.018,
+    "approx_route_dc_resistance_ohm": 0.0382,
+    "external_reference": "https://www.ti.com/document-viewer/DRV2605L/datasheet",
+    "external_reference_note": "TI recommends 75-100 um trace width at solder-pin escape, then increasing width for improved current flow. Selected route width is 0.30 mm."
+  },
+  "not_selected": [
+    {
+      "candidate": "D101.2/DOCK_5V_RAW to D102.1/DOCK_5V_RAW",
+      "reason": "primary dock/input power path; defer for coordinated current/ESD/power routing"
+    },
+    {
+      "candidate": "+1V8 track to R403.1/+1V8",
+      "reason": "0.099999 mm conservative result is below engineering threshold"
+    },
+    {
+      "candidate": "J8.3/NRF_RESET_N to R1.2/NRF_RESET_N",
+      "reason": "expanded-search route approaches C11/RF_B; rejected under RF freeze"
+    },
+    {
+      "candidate": "CHG_SENSE_GATE / HAPTIC_TRIG",
+      "reason": "targeted four-segment low-current screen found zero passing paths"
+    }
+  ],
+  "decision": "Proceed to exact Phase B validation of C305.1 to C304.1. Phase A is read-only preflight; route-1bj remains authority until executed KiCad gates pass.",
+  "release_status": "NOT_FOR_GERBER"
+}

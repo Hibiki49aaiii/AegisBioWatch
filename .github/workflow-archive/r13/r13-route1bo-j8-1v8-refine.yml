@@ -1,0 +1,128 @@
+name: r13 route1bo J8 +1V8 local refine
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bo-j8-1v8-refine.yml'
+      - 'tools/reproduce-route1bn-accepted.sh'
+      - 'tools/probe-pcb-r13-route1bn-max4-coarse.py'
+      - 'tools/probe-pcb-r13-route1bo-j8-1v8-refine.py'
+      - 'docs/ai/issues/21/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refine:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce accepted route1bn
+        run: bash tools/reproduce-route1bn-accepted.sh
+
+      - name: Refine only the J8.1 +1V8 four-segment family
+        run: |
+          python3 tools/probe-pcb-r13-route1bo-j8-1v8-refine.py \
+            --drc-json /tmp/route1bn.json \
+            --pin-net-audit /tmp/route1bn-audit.json \
+            --engine-output /tmp/route1bo-j8-refine-engine.json \
+            --output /tmp/route1bo-j8-refine.json
+
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/route1bo-j8-refine.json'))
+          assert x['source_gate']=={
+            'rule_violations':0,
+            'unconnected_items':110,
+            'pin_net_audit':'PASS',
+            'audited_nodes':268,
+          }
+          assert x['board_modified'] is False
+          assert x['semantic_selection']['selected_family']=='+1V8 source track -> J8.1/+1V8 HVHV'
+          ident=x['exact_identity']
+          assert ident['source_track_endpoint_mm']==[10.305,4.72]
+          assert abs(ident['source_track']['length_mm']-6.3650)<0.002
+          assert ident['source_track']['net']=='+1V8'
+          assert ident['J8_pad1']=={'net':'+1V8','position_mm':[12.105,15.26]}
+          assert len(x['blank_pad_context']['j8_numberless_pads'])>=1
+          assert all(p['net']=='' for p in x['blank_pad_context']['j8_numberless_pads'])
+          r=x['refine']
+          assert abs(r['grid_mm']-0.05)<1e-9
+          assert r['lane_x_range_mm']==[9.25,10.25]
+          assert r['lane_y_range_mm']==[15.25,16.25]
+          assert r['path_family']=='HVHV'
+          assert r['passing_path_count']>=1
+          assert r['best_passing_path']['minimum_conservative_clearance_mm']>=0.1
+          assert x['decision_state']['candidate_selected_for_phase_b'] is False
+          assert x['decision_state']['phase_b_started'] is False
+          assert x['release_status']=='NOT_FOR_GERBER'
+          print('ACTUAL_DRC_INDEX',ident['actual_drc_index'])
+          print('J8_VALUE',ident['J8_value'])
+          print('BLANK_PADS',x['blank_pad_context']['j8_numberless_pads'])
+          print('PATHS',r['candidate_path_count'])
+          print('PASSING',r['passing_path_count'])
+          print('BEST',r['best_passing_path'])
+          print('TOP',r['top_passing_paths'])
+          PY
+
+          (
+            cd /tmp
+            sha256sum route1bo-j8-refine.json route1bo-j8-refine-engine.json > route1bo-j8-refine-SHA256SUMS
+          )
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bo-j8-1v8-refine
+          path: |
+            /tmp/route1bo-j8-refine.json
+            /tmp/route1bo-j8-refine-engine.json
+            /tmp/route1bo-j8-refine-SHA256SUMS
+          if-no-files-found: error
+
+  verify-artifact:
+    needs: refine
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bo-j8-1v8-refine
+          path: artifact
+      - name: Verify downloaded refine Artifact
+        run: |
+          cd artifact
+          sha256sum -c route1bo-j8-refine-SHA256SUMS
+          python3 - <<'PY'
+          import json
+          x=json.load(open('route1bo-j8-refine.json'))
+          assert x['source_gate']['rule_violations']==0
+          assert x['source_gate']['unconnected_items']==110
+          assert x['source_gate']['pin_net_audit']=='PASS'
+          assert x['source_gate']['audited_nodes']==268
+          assert x['board_modified'] is False
+          assert x['refine']['grid_mm']==0.05
+          assert x['refine']['passing_path_count']>=1
+          assert len(x['blank_pad_context']['j8_numberless_pads'])>=1
+          assert x['decision_state']['phase_b_started'] is False
+          assert x['release_status']=='NOT_FOR_GERBER'
+          print('DOWNLOADED_ARTIFACT_VERIFY PASS')
+          print('BLANK_PADS',x['blank_pad_context']['j8_numberless_pads'])
+          print('BEST',x['refine']['best_passing_path'])
+          PY

@@ -1,0 +1,120 @@
+{
+  "revision": "r13-route1bp-phase-a1-coarse-screen",
+  "status": "PHASE_A1_COARSE_COMPLETE_NO_PASS",
+  "issue": 22,
+  "release_status": "NOT_FOR_GERBER",
+  "base": {
+    "accepted_authority": "route-1bo",
+    "rule_violations": 0,
+    "unconnected_items": 109,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268,
+    "source_pcb_sha256": "0c9153008ea677c2ac19e9c350b24f8de93c4197b4bd4b7b2425cdba97641d2b"
+  },
+  "executed": {
+    "workflow_run_id": 33508928391,
+    "inventory_job_id": 99859613888,
+    "verify_artifact_job_id": 99864481227,
+    "head_sha": "85125b439b0e52b5ae285cd23fb1e1d9aa2eea62",
+    "artifact_id": 9801374005,
+    "artifact_name": "r13-route1bp-source-inventory-screen",
+    "artifact_digest": "sha256:735418ff74ccdae775827ede636f20718735b64de01630b52e086b583a0774bd",
+    "downloaded_artifact_verify": "PASS"
+  },
+  "screen": {
+    "track_width_mm": 0.3,
+    "rule_clearance_mm": 0.1,
+    "grid_mm": 0.25,
+    "lane_margin_mm": 4,
+    "max_endpoint_distance_mm": 12,
+    "raw_pair_count": 109,
+    "evaluated_candidate_count": 7,
+    "passing_candidate_count": 0,
+    "board_modified": false,
+    "exclusion_summary": {
+      "excluded_ref": 51,
+      "too_long": 10,
+      "excluded_net": 35,
+      "unsupported_endpoint": 3,
+      "duplicate_terminal_same_component": 2,
+      "non_top_layer": 1
+    },
+    "evaluated_candidates": [
+      {
+        "drc_index": 0,
+        "net": "+1V8",
+        "a": "U2.1/+1V8",
+        "b": "+1V8 track @ (3.005,25.975)",
+        "endpoint_distance_mm": 6.03249,
+        "path_count": 4256,
+        "passing_path_count": 0
+      },
+      {
+        "drc_index": 1,
+        "net": "+1V8",
+        "a": "+1V8 track @ (9.700,15.800)",
+        "b": "+1V8 track @ (9.255,22.225)",
+        "endpoint_distance_mm": 6.440392,
+        "path_count": 4226,
+        "passing_path_count": 0
+      },
+      {
+        "drc_index": 2,
+        "net": "+1V8",
+        "a": "+1V8 track @ (11.1875,30.950)",
+        "b": "U2.1/+1V8",
+        "endpoint_distance_mm": 4.741308,
+        "path_count": 4351,
+        "passing_path_count": 0
+      },
+      {
+        "drc_index": 3,
+        "net": "+1V8",
+        "a": "C301.1/+1V8",
+        "b": "+1V8 track @ (15.755,26.200)",
+        "endpoint_distance_mm": 3.182079,
+        "path_count": 3784,
+        "passing_path_count": 0
+      },
+      {
+        "drc_index": 4,
+        "net": "+1V8",
+        "a": "C301.1/+1V8",
+        "b": "+1V8 track @ (8.964712,24.126353)",
+        "endpoint_distance_mm": 4.807072,
+        "path_count": 3980,
+        "passing_path_count": 0
+      },
+      {
+        "drc_index": 30,
+        "net": "CHG_SENSE_GATE",
+        "a": "R501.2",
+        "b": "Q501.1",
+        "endpoint_distance_mm": 9.100042,
+        "path_count": 4802,
+        "passing_path_count": 0
+      },
+      {
+        "drc_index": 59,
+        "net": "HAPTIC_TRIG",
+        "a": "U4.4",
+        "b": "R303.1",
+        "endpoint_distance_mm": 11.741619,
+        "path_count": 7820,
+        "passing_path_count": 0
+      }
+    ]
+  },
+  "artifact_internal_sha256": {
+    "inventory_json": "643e898ca82804754ccc33d54a069507d9325f610c6b5a7d867fd3c60fd8c729",
+    "screen_json": "c580b71b2f8ad1e15c14fd27e8ca4245cb285184a3ba5767ded722de11ea58bf",
+    "screen_engine_json": "916efacc63ef8a00860f0fce86bd7213e7335c71df8ce54f07860ae5a8978990"
+  },
+  "decision": {
+    "candidate_selected_for_phase_a2": false,
+    "phase_a2_started": false,
+    "accepted_authority_changed": false,
+    "reason": "No ordinary non-frozen candidate produced a >=0.100 mm path in the 0.25 mm max-four-segment coarse screen.",
+    "next_read_only_action": "Run an expanded max-four-segment screen using the established 0.05 mm grid and wider lane window before concluding that no ordinary F.Cu family exists."
+  }
+}

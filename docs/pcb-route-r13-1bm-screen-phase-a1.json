@@ -1,0 +1,62 @@
+{
+  "revision": "r13-route1bm-phase-a1-current-screen",
+  "issue": 19,
+  "base": {
+    "accepted_authority": "route-1bl",
+    "commit": "228fea4698bc661dd6f052cbc6cd9aefa8068690",
+    "rule_violations": 0,
+    "unconnected_items": 112,
+    "audited_nodes": 268,
+    "audit": "PASS"
+  },
+  "workflow": {
+    "run_id": 33341373479,
+    "job_id": 99337503613,
+    "artifact_id": 9740736278,
+    "artifact_zip_sha256": "a0b6ec3b1b4ca181e06d3a4034194872da1b292304ad18e1d543ef0160b02df1"
+  },
+  "screen": {
+    "grid_mm": 0.05,
+    "lane_margin_mm": 6,
+    "max_endpoint_distance_mm": 18,
+    "evaluated_candidates": 13,
+    "numerical_passing_candidates": 2,
+    "semantically_accepted_candidates": 0,
+    "exclusion_summary": {
+      "excluded_ref": 51,
+      "too_long": 8,
+      "excluded_net": 34,
+      "unsupported_endpoint": 3,
+      "duplicate_terminal_same_component": 2,
+      "non_top_layer": 1
+    }
+  },
+  "numerical_passes": [
+    {
+      "drc_index": 74,
+      "net": "NRF_RESET_N",
+      "path_family": "VHV",
+      "segment_count": 3,
+      "path_length_mm": 21.485,
+      "minimum_conservative_clearance_mm": 0.23,
+      "nearest_unrelated_copper": "C11.1/RF_B",
+      "disposition": "REJECTED_FOR_THIS_INCREMENT",
+      "reason": "RF-adjacent frozen context"
+    },
+    {
+      "drc_index": 13,
+      "net": "+1V8",
+      "target": "R403.1/+1V8",
+      "path_family": "HVH",
+      "segment_count": 3,
+      "path_length_mm": 12.76,
+      "minimum_conservative_clearance_mm": 0.099999,
+      "nearest_unrelated_copper": "GND via @ (39.2,15.025)",
+      "disposition": "REJECTED",
+      "reason": "0.099999 mm is below the exact 0.100000 mm policy threshold; no rounding upward"
+    }
+  ],
+  "next_action": "Run max-four-segment coarse screen on ordinary endpoint<=12 mm candidates, excluding NRF_RESET_N.",
+  "board_modified": false,
+  "release_status": "NOT_FOR_GERBER"
+}

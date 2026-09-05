@@ -1,0 +1,142 @@
+{
+  "revision": "r13-route1bi-u3-c1-1v8-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 15,
+  "base_accepted_revision": "route-1bg",
+  "base_commit": "cf138dd4835cc152c60c49d99f8a6d145745acbb",
+  "candidate_commit": "136adc8751d98b3e7680c7d9dc998032969f946f",
+  "phase_a3_selection": {
+    "workflow_name": "r13 route1bi dogleg screening",
+    "workflow_run_id": 33245640868,
+    "job_id": 99082503654,
+    "artifact_id": 9712771982,
+    "artifact_zip_sha256": "dae9cb709e959a18e1be7a2220272d08f13018ac35769080b065f6f4e81a2d78",
+    "board_modified": false,
+    "evaluated_candidate_count": 17,
+    "passing_candidate_count": 4,
+    "selected_candidate": "U3.8/+1V8 to C1.1/+1V8",
+    "selection_reason": "pad-to-pad Flash supply closure, two segments, 0.300 mm conservative minimum clearance, clearer semantics and larger margin than alternate ordinary doglegs"
+  },
+  "executed_authority": {
+    "workflow_name": "r13 route1bi U3-C1 +1V8 validation",
+    "workflow_run_id": 33245913627,
+    "validate_job_id": 99083205138,
+    "verify_artifact_job_id": 99083476497,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 115,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "mismatches": [],
+    "unexpected_pad_nets": [],
+    "artifact_verify": "PASS"
+  },
+  "probe": {
+    "board_modified": false,
+    "minimum_conservative_clearance_mm": 0.3,
+    "required_clearance_mm": 0.1,
+    "nearest_unrelated_copper": {
+      "kind": "pad",
+      "reference": "U3",
+      "pad": "5",
+      "net": "AUX_SPI_MOSI"
+    }
+  },
+  "routing_scope": {
+    "net": "+1V8",
+    "from": {
+      "reference": "U3",
+      "pad": "8",
+      "value": "W25Q256JWPIQ 256Mbit",
+      "position_mm": [11.08, 4.72]
+    },
+    "to": {
+      "reference": "C1",
+      "pad": "1",
+      "value": "10uF",
+      "position_mm": [10.305, 11.085]
+    },
+    "path_points_mm": [
+      [11.08, 4.72],
+      [10.305, 4.72],
+      [10.305, 11.085]
+    ],
+    "track_width_mm": 0.3,
+    "segment_lengths_mm": [0.775, 6.365],
+    "track_length_mm": 7.14,
+    "track_segments_added": 2,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "preserved_pads": {
+    "U3.7": {
+      "net": "FLASH_HOLD_N",
+      "position_mm": [11.08, 5.99],
+      "routing_touched": false
+    },
+    "U3.5": {
+      "net": "AUX_SPI_MOSI",
+      "position_mm": [11.08, 8.53],
+      "routing_touched": false
+    },
+    "C1.2": {
+      "net": "GND",
+      "position_mm": [11.265, 11.085],
+      "routing_touched": false
+    }
+  },
+  "preserved_geometry": {
+    "accepted_route1bg_geometry_modified": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9712848520,
+    "artifact_name": "r13-route1bi-u3-c1-1v8-evidence",
+    "zip_sha256": "a9d825985fac0304fcabfaf6ad0f82a26ea62e361e098a1cd2979a2406b6eae5",
+    "pcb_sha256": "9e513dc10b0cf16006bebcf60bf925e78740bbdd124811852b2703e45f1fd1ca",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "routing_seed_sha256": "6538a954cc140d38f69516d95329e283b3a8d95c029e3beab7fa50d0621d9a2f",
+    "drc_json_sha256": "e47fca6838a1fea605daff42a233bf5b0364bcbf848ebda1aee80d0fda1f2dce",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "summary_json_sha256": "e763357f1adb642ac6a63228a94ea4f5a4978c38afa7f4887c75558c6a1e8412",
+    "probe_json_sha256": "015b40e4508e87dc34af69cb8bc24f8b72cac736c38da1cf4378c8cdf0906f24",
+    "dogleg_screen_json_sha256": "28252922edd3d1becff9cfc26d8e62dab8b62769d8e916477e28936552d6fa66",
+    "downloaded_artifact_digest_verified_in_actions": true,
+    "sha256_manifest_verified_in_actions": true,
+    "independent_download_zip_sha256_verified": true,
+    "independent_sha256_manifest_verified": true,
+    "independent_json_gates_verified": true
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "accepted route-1bg reproduction",
+      "read-only Phase A3 Manhattan dogleg screen",
+      "exact U3/C1 identity, net and coordinate probe",
+      "0.300 mm conservative minimum unrelated-copper clearance",
+      "executed KiCad 9.0.9 DRC",
+      "exact 115 unconnected count",
+      "268-node physical pin/net audit",
+      "exact two-segment zero-via scope",
+      "U3 FLASH_HOLD_N / AUX_SPI_MOSI and C1 GND preservation",
+      "RF and supplier-gated preservation",
+      "downloaded Artifact digest/SHA256SUMS/JSON re-verification"
+    ]
+  },
+  "deferred_items_unchanged": [
+    "U1 adjacent-pad +1V8 closure",
+    "J7 routing",
+    "C401.2/GND RF-adjacent",
+    "U2.30/LDO2_IN to R106.2",
+    "CHG_5V",
+    "U2.14/SYS_I2C_SCL to R104.2",
+    "RF routing/matching",
+    "J3/J5/J6 supplier/mechanical interfaces"
+  ]
+}

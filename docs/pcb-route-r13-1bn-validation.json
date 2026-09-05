@@ -1,0 +1,153 @@
+{
+  "revision": "r13-route1bn-r403-1v8-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 20,
+  "base_accepted_revision": "route-1bm",
+  "candidate_commit": "89f495f8f792bb53ae3cef8422610f6a3d3f7f45",
+  "phase_a": {
+    "screen_evidence": "docs/pcb-route-r13-1bn-screen-phase-a1.json",
+    "refine_evidence": "docs/pcb-route-r13-1bn-r403-refine-phase-a2.json",
+    "refine_workflow_run_id": 33410882186,
+    "refine_job_id": 99549846926,
+    "refine_verify_artifact_job_id": 99551726561,
+    "refine_artifact_id": 9765271636,
+    "refine_artifact_digest": "sha256:ab1b720160f1c6d27e797303de1861472e250f44aa69ca67b7b12d78b18f1f50",
+    "paths_evaluated": 441,
+    "passing_paths": 251,
+    "grid_mm": 0.05
+  },
+  "executed_authority": {
+    "workflow_name": "r13 route1bn R403 +1V8 validation",
+    "workflow_run_id": 33413080742,
+    "validate_job_id": 99557105934,
+    "verify_artifact_job_id": 99558773007,
+    "head_sha": "89f495f8f792bb53ae3cef8422610f6a3d3f7f45",
+    "kicad_version": "9.0.9",
+    "source_rule_violations": 0,
+    "source_unconnected_items": 111,
+    "rule_violations": 0,
+    "unconnected_items": 110,
+    "ratsnest_decrement": 1,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "mismatches": [],
+    "unexpected_pad_nets": [],
+    "artifact_verify": "PASS",
+    "independent_verify": "PASS"
+  },
+  "routing_scope": {
+    "net": "+1V8",
+    "from": {
+      "kind": "existing_track_endpoint",
+      "position_mm": [41.005, 14.975],
+      "existing_track_length_mm": 4.662842,
+      "existing_track_preserved": true
+    },
+    "to": {
+      "reference": "R403",
+      "pad": "1",
+      "value": "4.7k PU PROV",
+      "net": "+1V8",
+      "position_mm": [40.255, 25.975]
+    },
+    "preserved_adjacent_pad": {
+      "reference": "R403",
+      "pad": "2",
+      "net": "SYS_I2C_SDA",
+      "position_mm": [40.895, 25.975],
+      "routing_touched": false
+    },
+    "path_family": "VHVH",
+    "path_points_mm": [
+      [41.005, 14.975],
+      [41.005, 15.65],
+      [39.6, 15.65],
+      [39.6, 25.975],
+      [40.255, 25.975]
+    ],
+    "track_width_mm": 0.3,
+    "segment_lengths_mm": [0.675, 1.405, 10.325, 0.655],
+    "track_length_mm": 13.06,
+    "track_segments_added": 4,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "geometry": {
+    "minimum_conservative_clearance_mm": 0.26,
+    "required_clearance_mm": 0.1,
+    "co_limiting_unrelated_copper": {
+      "R403.2/SYS_I2C_SDA": 0.26,
+      "C4.2/GND": 0.26
+    }
+  },
+  "physical_delta_audit": {
+    "result": "PASS",
+    "removed_items": 0,
+    "added_tracks": 4,
+    "added_vias": 0,
+    "footprint_state_unchanged": true,
+    "source_1v8_track_preserved": true
+  },
+  "preserved_geometry": {
+    "r403_sys_i2c_sda_pad2_routing_touched": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "validation_history": [
+    {
+      "workflow_run_id": 33412259518,
+      "validate_job_id": 99554414551,
+      "conclusion": "FAILURE_BEFORE_MATERIALIZATION",
+      "disposition": "EXACT_PROBE_FALSE_NEGATIVE",
+      "reason": "The initial exact probe required the Phase A2 engine's single nearest-copper identity C4.2/GND. Executed exact geometry encountered R403.2/SYS_I2C_SDA first. Accepted route-1bm Artifact inspection proved both pads co-limit the path at exactly 0.260 mm. No rule was relaxed."
+    },
+    {
+      "workflow_run_id": 33413080742,
+      "validate_job_id": 99557105934,
+      "verify_artifact_job_id": 99558773007,
+      "conclusion": "SUCCESS",
+      "correction": "Exact probe explicitly proves both R403.2/SYS_I2C_SDA and C4.2/GND are co-limiters at 0.260 mm while retaining the 0.100 mm rule."
+    }
+  ],
+  "artifact": {
+    "artifact_id": 9766085905,
+    "artifact_name": "r13-route1bn-r403-1v8-evidence",
+    "zip_sha256": "a3e27b162ec50809f90d5f7b6937621d63de455ca6a70b4937be158f647bb0fd",
+    "pcb_sha256": "5abd1e61dc4686ffe0241a06864b0914a3e6ce143f7b2346a0095b528f4738db",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "routing_seed_sha256": "9d42d56191d49dd941e296291c8981eb2e885e014c5fb26112e6890de3b5cf49",
+    "drc_json_sha256": "9a8e1ed8a699574c9a0aea8482ff514ccab776478029cdf538b0e2df1f78185e",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "summary_json_sha256": "0dd1289ba3a1cce5d3893e7563165dcacd95ed6c338c6920118df776e1277438",
+    "probe_json_sha256": "8c5aa2dc82cff09ecb898452700da106237db28fe5e4de36e0885b67f03953db",
+    "scope_json_sha256": "6855dab45137dd5410222e809ce9d2feda0a9de13ac9e17362993d166f430e28",
+    "sha256_manifest_sha256": "4062ab48ebd44133c642a9a8d70f3321e8b043dfce6455845336768777e072b5",
+    "downloaded_artifact_digest_verified_in_actions": true,
+    "sha256_manifest_verified_in_actions": true,
+    "independent_download_zip_sha256_verified": true,
+    "independent_sha256_manifest_verified": true,
+    "independent_json_gates_verified": true,
+    "independent_pcb_sha_verified": true
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "accepted route-1bm reproduction at 0/111/268",
+      "Phase A semantic screening and 0.05 mm local refine",
+      "exact +1V8 source-track and R403.1 identity/net/coordinate/path probe",
+      "0.260 mm conservative co-limiting clearance proof",
+      "exact four-segment zero-via materialization",
+      "before/after physical delta audit",
+      "executed KiCad 9.0.9 DRC",
+      "exact 110 unconnected count",
+      "268-node physical pin/net audit",
+      "downloaded Artifact SHA256SUMS/JSON verification",
+      "independent Artifact ZIP/SHA256SUMS/JSON/PCB verification"
+    ]
+  }
+}

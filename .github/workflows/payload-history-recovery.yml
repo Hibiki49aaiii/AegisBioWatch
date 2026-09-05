@@ -1,0 +1,16 @@
+name: payload history recovery (retired)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  retired:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: |
+          echo "Historical payload archaeology is complete."
+          echo "No byte-identical certified r7/r11 payload survives in Git history."
+          echo "Use the recovered-topology validation workflows for current engineering authority."

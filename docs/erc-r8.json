@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.kicad.org/erc.v1.json",
+  "coordinate_units": "mm",
+  "date": "2026-08-08T15:02:25+0000",
+  "included_severities": ["error", "warning", "exclusion"],
+  "kicad_version": "9.0.9",
+  "sheets": [
+    {"path":"/","uuid_path":"/64b8be14-3776-4cc1-99dc-d738e982b6c0","violations":[]},
+    {"path":"/MCU_RF_CLOCK/","uuid_path":"/64b8be14-3776-4cc1-99dc-d738e982b6c0/c1795e27-0c19-46fe-a2fb-7a2cf5567021","violations":[]},
+    {"path":"/PMIC_CHARGER/","uuid_path":"/64b8be14-3776-4cc1-99dc-d738e982b6c0/94e66df3-2175-40e3-8d47-16a649d0e617","violations":[]},
+    {"path":"/STORAGE_HAPTIC/","uuid_path":"/64b8be14-3776-4cc1-99dc-d738e982b6c0/c7d6cdee-48fb-43b1-a188-5cb25187a2e4","violations":[]},
+    {"path":"/DISPLAY_TOUCH/","uuid_path":"/64b8be14-3776-4cc1-99dc-d738e982b6c0/4fa45f04-b448-49b9-9cd5-5427fd977209","violations":[]},
+    {"path":"/BIO_INTERFACE/","uuid_path":"/64b8be14-3776-4cc1-99dc-d738e982b6c0/f8df603c-bf05-4005-81eb-edd3d9835461","violations":[]},
+    {"path":"/DEBUG_POWER/","uuid_path":"/64b8be14-3776-4cc1-99dc-d738e982b6c0/88d0dbd8-134a-433f-b75d-eec2c2cdcb1a","violations":[]}
+  ],
+  "source": "AegisBioWatch-MainBoard-Rev0.kicad_sch"
+}

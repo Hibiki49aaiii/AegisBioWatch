@@ -1,0 +1,43 @@
+{
+  "revision": "r13-route1g-pvss-corridor-refinement",
+  "status": "ACCEPTED_EXECUTED_KICAD_CLEAN_INCREMENT",
+  "workflow": {
+    "name": "r13 route1g PVSS corridor validation",
+    "run_id": 31322247376,
+    "job_id": 93266927047,
+    "validated_head_sha": "b15f77804aa3631bf9afce198d10f895fd66f763",
+    "kicad_version": "9.0.9"
+  },
+  "validation": {
+    "rule_violations": 0,
+    "unconnected_items": 178,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "controlled_segments_removed": 11,
+    "replacement_segments_added": 10,
+    "vias_added": 0
+  },
+  "routing": {
+    "logical_connectivity_added": false,
+    "sw_width_mm": 0.2,
+    "vsys_width_mm": 0.3,
+    "sw1_escape_x_mm": 8.45,
+    "sw2_escape_x_mm": 8.3,
+    "sw2_turn_y_mm": 30.65,
+    "vsys_escape_x_mm": 7.75,
+    "in1_gnd_plane_preserved": true,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  },
+  "evidence": {
+    "artifact_name": "r13-route1g-pvss-corridor-evidence",
+    "artifact_id": 9040511709,
+    "artifact_digest": "sha256:5e3a43c94082f1c7ca33799ec0d7987e6d850dcaadc676857956296107df2542",
+    "routed_pcb_sha256": "c003e2607db287d3a9b00081155dc0c8d29b4693c3d529c7fa2798470b32456d",
+    "route1g_summary_sha256": "419a2b495d62615860f0daa60fb8e9612716038eb9ee90b16b80325f6bd1b30b",
+    "route1g_drc_sha256": "0fb7337b274f8268fc9b14e5ed6855991684f0087c8b495b6724976f424f0140",
+    "pin_net_audit_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821"
+  },
+  "release_status": "NOT_FOR_GERBER",
+  "note": "This is a DRC-clean routing geometry refinement, not a completed PCB. 178 connections remain unrouted. Generated PCB SHA values can vary between reproductions because generated KiCad UUIDs vary; same-run artifact evidence is authoritative."
+}

@@ -1,0 +1,7 @@
+{
+  "bom_rows": 79,
+  "assigned": 76,
+  "unassigned": 3,
+  "unassigned_refs": ["J3", "J5", "J6"],
+  "closed_in_r8": ["J8", "J9", "J101", "J4"]
+}

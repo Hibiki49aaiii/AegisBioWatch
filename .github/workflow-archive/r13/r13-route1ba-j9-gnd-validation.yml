@@ -1,0 +1,97 @@
+name: r13 route1ba J9 right GND validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1ba-j9-gnd-validation.yml'
+      - 'tools/reproduce-route1az-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1ba-j9-gnd.py'
+      - 'tools/write-pcb-r13-route1ba-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+      - name: Reproduce and validate accepted route1az baseline
+        run: bash tools/reproduce-route1az-accepted.sh
+      - name: Materialize route1ba J9 right GND closure
+        run: |
+          python3 -X faulthandler tools/materialize-pcb-r13-route1ba-j9-gnd.py \
+            --route1az-drc-json /tmp/route1az.json \
+            --route1az-pin-net-audit /tmp/route1az-audit.json
+      - name: KiCad route1ba DRC and audit
+        run: |
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1ba.json hardware/main-board/pcb/route-r13-1ba/AegisBioWatch-MainBoard-Route1ba-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py \
+            --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
+            --pcb hardware/main-board/pcb/route-r13-1ba/AegisBioWatch-MainBoard-Route1ba-r13.kicad_pcb \
+            --output /tmp/route1ba-audit.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1ba.json')); a=json.load(open('/tmp/route1ba-audit.json'))
+          r=json.load(open('hardware/main-board/pcb/route-r13-1ba/routing-seed-r13-1ba.json'))
+          c=r.get('connections',{}).get('J9.1/GND right pad',{})
+          out={'rule_violations':len(d.get('violations',[])),'unconnected_items':len(d.get('unconnected_items',[])),
+            'pin_net_audit':a.get('result'),'audited_nodes':a.get('audited_present_source_nodes'),
+            'added_segments':r.get('track_segments_added'),'vias_added':r.get('vias_added'),
+            'component_moves':r.get('component_moves'),'component_rotations':r.get('component_rotations'),
+            'j9_value':c.get('j9_value'),'j9_1_net':c.get('j9_1_net'),'j9_2_net':c.get('j9_2_net'),
+            'j9_1_pad_positions_mm':c.get('j9_1_pad_positions_mm'),'j9_2_pad_positions_mm':c.get('j9_2_pad_positions_mm'),
+            'target_pad_mm':c.get('pad_mm'),'gnd_via_mm':c.get('gnd_via_mm'),
+            'target_physical_pad':c.get('target_physical_pad'),
+            'left_j9_1_gnd_pad_status':r.get('left_j9_1_gnd_pad_status'),'j9_side_button_pads_status':r.get('j9_side_button_pads_status'),
+            'accepted_route1az_geometry_modified':r.get('accepted_route1az_geometry_modified'),
+            'rf_routing_touched':r.get('rf_routing_touched'),'supplier_gated_interfaces_touched':r.get('supplier_gated_interfaces_touched')}
+          print(json.dumps(out,indent=2)); Path('/tmp/route1ba-summary.json').write_text(json.dumps(out,indent=2))
+          if out['rule_violations']!=0 or out['unconnected_items']!=122: raise SystemExit('route1ba DRC/ratsnest gate failed')
+          if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1ba audit gate failed')
+          if out['added_segments']!=1 or out['vias_added']!=1: raise SystemExit('route1ba routing scope gate failed')
+          if out['component_moves']!=[] or out['component_rotations']!=[]: raise SystemExit('route1ba placement scope gate failed')
+          if out['j9_value']!='EVQPUK02K_SIDE_BUTTON' or out['j9_1_net']!='GND' or out['j9_2_net']!='SIDE_BUTTON': raise SystemExit('route1ba J9 identity/net gate failed')
+          if out['j9_1_pad_positions_mm'] != [[20.85,5.775],[26.0,5.775]]: raise SystemExit('route1ba J9.1 duplicate-pad geometry gate failed')
+          if out['j9_2_pad_positions_mm'] != [[20.85,7.475],[26.0,7.475]]: raise SystemExit('route1ba J9.2 geometry gate failed')
+          if out['target_pad_mm'] != [26.0,5.775] or out['gnd_via_mm'] != [27.0,5.775] or out['target_physical_pad']!='right J9.1/GND': raise SystemExit('route1ba target geometry gate failed')
+          if out['left_j9_1_gnd_pad_status']!='UNCHANGED' or out['j9_side_button_pads_status']!='UNCHANGED': raise SystemExit('route1ba J9 preserved-pad gate failed')
+          if out['accepted_route1az_geometry_modified'] is not False: raise SystemExit('route1ba accepted route1az geometry mutation gate failed')
+          if out['rf_routing_touched'] is not False or out['supplier_gated_interfaces_touched'] is not False: raise SystemExit('route1ba frozen-interface scope gate failed')
+          PY
+      - name: Package route1ba evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/e
+          for f in \
+            hardware/main-board/pcb/route-r13-1ba/AegisBioWatch-MainBoard-Route1ba-r13.kicad_pcb \
+            hardware/main-board/pcb/route-r13-1ba/AegisBioWatch-MainBoard-Route1ba-r13.kicad_pro \
+            hardware/main-board/pcb/route-r13-1ba/routing-seed-r13-1ba.json \
+            /tmp/route1ba.json /tmp/route1ba-summary.json /tmp/route1ba-audit.json; do
+            test -f "$f" && cp "$f" /tmp/e/
+          done
+          sha256sum /tmp/e/* > /tmp/e/SHA256SUMS.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1ba-j9-right-gnd-evidence
+          path: /tmp/e/**
+          if-no-files-found: warn

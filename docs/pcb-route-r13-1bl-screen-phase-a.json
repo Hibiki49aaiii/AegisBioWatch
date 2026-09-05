@@ -1,0 +1,143 @@
+{
+  "revision": "r13-route1bl-phase-a-screen",
+  "issue": 18,
+  "base": {
+    "accepted_authority": "route-1bk",
+    "commit": "038bb5c349d0e8a823c152539094e74827705768",
+    "rule_violations": 0,
+    "unconnected_items": 113,
+    "audited_nodes": 268,
+    "audit": "PASS"
+  },
+  "phase_a1": {
+    "run": 33257200996,
+    "job": 99112904978,
+    "artifact": 9716233834,
+    "artifact_sha256": "d95c949da67bea6690220ccc0004e12edea8f91f3a02b5a523fd56788eca06e1",
+    "result": "C301_NO_PASS; R403_NUMERIC_0.099999_REJECTED"
+  },
+  "phase_a2": {
+    "run": 33257631053,
+    "job": 99114005797,
+    "artifact": 9716379240,
+    "artifact_sha256": "bd9abb576ff2f69ac25863e9b5a23c0cdd9d66425e5e365396114eb422b0f1bc",
+    "result": "NRF_RESET_N_RF_ADJACENT_REJECTED; R403_0.099999_REJECTED"
+  },
+  "phase_a3_c301": {
+    "run": 33258188435,
+    "job": 99115445926,
+    "artifact": 9716526627,
+    "artifact_sha256": "d72e9542db322f9a409c048073257a4c13b70cf643ff68cb1b872ba5e02a7530",
+    "paths_evaluated": 2884,
+    "passing_paths": 0,
+    "best_clearance_mm": 0.074999,
+    "limiting_copper": "GND via @ (15.000,23.725)",
+    "disposition": "REJECTED"
+  },
+  "phase_a4_r106_coarse": {
+    "run": 33287660251,
+    "job": 99193578209,
+    "artifact": 9725015907,
+    "artifact_sha256": "57ce2edf5607791c52b71a058c57aaf88302cdcd4a1579279f7a6f7b8b47cc63",
+    "paths_evaluated": 3444,
+    "passing_paths": 1,
+    "best_path": [
+      [
+        8.9875,
+        28.25
+      ],
+      [
+        7.25,
+        28.25
+      ],
+      [
+        7.25,
+        26.5
+      ],
+      [
+        5.270826,
+        26.5
+      ],
+      [
+        5.270826,
+        25.865834
+      ]
+    ],
+    "best_clearance_mm": 0.125
+  },
+  "phase_a5_r106_refine": {
+    "run": 33300792687,
+    "job": 99228424884,
+    "artifact": 9728930958,
+    "artifact_sha256": "9e53819baf6d4174efe4c339376d4dcc6b1f028dffa0e1fc15780383f853ae02",
+    "grid_mm": 0.05,
+    "candidate_paths": 88,
+    "passing_paths": 16,
+    "best_screen_path": [
+      [
+        8.9875,
+        28.25
+      ],
+      [
+        7.2,
+        28.25
+      ],
+      [
+        7.2,
+        26.4
+      ],
+      [
+        5.270826,
+        26.4
+      ],
+      [
+        5.270826,
+        25.865834
+      ]
+    ],
+    "best_clearance_mm": 0.184166,
+    "nearest_unrelated_copper": "R106.2/LDO2_IN",
+    "selected_effective_new_copper_path": [
+      [
+        7.35,
+        28.25
+      ],
+      [
+        7.2,
+        28.25
+      ],
+      [
+        7.2,
+        26.4
+      ],
+      [
+        5.270826,
+        26.4
+      ],
+      [
+        5.270826,
+        25.865834
+      ]
+    ],
+    "effective_segment_lengths_mm": [
+      0.15,
+      1.85,
+      1.929174,
+      0.534166
+    ],
+    "effective_total_length_mm": 4.46334,
+    "overlap_policy": "Do not materialize the already-existing VSYS segment from 8.9875 to 7.35.",
+    "disposition": "SELECTED_FOR_PHASE_B"
+  },
+  "invariants": {
+    "track_width_mm": 0.3,
+    "minimum_clearance_mm": 0.1,
+    "vias_allowed": 0,
+    "component_moves_allowed": 0,
+    "component_rotations_allowed": 0,
+    "r106_pad2_ldo2_in": "DEFERRED_UNTOUCHED",
+    "rule_waiver": false,
+    "via_in_pad": false,
+    "release_status": "NOT_FOR_GERBER"
+  }
+}

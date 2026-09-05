@@ -1,0 +1,117 @@
+{
+  "revision": "r13-route1bg-c5-l101-1v8-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 13,
+  "base_accepted_revision": "route-1bf",
+  "base_commit": "85d993250798f44163b093c220a37a41245c54dd",
+  "candidate_commit": "135c1630dfc9fe59a566c3df02a9296a164681d0",
+  "executed_authority": {
+    "workflow_name": "r13 route1bg C5-L101 +1V8 validation",
+    "workflow_run_id": 33241648484,
+    "validate_job_id": 99071908347,
+    "verify_artifact_job_id": 99072144111,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 116,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "mismatches": [],
+    "unexpected_pad_nets": [],
+    "artifact_verify": "PASS"
+  },
+  "probe": {
+    "board_modified": false,
+    "unrelated_blocker_count": 0,
+    "existing_l101_to_c107_rail_preserved": true,
+    "rule_clearance_mm": 0.1
+  },
+  "routing_scope": {
+    "net": "+1V8",
+    "from": {
+      "reference": "C5",
+      "pad": "1",
+      "value": "100nF",
+      "position_mm": [9.255, 22.225]
+    },
+    "to": {
+      "reference": "L101",
+      "pad": "2",
+      "value": "2.2uH / DCR<400mR",
+      "position_mm": [8.964712, 24.126353]
+    },
+    "track_width_mm": 0.3,
+    "track_length_mm": 1.923385,
+    "track_segments_added": 1,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "preserved_pads": {
+    "C5.2": {
+      "net": "GND",
+      "position_mm": [9.895, 22.225],
+      "routing_touched": false
+    },
+    "L101.1": {
+      "net": "PMIC_SW1",
+      "position_mm": [7.514712, 24.126353],
+      "routing_touched": false
+    },
+    "C107.1": {
+      "net": "+1V8",
+      "position_mm": [10.407553, 23.51711]
+    }
+  },
+  "preserved_geometry": {
+    "existing_l101_to_c107_rail_status": "UNCHANGED",
+    "accepted_route1bf_geometry_modified": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9711553298,
+    "artifact_name": "r13-route1bg-c5-l101-1v8-evidence",
+    "zip_sha256": "ed78cedd15dde29c0cabe13ad9c0612fa2471bc092ea58d947cdc6019ef6e468",
+    "pcb_sha256": "5f15cfde5b3172a7a491fc836550c70e4e3d7a7456267ea275b03386272dca78",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "routing_seed_sha256": "8738be23572ef5ebf639f1e545fab52a42b0738f8ee7ff758719b1aac1d9c6bf",
+    "drc_json_sha256": "7f7bb701c54e08c4fc2ef97d5bde24fe638627e5006fab54fa27d06530cf978d",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "summary_json_sha256": "8f269e28db9fe901e621021e76a49c997c5e106f4fe2b8f57520a212987bfdbb",
+    "probe_json_sha256": "6a0ea3e0675f88d0a7ad9aade639bdca8f143c4006d2452b5a96ebcfa4acdf33",
+    "downloaded_artifact_digest_verified_in_actions": true,
+    "sha256_manifest_verified_in_actions": true,
+    "independent_download_zip_sha256_verified": true,
+    "independent_sha256_manifest_verified": true,
+    "independent_json_gates_verified": true
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "accepted route-1bf reproduction",
+      "executed read-only C5/L101 F.Cu blocker probe",
+      "executed KiCad 9.0.9 DRC",
+      "exact 116 unconnected count",
+      "268-node physical pin/net audit",
+      "exact one-segment zero-via scope",
+      "C5/L101/C107 identity, net and coordinate gates",
+      "C5 GND / L101 PMIC_SW1 / existing +1V8 rail preservation",
+      "RF and supplier-gated preservation",
+      "downloaded Artifact digest/SHA256SUMS/JSON re-verification"
+    ]
+  },
+  "deferred_items_unchanged": [
+    "U1 adjacent-pad +1V8 closure",
+    "J7 routing",
+    "C401.2/GND RF-adjacent",
+    "U2.30/LDO2_IN to R106.2",
+    "CHG_5V",
+    "U2.14/SYS_I2C_SCL to R104.2",
+    "RF routing/matching",
+    "J3/J5/J6 supplier/mechanical interfaces"
+  ]
+}

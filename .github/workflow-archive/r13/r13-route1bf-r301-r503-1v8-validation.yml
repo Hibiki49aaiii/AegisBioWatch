@@ -1,0 +1,167 @@
+name: r13 route1bf R301-R503 +1V8 validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bf-r301-r503-1v8-validation.yml'
+      - 'tools/reproduce-route1be-accepted.sh'
+      - 'tools/probe-pcb-r13-route1bf-r301-r503-1v8.py'
+      - 'tools/materialize-pcb-r13-route1bf-r301-r503-1v8.py'
+      - 'tools/write-pcb-r13-route1bf-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce accepted route1be
+        run: bash tools/reproduce-route1be-accepted.sh
+
+      - name: Run read-only route1bf geometry probe
+        run: |
+          python3 tools/probe-pcb-r13-route1bf-r301-r503-1v8.py             --route1be-drc-json /tmp/route1be.json             --route1be-pin-net-audit /tmp/route1be-audit.json             --output /tmp/route1bf-probe.json
+
+      - name: Materialize route1bf
+        run: |
+          python3 -X faulthandler tools/materialize-pcb-r13-route1bf-r301-r503-1v8.py             --route1be-drc-json /tmp/route1be.json             --route1be-pin-net-audit /tmp/route1be-audit.json
+
+      - name: Validate route1bf
+        run: |
+          kicad-cli pcb drc --format json --severity-all             -o /tmp/route1bf.json             hardware/main-board/pcb/route-r13-1bf/AegisBioWatch-MainBoard-Route1bf-r13.kicad_pcb
+
+          python3 tools/audit-pcb-pin-nets.py             --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml             --pcb hardware/main-board/pcb/route-r13-1bf/AegisBioWatch-MainBoard-Route1bf-r13.kicad_pcb             --output /tmp/route1bf-audit.json
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1bf.json'))
+          a=json.load(open('/tmp/route1bf-audit.json'))
+          p=json.load(open('/tmp/route1bf-probe.json'))
+          r=json.load(open('hardware/main-board/pcb/route-r13-1bf/routing-seed-r13-1bf.json'))
+          c=r['connections']['R301.1/+1V8 to R503.1/+1V8']
+          out={
+            'rule_violations':len(d.get('violations',[])),
+            'unconnected_items':len(d.get('unconnected_items',[])),
+            'pin_net_audit':a.get('result'),
+            'audited_nodes':a.get('audited_present_source_nodes'),
+            'probe_board_modified':p.get('board_modified'),
+            'probe_blocker_count':p.get('blocker_count'),
+            'probe_lateral_gap_mm':p.get('candidate',{}).get('lateral_gap_to_signal_pad_column_mm'),
+            'added_segments':r.get('track_segments_added'),
+            'vias_added':r.get('vias_added'),
+            'track_width_mm':r.get('track_width_mm'),
+            'track_length_mm':r.get('track_length_mm'),
+            'component_moves':r.get('component_moves'),
+            'component_rotations':r.get('component_rotations'),
+            'r301_value':c.get('r301_value'),'r503_value':c.get('r503_value'),
+            'r301_pad1_mm':c.get('r301_pad1_mm'),'r503_pad1_mm':c.get('r503_pad1_mm'),
+            'r301_pad1_net':c.get('r301_pad1_net'),'r503_pad1_net':c.get('r503_pad1_net'),
+            'r301_pad2_mm':c.get('r301_pad2_mm'),'r503_pad2_mm':c.get('r503_pad2_mm'),
+            'r301_pad2_net':c.get('r301_pad2_net'),'r503_pad2_net':c.get('r503_pad2_net'),
+            'signal_side_routing_touched':r.get('signal_side_routing_touched'),
+            'accepted_route1be_geometry_modified':r.get('accepted_route1be_geometry_modified'),
+            'rf_routing_touched':r.get('rf_routing_touched'),
+            'supplier_gated_interfaces_touched':r.get('supplier_gated_interfaces_touched')
+          }
+          print(json.dumps(out,indent=2))
+          Path('/tmp/route1bf-summary.json').write_text(json.dumps(out,indent=2))
+          assert out['rule_violations']==0 and out['unconnected_items']==117
+          assert out['pin_net_audit']=='PASS' and out['audited_nodes']==268
+          assert out['probe_board_modified'] is False
+          assert out['probe_blocker_count']==0
+          assert out['probe_lateral_gap_mm']>=0.10
+          assert out['added_segments']==1 and out['vias_added']==0
+          assert out['track_width_mm']==0.30 and out['track_length_mm']==1.5
+          assert out['component_moves']==[] and out['component_rotations']==[]
+          assert out['r301_value']=='47k PU' and out['r503_value']=='47k PU'
+          assert out['r301_pad1_mm']==[3.005,25.975] and out['r503_pad1_mm']==[3.005,27.475]
+          assert out['r301_pad1_net']=='+1V8' and out['r503_pad1_net']=='+1V8'
+          assert out['r301_pad2_mm']==[3.645,25.975] and out['r503_pad2_mm']==[3.645,27.475]
+          assert out['r301_pad2_net']=='FLASH_WP_N' and out['r503_pad2_net']=='CHG_PRESENT_N'
+          assert out['signal_side_routing_touched'] is False
+          assert out['accepted_route1be_geometry_modified'] is False
+          assert out['rf_routing_touched'] is False
+          assert out['supplier_gated_interfaces_touched'] is False
+          PY
+
+      - name: Package route1bf evidence
+        run: |
+          mkdir -p /tmp/e
+          cp hardware/main-board/pcb/route-r13-1bf/AegisBioWatch-MainBoard-Route1bf-r13.kicad_pcb /tmp/e/
+          cp hardware/main-board/pcb/route-r13-1bf/AegisBioWatch-MainBoard-Route1bf-r13.kicad_pro /tmp/e/
+          cp hardware/main-board/pcb/route-r13-1bf/routing-seed-r13-1bf.json /tmp/e/
+          cp /tmp/route1bf.json /tmp/e/
+          cp /tmp/route1bf-audit.json /tmp/e/
+          cp /tmp/route1bf-summary.json /tmp/e/
+          cp /tmp/route1bf-probe.json /tmp/e/
+          (cd /tmp/e && sha256sum             AegisBioWatch-MainBoard-Route1bf-r13.kicad_pcb             AegisBioWatch-MainBoard-Route1bf-r13.kicad_pro             routing-seed-r13-1bf.json             route1bf.json route1bf-audit.json route1bf-summary.json route1bf-probe.json             > SHA256SUMS.txt)
+          cat /tmp/e/SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bf-r301-r503-1v8-evidence
+          path: /tmp/e/**
+          if-no-files-found: error
+
+  verify-artifact:
+    needs: validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bf-r301-r503-1v8-evidence
+          path: /tmp/e
+      - name: Verify downloaded evidence package
+        run: |
+          cd /tmp/e
+          sha256sum -c SHA256SUMS.txt
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('/tmp/e')
+          d=json.loads((root/'route1bf.json').read_text())
+          a=json.loads((root/'route1bf-audit.json').read_text())
+          s=json.loads((root/'route1bf-summary.json').read_text())
+          r=json.loads((root/'routing-seed-r13-1bf.json').read_text())
+          p=json.loads((root/'route1bf-probe.json').read_text())
+          pcb=root/'AegisBioWatch-MainBoard-Route1bf-r13.kicad_pcb'
+          assert len(d.get('violations',[]))==0
+          assert len(d.get('unconnected_items',[]))==117
+          assert a.get('result')=='PASS' and a.get('audited_present_source_nodes')==268
+          assert s.get('rule_violations')==0 and s.get('unconnected_items')==117
+          assert s.get('pin_net_audit')=='PASS' and s.get('audited_nodes')==268
+          assert s.get('probe_blocker_count')==0
+          assert r.get('track_segments_added')==1 and r.get('vias_added')==0
+          assert r.get('output_sha256')==hashlib.sha256(pcb.read_bytes()).hexdigest()
+          assert p.get('board_modified') is False and p.get('blocker_count')==0
+          print(json.dumps({
+            'artifact_verify':'PASS',
+            'rule_violations':0,
+            'unconnected_items':117,
+            'pin_net_audit':'PASS',
+            'audited_nodes':268,
+            'pcb_sha256':r.get('output_sha256')
+          },indent=2))
+          PY

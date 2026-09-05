@@ -1,0 +1,38 @@
+[
+  {
+    "file": "MCU_RF_CLOCK.sch",
+    "header": true,
+    "closed": true,
+    "comp_blocks": 22,
+    "balanced": true,
+    "missing_required": []
+  },
+  {
+    "file": "PMIC_CHARGER.sch",
+    "header": true,
+    "closed": true,
+    "comp_blocks": 7,
+    "balanced": true,
+    "missing_required": []
+  },
+  {
+    "file": "STORAGE_HAPTIC.sch",
+    "header": true,
+    "closed": true,
+    "comp_blocks": 12,
+    "balanced": true,
+    "missing_required": []
+  },
+  {
+    "rule": "RF raw/filtered nets distinct",
+    "pass": true
+  },
+  {
+    "rule": "reset raw/external nets distinct",
+    "pass": true
+  },
+  {
+    "rule": "internal regulator remains explicit gate",
+    "pass": true
+  }
+]

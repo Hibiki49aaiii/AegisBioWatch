@@ -1,0 +1,84 @@
+name: r13 route1n CHG_5V local validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1n-chg5v-local-validation.yml'
+      - 'tools/reproduce-route1m-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1n-chg5v-local.py'
+      - 'tools/write-pcb-r13-route1n-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  push:
+    branches: [agent/phase1-mainboard-schematic]
+    paths:
+      - '.github/workflows/r13-route1n-chg5v-local-validation.yml'
+      - 'tools/reproduce-route1m-accepted.sh'
+      - 'tools/materialize-pcb-r13-route1n-chg5v-local.py'
+      - 'tools/write-pcb-r13-route1n-report.py'
+      - 'tools/audit-pcb-pin-nets.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 9.0.9
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+      - name: Reproduce and validate accepted route1m baseline
+        run: bash tools/reproduce-route1m-accepted.sh
+      - name: Materialize route1n CHG_5V local closure
+        run: |
+          python3 -X faulthandler tools/materialize-pcb-r13-route1n-chg5v-local.py \
+            --route1m-drc-json /tmp/route1m.json \
+            --route1m-pin-net-audit /tmp/route1m-audit.json
+      - name: KiCad route1n DRC and audit
+        run: |
+          kicad-cli pcb drc --format json --severity-all -o /tmp/route1n.json hardware/main-board/pcb/route-r13-1n/AegisBioWatch-MainBoard-Route1n-r13.kicad_pcb
+          python3 tools/audit-pcb-pin-nets.py \
+            --xml hardware/main-board/kicad/recovered-r8/AegisBioWatch-MainBoard-r8-recovered.xml \
+            --pcb hardware/main-board/pcb/route-r13-1n/AegisBioWatch-MainBoard-Route1n-r13.kicad_pcb \
+            --output /tmp/route1n-audit.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('/tmp/route1n.json')); a=json.load(open('/tmp/route1n-audit.json')); r=json.load(open('hardware/main-board/pcb/route-r13-1n/routing-seed-r13-1n.json'))
+          out={'rule_violations':len(d.get('violations',[])),'unconnected_items':len(d.get('unconnected_items',[])),'pin_net_audit':a.get('result'),'audited_nodes':a.get('audited_present_source_nodes'),'added_segments':r.get('track_segments_added'),'vias_added':r.get('vias_added'),'component_moves':r.get('component_moves'),'component_rotations':r.get('component_rotations')}
+          print(json.dumps(out,indent=2)); Path('/tmp/route1n-summary.json').write_text(json.dumps(out,indent=2))
+          if out['rule_violations']!=0 or out['unconnected_items']!=162: raise SystemExit('route1n DRC/ratsnest gate failed')
+          if out['pin_net_audit']!='PASS' or out['audited_nodes']!=268: raise SystemExit('route1n audit gate failed')
+          if out['added_segments']!=2 or out['vias_added']!=1 or out['component_moves']!=[]: raise SystemExit('route1n routing/move scope gate failed')
+          rot=out['component_rotations'] or {}
+          if sorted(rot)!=['C101'] or rot['C101'].get('from_deg')!=90.0 or rot['C101'].get('to_deg')!=270.0: raise SystemExit('route1n rotation scope gate failed')
+          PY
+      - name: Package route1n evidence
+        if: always()
+        run: |
+          mkdir -p /tmp/e
+          for f in \
+            hardware/main-board/pcb/route-r13-1n/AegisBioWatch-MainBoard-Route1n-r13.kicad_pcb \
+            hardware/main-board/pcb/route-r13-1n/AegisBioWatch-MainBoard-Route1n-r13.kicad_pro \
+            hardware/main-board/pcb/route-r13-1n/routing-seed-r13-1n.json \
+            /tmp/route1n.json \
+            /tmp/route1n-summary.json \
+            /tmp/route1n-audit.json; do
+            test -f "$f" && cp "$f" /tmp/e/
+          done
+          sha256sum /tmp/e/* > /tmp/e/SHA256SUMS.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r13-route1n-chg5v-local-evidence
+          path: /tmp/e/**
+          if-no-files-found: warn

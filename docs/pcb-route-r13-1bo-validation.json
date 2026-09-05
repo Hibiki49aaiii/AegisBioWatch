@@ -1,0 +1,156 @@
+{
+  "revision": "r13-route1bo-j8-1v8-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 21,
+  "base_accepted_revision": "route-1bn",
+  "candidate_commit": "b1a0778fba6ac1e144523465ab5bc14335aee934",
+  "phase_a": {
+    "inventory_workflow_run_id": 33414128987,
+    "inventory_job_id": 99560606286,
+    "inventory_verify_artifact_job_id": 99565200085,
+    "inventory_artifact_id": 9766840998,
+    "refine_evidence": "docs/pcb-route-r13-1bo-j8-refine-phase-a2.json",
+    "refine_workflow_run_id": 33446851666,
+    "refine_job_id": 99667764079,
+    "refine_verify_artifact_job_id": 99668973400,
+    "refine_artifact_id": 9778457767,
+    "grid_mm": 0.05,
+    "paths_evaluated": 441,
+    "passing_paths": 288,
+    "board_modified": false
+  },
+  "executed_authority": {
+    "workflow_name": "r13 route1bo J8 +1V8 validation",
+    "workflow_run_id": 33447520649,
+    "validate_job_id": 99669842446,
+    "verify_artifact_job_id": 99671064031,
+    "head_sha": "b1a0778fba6ac1e144523465ab5bc14335aee934",
+    "kicad_version": "9.0.9",
+    "source_rule_violations": 0,
+    "source_unconnected_items": 110,
+    "rule_violations": 0,
+    "unconnected_items": 109,
+    "ratsnest_decrement": 1,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268,
+    "mismatches": [],
+    "unexpected_pad_nets": [],
+    "downloaded_artifact_verify": "PASS",
+    "independent_artifact_verify": "PASS"
+  },
+  "routing_scope": {
+    "net": "+1V8",
+    "from": {
+      "kind": "existing_track_endpoint",
+      "position_mm": [
+        10.305,
+        4.72
+      ],
+      "existing_track_length_mm": 6.365,
+      "existing_track_preserved": true
+    },
+    "to": {
+      "reference": "J8",
+      "pad": "1",
+      "value": "TC2030_SWD_6",
+      "net": "+1V8",
+      "position_mm": [
+        12.105,
+        15.26
+      ]
+    },
+    "path_family": "HVHV",
+    "path_points_mm": [
+      [
+        10.305,
+        4.72
+      ],
+      [
+        9.7,
+        4.72
+      ],
+      [
+        9.7,
+        15.8
+      ],
+      [
+        12.105,
+        15.8
+      ],
+      [
+        12.105,
+        15.26
+      ]
+    ],
+    "track_width_mm": 0.3,
+    "segment_lengths_mm": [
+      0.605,
+      11.08,
+      2.405,
+      0.54
+    ],
+    "track_length_mm": 14.63,
+    "track_segments_added": 4,
+    "vias_added": 0,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "geometry": {
+    "minimum_conservative_clearance_mm": 0.4897,
+    "required_clearance_mm": 0.1,
+    "nearest_unrelated_copper": {
+      "kind": "pad",
+      "reference": "J8",
+      "pad": "",
+      "net": ""
+    }
+  },
+  "j8_mechanical_gate": {
+    "numberless_pad_count": 3,
+    "all_numberless_pads_exact_npth": true,
+    "netless": true,
+    "preserved_before_after": true
+  },
+  "physical_delta_audit": {
+    "result": "PASS",
+    "removed_items": 0,
+    "added_tracks": 4,
+    "added_vias": 0,
+    "footprint_state_unchanged": true,
+    "source_1v8_track_preserved": true,
+    "j8_numberless_npth_unchanged": true
+  },
+  "preserved_geometry": {
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9778684430,
+    "artifact_name": "r13-route1bo-j8-1v8-evidence",
+    "artifact_digest": "sha256:9520621a3e47fbb75aab8ab1689b73977b473159a79082e7c9fa1c55437183e6",
+    "pcb_sha256": "e1239dfd912fbb910313b32af3e88f23e34cbc198a742a33ec6beb7b108410c6",
+    "sha256_manifest_verified_in_actions": true,
+    "downloaded_artifact_json_gates_verified": true,
+    "downloaded_artifact_pcb_sha_verified": true
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "accepted route-1bn reproduction at 0/110/268",
+      "Phase A1 semantic screening and Phase A2 0.05 mm local refine",
+      "exact +1V8 source-track and J8.1 identity/net/coordinate/path probe",
+      "exact J8 numberless PAD_ATTRIB_NPTH identity and preservation gate",
+      "0.4897 mm conservative clearance proof",
+      "exact four-segment zero-via materialization",
+      "before/after physical delta audit",
+      "executed KiCad 9.0.9 DRC",
+      "exact 109 unconnected count",
+      "268-node physical pin/net audit",
+      "downloaded Artifact SHA256SUMS/JSON/PCB verification"
+    ]
+  }
+}

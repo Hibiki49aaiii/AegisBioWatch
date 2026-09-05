@@ -1,0 +1,54 @@
+{
+  "revision": "r13-route1o-vbusout-sense-local-decoupling",
+  "status": "ACCEPTED_EXECUTED_KICAD_DRC",
+  "source_baseline": "r13-route1m-vbat-local-decoupling",
+  "workflow": {
+    "name": "r13 route1o VBUSOUT local validation",
+    "run_id": 31348260793,
+    "job_id": 93334176102,
+    "kicad_version": "9.0.9"
+  },
+  "validation": {
+    "rule_violations": 0,
+    "unconnected_items": 162,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268
+  },
+  "scope": {
+    "connection": "U2.22/VBUSOUT_SENSE <-> C105.1/VBUSOUT_SENSE",
+    "gnd_connection": "C105.2/GND -> continuous In1.Cu GND reference",
+    "track_segments_added": 5,
+    "vias_added": 3,
+    "sense_track_width_mm": 0.25,
+    "sense_via_size_mm": 0.45,
+    "sense_via_drill_mm": 0.20,
+    "gnd_track_width_mm": 0.30,
+    "gnd_via_size_mm": 0.60,
+    "gnd_via_drill_mm": 0.30,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "geometry": {
+    "U2.22_mm": [13.8875, 27.75],
+    "C105.1_mm": [15.410102, 25.381239],
+    "C105.2_mm": [16.960102, 25.381239],
+    "sense_entry_via_mm": [14.05, 27.75],
+    "sense_bcu_corner_mm": [14.05, 25.05],
+    "sense_exit_via_mm": [15.0, 25.05],
+    "gnd_via_mm": [17.7, 25.38]
+  },
+  "rejected_geometry": {
+    "strategy": "Top-only dogleg at x=14.10",
+    "reason": "vertical VBUSOUT_SENSE segment bridged/shorted adjacent U2.23/CC1_NC and U2.24/CC2_NC; no waiver used"
+  },
+  "route1n_chg5v_status": "REJECTED_SEPARATE_STAGE_AND_DEFERRED",
+  "same_run_pcb_sha256": "f55445dc15781140fadccc53be3ba6fc6d8b2cb35881641c04980be2bf3be0a9",
+  "evidence_artifact": {
+    "id": 9048094233,
+    "name": "r13-route1o-vbusout-local-evidence",
+    "digest": "sha256:cd4f843391cf578eaf005fead8ef2933fe8b54c22935bdfd03e83d74e58eac9d"
+  },
+  "current_accepted_baseline": "r13-route1o-vbusout-sense-local-decoupling",
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}

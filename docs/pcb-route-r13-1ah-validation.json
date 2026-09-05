@@ -1,0 +1,47 @@
+{
+  "revision": "r13-route1ah-c305-gnd-local",
+  "status": "ACCEPTED_EXECUTED_KICAD",
+  "source_baseline": "route-1ag",
+  "geometry": {
+    "connection": "C305.2/GND -> continuous In1.Cu GND",
+    "pad_mm": [7.765, 22.335],
+    "gnd_via_mm": [8.4, 22.335],
+    "track_width_mm": 0.30,
+    "via_size_mm": 0.60,
+    "via_drill_mm": 0.30,
+    "segments_added": 1,
+    "vias_added": 1,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "scope": {
+    "C305_1_VSYS_HAPTIC": "untouched_pending_separate_validation",
+    "SYS_I2C_SCL": "deferred_geometry_gated",
+    "LDO2_IN": "deferred_geometry_constrained_no_via_in_pad",
+    "CHG_5V": "rejected_and_deferred",
+    "RF": "untouched",
+    "supplier_gated_interfaces": "untouched",
+    "release_status": "NOT_FOR_GERBER"
+  },
+  "validation": {
+    "workflow_run_id": 32158175579,
+    "job_id": 95780342163,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 141,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268,
+    "same_run_source_route1ag_sha256": "0466c3e4891f78b409bf3ce9aa6827c0a781bccb551ec4c30da5b8a2e7fb7913",
+    "historical_accepted_route1ag_artifact_sha256": "3cc008388afd07e1f8bf673de5c43374331058515d460b643a943ccd6de5d082",
+    "same_run_route1ah_pcb_sha256": "334545367756d9429484cadecb605911b556756a61fc2f90b74d1a33ba36f084",
+    "route1ah_drc_json_sha256": "4ac5a5a2b60a31f0296ad18e8005cf5b7ca01f882cc641aad95b1ebec51a1c4e",
+    "route1ah_pin_net_audit_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "route1ah_summary_sha256": "bbc27d3a8fe2d563b8cc7fad748762c7e7885b030c7dc1eba458ecaf34be90bb",
+    "route1ah_routing_seed_sha256": "77341206adec33d232d27c151011da211e4c6bb546ba1f142bff84f6adac37b6",
+    "artifact_id": 9332628877,
+    "artifact_name": "r13-route1ah-c305-gnd-evidence",
+    "artifact_digest": "sha256:49133135418ce0bf90ce0a27fc1db2a8eb8e8dc8adf76565401b0fe1bcef2fba",
+    "source_hash_note": "The same-run regenerated route-1ag byte SHA is recorded separately from the prior accepted route-1ag artifact SHA. Acceptance is based on executed same-run KiCad DRC/pin-net gates and recorded geometry, not byte-identical regeneration."
+  },
+  "acceptance": "Accepted only from workflow run 32158175579 under KiCad 9.0.9: 0 violations / 141 unconnected / 268 of 268 physical pin-net nodes PASS, with one 0.30 mm F.Cu segment and one 0.60/0.30 mm GND via and no placement changes."
+}

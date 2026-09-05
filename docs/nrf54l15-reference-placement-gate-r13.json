@@ -1,0 +1,81 @@
+{
+  "revision": "r13-nrf54l15-qfaa-reference-placement-gate",
+  "device": "nRF54L15-QFAA",
+  "package": "QFN48_6x6mm_P0.4mm",
+  "official_reference": {
+    "vendor": "Nordic Semiconductor",
+    "physical_authority": "Revision-matched Nordic nRF54L15-QFAA reference design plus applicable datasheet and errata",
+    "compatibility_matrix": {
+      "Engineering_B": "QFAA_reference_design_0.8",
+      "Revision_1": "QFAA_reference_design_0.7",
+      "Revision_2": "QFAA_reference_design_1.0"
+    },
+    "selected_for_aegis": null,
+    "selection_gate": "Identify actual procured nRF54L15 silicon revision/build code before freezing RF/DC-DC/crystal placement.",
+    "third_party_coordinates_allowed_as_authority": false
+  },
+  "critical_pins": {
+    "1": "XL1",
+    "2": "XL2",
+    "25": "SWDIO",
+    "26": "SWDCLK",
+    "30": "nRESET",
+    "31": "ANT",
+    "32": "VSS_PA",
+    "33": "DECRF",
+    "34": "XC1",
+    "35": "XC2",
+    "43": "DECA",
+    "44": "VSS",
+    "45": "DECD",
+    "46": "DCC",
+    "47": "VDD",
+    "48": "VDD",
+    "49": "VSS_exposed_die_pad"
+  },
+  "aegis_functional_translation": {
+    "nordic_reference_example_first_rf_shunt_C6": "Aegis_C10_1p5pF_RF_A_to_GND",
+    "first_shunt_warning": "Do not apply the Nordic reference-designator C6 special RF grounding rule to Aegis C6; Aegis C6 is the 2.2uF DECD capacitor.",
+    "first_shunt_return_gate": "If the selected revision-matched Nordic design uses the VSS_PA/die-pad first-shunt return, Aegis C10 must reproduce that functional topology.",
+    "nordic_reference_example_following_rf_shunt_C9": "Aegis_C11_2p0pF_RF_B_to_GND",
+    "following_shunt_return_gate": "Reviewed QFN reference material requires its C9 ground to be isolated from other ground layers except the specified bottom-layer return. Apply that only if the selected revision-matched design retains the rule, and translate it by function to Aegis C11 rather than by designator."
+  },
+  "current_r8_rf_nominal_sequence": [
+    "L2_2p7nH_series",
+    "C10_1p5pF_first_shunt",
+    "L3_3p5nH_series",
+    "C11_2p0pF_following_shunt",
+    "L4_3p5nH_series",
+    "C12_0p3pF_shunt"
+  ],
+  "current_r8_internal_regulator_cluster": [
+    "L1_4p7uH_DCC_DECD",
+    "C6_2p2uF_DECD",
+    "FB1_120ohm_at_100MHz_DECA_RF_DECD",
+    "C7_2p2uF_DECA_RF",
+    "C8_10nF_DECA_RF",
+    "C9_2p2nF_DECA_RF"
+  ],
+  "placement_status": {
+    "pin_authority_verified": true,
+    "schematic_functional_mapping_reviewed": true,
+    "actual_silicon_revision_identified": false,
+    "revision_matched_reference_selected": false,
+    "exact_rf_coordinates_frozen": false,
+    "reason": "Exact RF/DC-DC/crystal geometry and special RF-return structures must be cross-checked against the Nordic QFAA reference design recommended for the actual procured silicon revision.",
+    "rf_impedance_width_frozen": false,
+    "routing_started_for_u1_rf": false
+  },
+  "release_gates": [
+    "actual_nRF54L15_silicon_revision_and_build_code",
+    "revision_matched_Nordic_QFAA_reference_design_selection",
+    "applicable_nRF54L15_errata_review",
+    "direct_revision_matched_QFAA_reference_geometry_review",
+    "revision_matched_special_RF_return_structures",
+    "performance_critical_RF_and_internal_supply_passive_MPNs",
+    "fabricator_stackup_and_impedance_geometry",
+    "VNA_antenna_tuning_and_RF_precompliance"
+  ],
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}

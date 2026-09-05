@@ -1,0 +1,97 @@
+{
+  "revision": "r13-route1bj-phase-a-refined-dogleg-selection",
+  "status": "SELECTED_FOR_PHASE_B",
+  "source_authority": "route-1bi",
+  "source_commit": "df35a6cf0b82c6234024afa0f5de4764971bd733",
+  "source_metrics": {
+    "rule_violations": 0,
+    "unconnected_items": 115,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268
+  },
+  "coarse_screen": {
+    "workflow_run_id": 33246360328,
+    "job_id": 99084399327,
+    "grid_mm": 0.25,
+    "evaluated_candidate_count": 16,
+    "passing_candidate_count": 3,
+    "selected_candidate_clearance_mm": 0.125,
+    "board_modified": false
+  },
+  "refined_screen": {
+    "workflow_run_id": 33246532809,
+    "job_id": 99084854067,
+    "artifact_id": 9713058941,
+    "artifact_zip_sha256": "060b4c00984ec68e7fa21aeda5d54547b21d1ad9a8802f76c732bdff16978705",
+    "grid_mm": 0.05,
+    "evaluated_candidate_count": 16,
+    "passing_candidate_count": 6,
+    "board_modified": false,
+    "independent_artifact_zip_sha256_verified": true
+  },
+  "selected": {
+    "drc_index": 6,
+    "net": "+1V8",
+    "from": "R404.1",
+    "from_value": "4.7k PU PROV",
+    "from_position_mm": [15.755, 26.725],
+    "from_signal_side": {
+      "pad": "R404.2",
+      "net": "SYS_I2C_SCL",
+      "position_mm": [16.395, 26.725]
+    },
+    "to": "R302.1",
+    "to_value": "47k PU",
+    "to_position_mm": [20.255, 25.975],
+    "to_signal_side": {
+      "pad": "R302.2",
+      "net": "FLASH_HOLD_N",
+      "position_mm": [20.895, 25.975]
+    },
+    "path_family": "VHV",
+    "points_mm": [
+      [15.755, 26.725],
+      [15.755, 26.2],
+      [20.255, 26.2],
+      [20.255, 25.975]
+    ],
+    "segment_count": 3,
+    "segment_lengths_mm": [0.525, 4.5, 0.225],
+    "total_length_mm": 5.25,
+    "track_width_mm": 0.3,
+    "minimum_conservative_clearance_mm": 0.175,
+    "nearest_unrelated_copper": {
+      "kind": "pad",
+      "reference": "R501",
+      "pad": "1",
+      "net": "CHG_5V",
+      "position_mm": [18.005, 26.725],
+      "pad_size_mm": [0.46, 0.4]
+    },
+    "semantic_reason": "Join two low-current +1V8 pull-up rail pads while escaping away from R404.2/SYS_I2C_SCL and R302.2/FLASH_HOLD_N."
+  },
+  "not_selected": [
+    {
+      "candidate": "C6.1/NRF_DECD to L1.1/NRF_DECD",
+      "reason": "nRF internal regulator/decoupling network; not preferred for ordinary pull-up increment"
+    },
+    {
+      "candidate": "FB1.2/NRF_DECD to C6.1/NRF_DECD",
+      "reason": "nRF internal regulator/decoupling network; not preferred for ordinary pull-up increment"
+    },
+    {
+      "candidate": "C305.1/VSYS_HAPTIC to C304.1/VSYS_HAPTIC",
+      "reason": "longer haptic power path with only 0.125 mm modeled margin"
+    },
+    {
+      "candidate": "D101.2/DOCK_5V_RAW to D102.1/DOCK_5V_RAW",
+      "reason": "12.555 mm power route should be handled with coordinated dock-power current/placement intent"
+    },
+    {
+      "candidate": "+1V8 track to R403.1/+1V8",
+      "reason": "0.099999 mm modeled result is treated as below the 0.100 mm engineering threshold"
+    }
+  ],
+  "decision": "Proceed to exact Phase B validation. Phase A geometry is preflight only; route-1bi remains authoritative until executed KiCad gates pass.",
+  "release_status": "NOT_FOR_GERBER"
+}

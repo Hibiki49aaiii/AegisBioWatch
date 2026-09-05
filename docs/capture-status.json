@@ -1,0 +1,94 @@
+{
+  "project": "AegisBioWatch",
+  "revision": "Rev.0",
+  "phase": 1,
+  "capture_revision": "r8",
+  "design_review_revision": "r9",
+  "pcb_floorplan_revision": "r10",
+  "pcb_placement_seed_revision": "r11",
+  "pcb_reference_placement_review_revision": "r12",
+  "status": "R8_ELECTRICAL_R9_INTERFACE_R10_FLOORPLAN_R11_UNROUTED_SEED_R12_REFERENCE_REVIEW",
+  "manufacturing_ready": false,
+  "kicad_cli": "9.0.9",
+  "electrical_authority": {
+    "revision": "r8",
+    "canonical_materialization": "python3 tools/materialize-native-r8.py",
+    "canonical_output": "hardware/main-board/kicad/native-r8/AegisBioWatch-MainBoard-Rev0.kicad_sch",
+    "erc": {"violations": 0, "severity_all": true},
+    "interface_netlist_validation": {"checks": 12, "passed": 12, "failed": 0},
+    "footprints": {"bom_rows": 79, "assigned": 76, "empty_or_unfrozen": 3, "empty_refs": ["J3", "J5", "J6"]}
+  },
+  "pcb_floorplan": {
+    "revision": "r10",
+    "authority": "PROVISIONAL_NOT_GERBER_AUTHORITY",
+    "path": "hardware/main-board/pcb/AegisBioWatch-MainBoard-Floorplan-r10.kicad_pcb",
+    "board_mm": [41.0, 34.0],
+    "case_max_mm": [45.0, 39.5],
+    "thickness_mm": 0.8,
+    "layers": 4,
+    "planning_layer_roles": {"In1.Cu": "continuous_GND", "In2.Cu": "power_and_low_speed"},
+    "rf_antenna_keepout_mm": [31.0, 2.75, 43.0, 9.0],
+    "floorplan_drc": {"violations": 0, "unconnected_items": 0, "electrical_pcb_drc": false},
+    "final_fab_stackup_frozen": false,
+    "controlled_impedance_frozen": false
+  },
+  "pcb_placement_seed": {
+    "revision": "r11",
+    "authority": "UNROUTED_NET_AND_FOOTPRINT_SYNC_SEED_NOT_GERBER_AUTHORITY",
+    "canonical_materialization": "python3 tools/materialize-pcb-r11.py",
+    "canonical_output": "hardware/main-board/pcb/placement-r11/AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pcb",
+    "components_total": 79,
+    "footprints_imported": 76,
+    "missing_refs": ["J3", "J5", "J6"],
+    "nets": 86,
+    "pin_net_audit": {"checks": 268, "mismatches": 0, "missing_source_footprint_pins": 0},
+    "drc": {"rule_violations": 0, "unconnected_items": 186, "routing_started": false},
+    "planning_rules_frozen_for_fab": false,
+    "critical_placement": {
+      "nRF54L15_RF": "seed_only_keep_until_authoritative_QFAA_placement",
+      "nPM1300": "seed_only_replace_with_reviewed_Nordic_QFN_placement",
+      "PVSS_NetTies": "staged_not_final"
+    }
+  },
+  "pcb_reference_placement_review": {
+    "revision": "r12",
+    "board_coordinate_changes": false,
+    "npm1300_density_crosscheck": {
+      "source": "hlord2000/nPM1300-Stamp",
+      "license": "CERN-OHL-P-2.0",
+      "sample_relative_bounds_mm": [12.17, 5.94],
+      "use": "density_and_adjacency_crosscheck_only",
+      "final_authority": "Nordic nPM1300 reference layout"
+    },
+    "nrf54l15_raw_qfn_third_party_coordinates_accepted": false,
+    "nrf54l15_reason": "inspected public raw-QFN layouts did not yet satisfy the required license/authority confidence for coordinate reuse"
+  },
+  "frozen_interfaces": {
+    "SWD": "Tag-Connect TC2030 6-pin; 1 VTRef, 2 SWDIO, 3 nRESET, 4 SWCLK, 5 GND, 6 SWO",
+    "SideButton": "Panasonic EVQPUK02K",
+    "ShipWakeButton": "Panasonic EVQPLDA15",
+    "LRA": "Precision Microdrives C10-100 direct solder with strain relief",
+    "Main-Bio": "Hirose FH12-20S-0.5SH(55)",
+    "Battery": "Hirose DF57H-3P-1.2V(21)"
+  },
+  "r9_selected_not_yet_footprint_frozen": {
+    "J3_watch_contact": "Harwin S70-125161545R",
+    "J3_dock_pogo": "Harwin P70-7000045",
+    "J5_display_candidate": "GL175AMC10C / CO5300AF-41 / CST820B / 24-pin OK-118RM024-35"
+  },
+  "r9_tracking_issue": 3,
+  "open_hard_gates": [
+    "J3 Harwin S70 verified land pattern plus dock contact pitch/compression stack",
+    "J5 GL175AMC10C supplier 24-pin map / rails / sequence / timing",
+    "J6 CST820B physical integration and I/O voltage from module supplier data",
+    "performance-critical RF/PMIC passive MPN closure",
+    "procured nPM1300 build code / applicable errata",
+    "protected battery-pack drawing/PCM/charge limits",
+    "final PCB fabricator stackup and controlled-impedance RF geometry",
+    "replace r11 seed positions with reviewed Nordic QFAA RF and nPM1300 reference placement/current-return geometry",
+    "route production PCB and close 186 ratsnest connections",
+    "Bio Board charging-time electrode disconnect/high-Z hardware",
+    "full routed PCB DRC/DFM and prototype bring-up"
+  ],
+  "privacy": "No individual case history, private messages, medication details, or identifying health data stored."
+}

@@ -1,0 +1,79 @@
+{
+  "revision": "r13-route1bb-j9-left-gnd-accepted",
+  "status": "ACCEPTED",
+  "release_status": "NOT_FOR_GERBER",
+  "issue": 8,
+  "base_accepted_revision": "route-1ba",
+  "candidate_commit": "f19c8c8221c7c959b83bf10e203dd0f04244be21",
+  "executed_authority": {
+    "workflow_name": "r13 route1bb J9 left GND validation",
+    "workflow_run_id": 33239333859,
+    "job_id": 99065841507,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 121,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268
+  },
+  "routing_scope": {
+    "target_reference": "J9",
+    "target_value": "EVQPUK02K_SIDE_BUTTON",
+    "target_pad": "J9.1/GND left physical pad",
+    "target_pad_mm": [20.85, 5.775],
+    "gnd_via_mm": [19.85, 5.775],
+    "track_width_mm": 0.3,
+    "via_size_mm": 0.6,
+    "via_drill_mm": 0.3,
+    "track_segments_added": 1,
+    "vias_added": 1,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "j9_identity_gates": {
+    "j9_1_net": "GND",
+    "j9_2_net": "SIDE_BUTTON",
+    "j9_1_pad_positions_mm": [[20.85, 5.775], [26.0, 5.775]],
+    "j9_2_pad_positions_mm": [[20.85, 7.475], [26.0, 7.475]],
+    "accepted_right_j9_1_route1ba_status": "UNCHANGED",
+    "side_button_pads_status": "UNCHANGED"
+  },
+  "preservation_gates": {
+    "accepted_route1ba_geometry_modified": false,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false,
+    "design_rule_waiver_used": false,
+    "via_in_pad_used": false
+  },
+  "artifact": {
+    "artifact_id": 9710891034,
+    "artifact_name": "r13-route1bb-j9-left-gnd-evidence",
+    "zip_sha256": "df2534c4cb89f9324857e56480dd109765de18be21cf13ab9d31c57a7bb377e0",
+    "pcb_sha256": "1673120b753fa498d4ca3cce7f7a2014088114ee26d58cfcb23cdc36643f8fa3",
+    "project_sha256": "efff980a782d2c90d54599fe64b641185793ff4276b245983fe658cc1f602a3a",
+    "drc_json_sha256": "5136e0b66f1f1857da9ff0d51c915943ceb33a0924ec3a930128bacb4b487449",
+    "audit_json_sha256": "a6072a3207489a8ceae9c7863e65235e002775217e92225120180fe9fe273821",
+    "routing_seed_sha256": "45b8d49f32e526ab55b980d9219e98456547f5c59fffd69e1f6019cf5caa6dd0",
+    "sha256sums_sha256": "14744720dedfc0ec58f9a5e9e35cedf3d32acb248a6bc4b7f1f50ef3cb1cd4dc"
+  },
+  "provenance_policy": {
+    "artifact_hashes_are_provenance": true,
+    "historical_byte_identity_is_electrical_gate": false,
+    "authoritative_gates": [
+      "executed KiCad DRC",
+      "expected unconnected count",
+      "268-node pin/net audit",
+      "exact routing scope",
+      "component identity and coordinates",
+      "accepted baseline preservation",
+      "frozen interface preservation"
+    ]
+  },
+  "deferred_items_unchanged": [
+    "C401.2/GND RF-adjacent",
+    "U2.30/LDO2_IN to R106.2",
+    "CHG_5V",
+    "U2.14/SYS_I2C_SCL to R104.2",
+    "RF routing/matching",
+    "J3/J5/J6 supplier/mechanical interfaces"
+  ]
+}

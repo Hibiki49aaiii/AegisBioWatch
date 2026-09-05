@@ -1,0 +1,39 @@
+{
+  "revision": "r12-reference-placement-evidence",
+  "purpose": "cross-check placement density before replacing r11 seed coordinates; not a coordinate-copy authority",
+  "npm1300_crosscheck": {
+    "source_repository": "hlord2000/nPM1300-Stamp",
+    "source_file": "nPM1300-Stamp.kicad_pcb",
+    "license": "CERN-OHL-P-2.0",
+    "source_kicad_version": "8.0",
+    "source_layers": 4,
+    "reference_local_designators_only": true,
+    "pmic_origin_mm": [150.5, 99.5],
+    "sample_relative_positions_mm": {
+      "L1": [-6.33, -1.63],
+      "L2": [-6.53, 1.28],
+      "C1": [-0.25, 4.20],
+      "C2": [-4.21, 1.28],
+      "C3": [-4.21, -1.74],
+      "C4": [5.64, 1.00],
+      "C5": [5.64, -0.57]
+    },
+    "sample_bounds_relative_to_pmic_mm": {
+      "x_min": -6.53,
+      "x_max": 5.64,
+      "y_min": -1.74,
+      "y_max": 4.20,
+      "width": 12.17,
+      "height": 5.94
+    },
+    "interpretation": "The licensed implementation demonstrates a compact flanking arrangement around the PMIC. Designators are source-local and are not mapped one-to-one to AegisBioWatch components. Nordic official reference layout remains the physical authority."
+  },
+  "nrf54l15_review": {
+    "raw_qfn_kicad_implementations_found": true,
+    "licensed_raw_qfn_layout_accepted_for_coordinate_reuse": false,
+    "action": "retain r11 seed coordinates until Nordic QFAA reference placement data or a clearly licensed implementation demonstrably derived from it is available",
+    "schematic_reference_block": "feastorg/KiCad-Master-Lib nRF54L15-QFAA reference block (CC0) remains usable for topology/value cross-check only"
+  },
+  "r12_board_coordinate_changes": false,
+  "manufacturing_ready": false
+}

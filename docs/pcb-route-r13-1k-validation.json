@@ -1,0 +1,58 @@
+{
+  "revision": "r13-route1k-c114-vsys-hf-decoupling",
+  "status": "ACCEPTED_EXECUTED_KICAD_BASELINE",
+  "source_baseline": "r13-route1j-nettie-gnd",
+  "workflow": {
+    "name": "r13 route1k C114 VSYS validation",
+    "run_id": 31345109456,
+    "kicad_version": "9.0.9"
+  },
+  "result": {
+    "rule_violations": 0,
+    "unconnected_items": 168,
+    "pin_net_audit": "PASS",
+    "audited_present_source_nodes": 268
+  },
+  "scope": {
+    "track_segments_added": 4,
+    "vias_added": 1,
+    "vsys_track_width_mm": 0.3,
+    "gnd_track_width_mm": 0.3,
+    "via_size_mm": 0.6,
+    "via_drill_mm": 0.3,
+    "component_moves": [
+      {
+        "ref": "C114",
+        "from_mm": [6.892232, 26.710566],
+        "to_mm": [14.9, 27.25]
+      }
+    ],
+    "accepted_pvss_geometry_modified": false,
+    "in1_gnd_plane_preserved_and_refilled": true,
+    "rf_routing_touched": false,
+    "supplier_gated_interfaces_touched": false
+  },
+  "c114": {
+    "value": "100nF HF / APP",
+    "vsys_pad_after_move_mm": [14.9, 27.57],
+    "gnd_pad_after_move_mm": [14.9, 26.93],
+    "u2_20_vsys_mm": [13.8875, 28.75],
+    "gnd_via_mm": [14.9, 26.45],
+    "gnd_reference": "continuous In1.Cu GND zone"
+  },
+  "rejected_geometries": [
+    {"strategy": "old-location top-only", "reason": "SW1 short/clearance conflicts"},
+    {"strategy": "old-location B.Cu crossing", "reason": "R502/PVSS1/PVSS2/SW2 conflicts"},
+    {"strategy": "relocated center (15.05,27.25)", "reason": "electrically clean but C114/R404 courtyard overlap by 0.025 mm"}
+  ],
+  "same_run_pcb_sha256": "844680b02dfd8f04df88d283dcdb4b15fad394cc932f6d7fcee33c11af54dc1f",
+  "evidence_artifact": {
+    "id": 9047068110,
+    "name": "r13-route1k-c114-vsys-evidence",
+    "digest": "sha256:a124463ad81a7d7ce975f22c4cb2afdec4e2d65839117d40637a6ad8d6e9e6ef",
+    "size_bytes": 72687
+  },
+  "c102_bulk_vsys_deferred": true,
+  "release_status": "NOT_FOR_GERBER",
+  "privacy_boundary": "engineering_abstractions_only"
+}

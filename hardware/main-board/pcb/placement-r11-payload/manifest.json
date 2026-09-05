@@ -1,0 +1,24 @@
+{
+  "archive": "hardware/main-board/pcb/placement-r11-payload/r11-placement-seed.tar.gz.b64",
+  "archive_bytes": 28017,
+  "archive_sha256": "f3d9366c1c77d3030c453e316edbc2fd9c31722a657fa67b01b385dc7f0b0d94",
+  "output": "hardware/main-board/pcb/placement-r11",
+  "files": {
+    "AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pcb": {
+      "bytes": 246085,
+      "sha256": "f31211be596c4435faa7bdf116bc16239b70e668b6e9377ef26f0909ebce19e2"
+    },
+    "AegisBioWatch-MainBoard-PlacementSeed-r11.kicad_pro": {
+      "bytes": 8120,
+      "sha256": "fc004fb190200d58f1b6442a83de97237e5f3a5d6878c81f791d5532a7b57906"
+    },
+    "placement-seed-manifest-r11.json": {
+      "bytes": 4415,
+      "sha256": "004dccd041cd27fc7d7e109f8df5a52d4f231752df39950e3839f48d193cf928"
+    },
+    "README-r11.md": {
+      "bytes": 1100,
+      "sha256": "e770f0e8fbb7a02d2198f8a27c45a61fe11e489b64d8926c093f36f1c20b4b73"
+    }
+  }
+}

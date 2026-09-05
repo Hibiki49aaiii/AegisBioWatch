@@ -1,0 +1,74 @@
+name: r13 route1bl R106 VSYS local refine
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bl-r106-vsys-refine.yml'
+      - 'tools/reproduce-route1bk-accepted.sh'
+      - 'tools/probe-pcb-r13-route1bl-r106-vsys-refine.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refine:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce accepted route1bk
+        run: bash tools/reproduce-route1bk-accepted.sh
+
+      - name: Refine R106 VSYS route locally
+        run: |
+          python3 tools/probe-pcb-r13-route1bl-r106-vsys-refine.py             --route1bk-drc-json /tmp/route1bk.json             --route1bk-pin-net-audit /tmp/route1bk-audit.json             --output /tmp/route1bl-r106-vsys-refine.json
+
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/route1bl-r106-vsys-refine.json'))
+          assert x['source_gate']=={
+            'rule_violations':0,
+            'unconnected_items':113,
+            'pin_net_audit':'PASS',
+            'audited_nodes':268
+          }
+          assert x['board_modified'] is False
+          assert x['R106_value']=='0R DNP/OPTION'
+          assert x['R106_pad1_mm']==[5.270826,25.865834]
+          assert x['R106_pad1_net']=='VSYS'
+          assert x['R106_pad2_mm']==[5.910826,25.865834]
+          assert x['R106_pad2_net']=='LDO2_IN'
+          assert x['source_point_mm']==[8.9875,28.25]
+          assert abs(x['grid_mm']-0.05)<1e-9
+          assert x['x_range_mm']==[7.0,7.5]
+          assert x['y_range_mm']==[26.2,26.55]
+          assert x['max_segments']==4
+          assert x['passing_path_count'] >= 1
+          print('PATHS',x['candidate_path_count'])
+          print('PASSING',x['passing_path_count'])
+          print('BEST',x['best_passing_path'])
+          print('TOP',x['top_passing_paths'][:10])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bl-r106-vsys-refine
+          path: /tmp/route1bl-r106-vsys-refine.json
+          if-no-files-found: error

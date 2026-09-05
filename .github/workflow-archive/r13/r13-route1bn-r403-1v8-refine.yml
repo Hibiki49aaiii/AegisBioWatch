@@ -1,0 +1,125 @@
+name: r13 route1bn R403 +1V8 local refine
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.github/workflows/r13-route1bn-r403-1v8-refine.yml'
+      - 'tools/reproduce-route1bm-accepted.sh'
+      - 'tools/probe-pcb-r13-route1bm-max4-coarse.py'
+      - 'tools/probe-pcb-r13-route1bn-r403-1v8-refine.py'
+      - 'docs/pcb-route-r13-1bn-screen-phase-a1.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refine:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install KiCad 9.0.9
+        timeout-minutes: 45
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+            test -s /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends kicad kicad-footprints
+          test "$(kicad-cli --version | head -n1)" = "9.0.9"
+
+      - name: Reproduce accepted route1bm
+        run: bash tools/reproduce-route1bm-accepted.sh
+
+      - name: Refine only the R403 +1V8 four-segment family
+        run: |
+          python3 tools/probe-pcb-r13-route1bn-r403-1v8-refine.py \
+            --drc-json /tmp/route1bm.json \
+            --pin-net-audit /tmp/route1bm-audit.json \
+            --engine-output /tmp/route1bn-r403-refine-engine.json \
+            --output /tmp/route1bn-r403-refine.json
+
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/route1bn-r403-refine.json'))
+          assert x['source_gate']=={
+            'rule_violations':0,
+            'unconnected_items':111,
+            'pin_net_audit':'PASS',
+            'audited_nodes':268,
+          }
+          assert x['board_modified'] is False
+          assert x['semantic_selection']['selected_family']=='+1V8 source track -> R403.1/+1V8 VHVH'
+          assert x['semantic_selection']['alternate_j8_status']=='HOLD_NOT_SELECTED'
+          ident=x['exact_identity']
+          assert ident['source_track_endpoint_mm']==[41.005,14.975]
+          assert abs(ident['source_track']['length_mm']-4.6628)<0.002
+          assert ident['source_track']['net']=='+1V8'
+          assert ident['R403_pad1']=={'net':'+1V8','position_mm':[40.255,25.975]}
+          assert ident['R403_pad2']=={'net':'SYS_I2C_SDA','position_mm':[40.895,25.975]}
+          r=x['refine']
+          assert abs(r['grid_mm']-0.05)<1e-9
+          assert r['lane_x_range_mm']==[39.0,40.0]
+          assert r['lane_y_range_mm']==[15.25,16.25]
+          assert r['path_family']=='VHVH'
+          assert r['passing_path_count']>=1
+          assert r['best_passing_path']['minimum_conservative_clearance_mm']>=0.1
+          assert x['decision_state']['candidate_selected_for_phase_b'] is False
+          assert x['decision_state']['phase_b_started'] is False
+          assert x['release_status']=='NOT_FOR_GERBER'
+          print('ACTUAL_DRC_INDEX',ident['actual_drc_index'])
+          print('R403_VALUE',ident['R403_value'])
+          print('PATHS',r['candidate_path_count'])
+          print('PASSING',r['passing_path_count'])
+          print('BEST',r['best_passing_path'])
+          print('TOP',r['top_passing_paths'])
+          PY
+
+          (
+            cd /tmp
+            sha256sum route1bn-r403-refine.json route1bn-r403-refine-engine.json > route1bn-r403-refine-SHA256SUMS
+          )
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r13-route1bn-r403-1v8-refine
+          path: |
+            /tmp/route1bn-r403-refine.json
+            /tmp/route1bn-r403-refine-engine.json
+            /tmp/route1bn-r403-refine-SHA256SUMS
+          if-no-files-found: error
+
+  verify-artifact:
+    needs: refine
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: r13-route1bn-r403-1v8-refine
+          path: artifact
+      - name: Verify downloaded refine Artifact
+        run: |
+          cd artifact
+          sha256sum -c route1bn-r403-refine-SHA256SUMS
+          python3 - <<'PY'
+          import json
+          x=json.load(open('route1bn-r403-refine.json'))
+          assert x['source_gate']['rule_violations']==0
+          assert x['source_gate']['unconnected_items']==111
+          assert x['source_gate']['pin_net_audit']=='PASS'
+          assert x['source_gate']['audited_nodes']==268
+          assert x['board_modified'] is False
+          assert x['refine']['grid_mm']==0.05
+          assert x['refine']['passing_path_count']>=1
+          assert x['decision_state']['phase_b_started'] is False
+          assert x['release_status']=='NOT_FOR_GERBER'
+          print('DOWNLOADED_ARTIFACT_VERIFY PASS')
+          print('BEST',x['refine']['best_passing_path'])
+          PY

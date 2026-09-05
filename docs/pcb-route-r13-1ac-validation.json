@@ -1,0 +1,43 @@
+{
+  "revision": "r13-route1ac-c6-gnd-local",
+  "status": "ACCEPTED_EXECUTED_KICAD",
+  "source_baseline": "route-1ab",
+  "geometry": {
+    "connection": "C6.2/GND -> continuous In1.Cu GND",
+    "pad_mm": [12.145, 22.225],
+    "gnd_via_mm": [12.75, 22.225],
+    "track_width_mm": 0.30,
+    "via_size_mm": 0.60,
+    "via_drill_mm": 0.30,
+    "segments_added": 1,
+    "vias_added": 1,
+    "component_moves": [],
+    "component_rotations": []
+  },
+  "scope": {
+    "NRF_DECD": "untouched_except_C6_ground_return",
+    "SYS_I2C_SCL": "deferred_geometry_gated",
+    "LDO2_IN": "deferred_geometry_constrained_no_via_in_pad",
+    "CHG_5V": "rejected_and_deferred",
+    "RF": "untouched",
+    "supplier_gated_interfaces": "untouched",
+    "release_status": "NOT_FOR_GERBER"
+  },
+  "validation": {
+    "workflow_run_id": 32147329066,
+    "job_id": 95744185867,
+    "kicad_version": "9.0.9",
+    "rule_violations": 0,
+    "unconnected_items": 146,
+    "pin_net_audit": "PASS",
+    "audited_nodes": 268,
+    "same_run_source_route1ab_sha256": "72bf6af3b46ff892d1cc0947ecadb4f1136a6fa1e40185f58d269d2faa61380a",
+    "historical_accepted_route1ab_artifact_sha256": "71b88f9d0a28228b04a4eb5bb5caf971803e213f63230e844b944e69e4251211",
+    "same_run_route1ac_pcb_sha256": "af270aa402d0ec6ffc0011f4163a9a0d77bb3cfaa1ae17c73ea37a015e9449f0",
+    "artifact_id": 9328472648,
+    "artifact_name": "r13-route1ac-c6-gnd-evidence",
+    "artifact_digest": "sha256:f6782289849663816f37c5ec3dfb3f015782b4bd85f44e5a15fda52c84b3b444",
+    "source_hash_note": "The same-run regenerated route-1ab byte SHA differs from the historical accepted route-1ab artifact SHA. Acceptance is therefore based on same-run executed KiCad DRC/pin-net gates and recorded geometry, not a claim of byte-identical regeneration."
+  },
+  "acceptance": "Accepted only from workflow run 32147329066 under KiCad 9.0.9: 0 violations / 146 unconnected / 268 of 268 physical pin-net nodes PASS, with one 0.30 mm F.Cu segment and one 0.60/0.30 mm GND via and no placement changes."
+}
