@@ -74,7 +74,7 @@ jobs:
             --expected-unconnected 109 \
             --grid-mm 0.25 \
             --lane-margin-mm 6.0 \
-            --max-endpoint-distance-mm 16.0 \
+            --max-endpoint-distance-mm 18.0 \
             --output /tmp/route1bp-screen-engine.json
 
           python3 - <<'PY'
@@ -87,7 +87,7 @@ jobs:
           assert x['source_pcb'].endswith('route-r13-1bo/AegisBioWatch-MainBoard-Route1bo-r13.kicad_pcb')
           assert x['grid_mm']==0.25
           assert x['lane_margin_mm']==6.0
-          assert x['max_endpoint_distance_mm']==16.0
+          assert x['max_endpoint_distance_mm']==18.0
           out=dict(x)
           out['revision']='r13-route1bp-max4-coarse-screen'
           out['source_revision']='route-1bo'
@@ -161,7 +161,7 @@ jobs:
           assert scr['board_modified'] is False
           assert scr['grid_mm']==0.25
           assert scr['lane_margin_mm']==6.0
-          assert scr['max_endpoint_distance_mm']==16.0
+          assert scr['max_endpoint_distance_mm']==18.0
           print('DOWNLOADED_ARTIFACT_VERIFY PASS')
           print('PASSING',scr['passing_candidate_count'])
           PY
